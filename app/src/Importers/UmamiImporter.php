@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Importers;
+namespace Petitstats\Importers;
 
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -91,7 +91,7 @@ class UmamiImporter extends BaseImporter
         $workDir = $sourcePath;
 
         if ($this->isZipArchiveFile($sourcePath)) {
-            $tempDir = sys_get_temp_dir() . '/minilytics_inspect_' . uniqid();
+            $tempDir = sys_get_temp_dir() . '/petitstats_inspect_' . uniqid();
             $this->extractZip($sourcePath, $tempDir);
             $workDir = $tempDir;
         }
@@ -153,7 +153,7 @@ class UmamiImporter extends BaseImporter
     }
 
     /**
-     * Import data into Minilytics SQLite database
+     * Import data into Petitstats SQLite database
      */
     public function import(string $sourcePath, string $siteId, array $options = []): array
     {
@@ -164,7 +164,7 @@ class UmamiImporter extends BaseImporter
         if (is_file($sourcePath)) {
             $ext = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
             if ($ext === 'zip' || $this->isZipArchiveFile($sourcePath)) {
-                $tempDir = sys_get_temp_dir() . '/minilytics_import_' . uniqid();
+                $tempDir = sys_get_temp_dir() . '/petitstats_import_' . uniqid();
                 $this->extractZip($sourcePath, $tempDir);
                 $workDir = $tempDir;
             } elseif ($ext === 'csv') {

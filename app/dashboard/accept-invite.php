@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use Delight\Auth\UserAlreadyExistsException;
-use Minilytics\Auth\Auth;
-use Minilytics\Auth\Csrf;
-use Minilytics\Auth\Invitations;
-use Minilytics\Http\Asset;
-use Minilytics\Http\View;
+use Petitstats\Auth\Auth;
+use Petitstats\Auth\Csrf;
+use Petitstats\Auth\Invitations;
+use Petitstats\Http\Asset;
+use Petitstats\Http\View;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 Auth::startSession();
@@ -36,7 +36,7 @@ if (!$error && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     }
 }
 echo View::render('auth/accept-invite', [
-    'title' => 'Join Minilytics',
+    'title' => 'Join Petitstats',
     'error' => $error,
     'email' => $invite['email'] ?? '',
     'token' => $token,

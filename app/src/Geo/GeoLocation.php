@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Geo;
+namespace Petitstats\Geo;
 
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\DataDirectory;
 use RuntimeException;
 use Throwable;
 

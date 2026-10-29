@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-$dataDir = sys_get_temp_dir() . '/minilytics-phpunit-' . bin2hex(random_bytes(4));
+$dataDir = sys_get_temp_dir() . '/petitstats-phpunit-' . bin2hex(random_bytes(4));
 mkdir($dataDir, 0770, true);
 file_put_contents($dataDir . '/sites.json', json_encode([[
     'id' => 'test_site',
@@ -21,13 +21,13 @@ file_put_contents($dataDir . '/sites.json', json_encode([[
     'internal_ips' => ['10.0.0.99'],
     'retention_days' => 395,
 ]]));
-putenv('MINILYTICS_DATA_DIR=' . $dataDir);
+putenv('PETITSTATS_DATA_DIR=' . $dataDir);
 
 register_shutdown_function(static function () use ($dataDir): void {
     // Close the cached SQLite connections first: Windows cannot delete open files.
-    Minilytics\Database\Connections::closeAll();
-    Minilytics\Auth\AuthDatabase::close();
-    (new ReflectionProperty(Minilytics\Auth\Auth::class, 'engine'))->setValue(null, null);
+    Petitstats\Database\Connections::closeAll();
+    Petitstats\Auth\AuthDatabase::close();
+    (new ReflectionProperty(Petitstats\Auth\Auth::class, 'engine'))->setValue(null, null);
     gc_collect_cycles();
 
     $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dataDir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);

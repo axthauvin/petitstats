@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Minilytics\Tracking\Tracker;
+use Petitstats\Tracking\Tracker;
 
-/** Collection endpoint called by minilytics.js. The work happens in Minilytics\Tracking\Tracker. */
+/** Collection endpoint called by petitstats.js. The work happens in Petitstats\Tracking\Tracker. */
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');

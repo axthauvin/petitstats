@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Updates\UpdateCheck;
-use Minilytics\Updates\Updater;
+use Petitstats\Auth\Auth;
+use Petitstats\Updates\UpdateCheck;
+use Petitstats\Updates\Updater;
 
-/** Installs the latest release from Settings → Updates, one step per request (see Minilytics\Updates\Updater). */
+/** Installs the latest release from Settings → Updates, one step per request (see Petitstats\Updates\Updater). */
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 require_once __DIR__ . '/../../../vendor/autoload.php';
@@ -50,7 +50,7 @@ try {
                 throw new RuntimeException('GitHub could not be reached. Try again later.');
             }
             if (!UpdateCheck::isNewer($latest['version'], $check->installed())) {
-                throw new RuntimeException('Minilytics is already up to date.');
+                throw new RuntimeException('Petitstats is already up to date.');
             }
             $updater->download($latest['version']);
             break;

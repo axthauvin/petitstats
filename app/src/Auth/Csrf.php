@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Auth;
+namespace Petitstats\Auth;
 
 /**
  * Per-session token proving that a state-changing request comes from a
- * Minilytics page and not from a form or script on another site.
+ * Petitstats page and not from a form or script on another site.
  *
  * Forms send it as the hidden "csrf" field, the dashboard API client as the
  * X-CSRF-Token header.
@@ -46,7 +46,7 @@ final class Csrf
         if (!self::isValid()) {
             http_response_code(403);
             // Lets the dashboard tell a stale page apart from a missing permission.
-            header('X-Minilytics-Error: csrf');
+            header('X-Petitstats-Error: csrf');
             Auth::jsonError('Invalid or missing CSRF token. Reload the page and try again.');
         }
     }

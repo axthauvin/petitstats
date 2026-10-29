@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Http;
+namespace Petitstats\Tests\Http;
 
-use Minilytics\Http\Asset;
-use Minilytics\Tests\PhpServer;
+use Petitstats\Http\Asset;
+use Petitstats\Tests\PhpServer;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -53,6 +53,6 @@ final class AssetTest extends TestCase
             }
         }
 
-        $this->assertSame([], $unversioned, 'Wrap these asset URLs in Minilytics\Http\Asset::url().');
+        $this->assertSame([], $unversioned, 'Wrap these asset URLs in Petitstats\Http\Asset::url().');
     }
 }

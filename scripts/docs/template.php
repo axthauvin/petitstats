@@ -20,7 +20,7 @@ function docs_page(array $page, array $pages, ?array $previous, ?array $next, ar
 {
     $e = 'docs_escape';
     $isHome = $page['slug'] === '';
-    $title = $isHome ? 'Minilytics documentation' : $page['title'] . ' · Minilytics docs';
+    $title = $isHome ? 'Petitstats documentation' : $page['title'] . ' · Petitstats docs';
 
     $nav = '';
     $group = null;
@@ -57,7 +57,7 @@ function docs_page(array $page, array $pages, ?array $previous, ?array $next, ar
     }
 
     $editUrl = REPOSITORY . '/edit/main/docs/' . $page['file'];
-    $description = $page['description'] !== '' ? $page['description'] : 'Documentation for Minilytics, private and lightweight web analytics.';
+    $description = $page['description'] !== '' ? $page['description'] : 'Documentation for Petitstats, private and lightweight web analytics.';
 
     return <<<HTML
 <!doctype html>
@@ -72,14 +72,14 @@ function docs_page(array $page, array $pages, ?array $previous, ?array $next, ar
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/docs/_static/docs.css">
-<script defer src="https://minilytics.axthauvin.fr/minilytics.js" data-site-id="minilytics_landing" data-site-key="2211ebf1d2edb11b201de997cfaf48cd1dee0ed231bace06" data-privacy-mode="strict"></script>
+<script defer src="https://minilytics.axthauvin.fr/petitstats.js" data-site-id="petitstats_landing" data-site-key="2211ebf1d2edb11b201de997cfaf48cd1dee0ed231bace06" data-privacy-mode="strict"></script>
 <script defer src="/docs/_static/docs.js"></script>
 </head>
 <body>
 <header class="topbar">
   <div class="topbar-inner">
     <button class="icon-button menu-toggle" type="button" aria-label="Open the navigation" aria-controls="sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <a class="brand" href="/docs/"><img src="/favicon.svg" alt="" width="26" height="26"><span>Minilytics</span><span class="brand-tag">Docs</span></a>
+    <a class="brand" href="/docs/"><img src="/favicon.svg" alt="" width="26" height="26"><span>Petitstats</span><span class="brand-tag">Docs</span></a>
     <button class="search-trigger" type="button" data-search-open><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search the docs</span><kbd>Ctrl K</kbd></button>
     <nav class="top-links" aria-label="Site">
       <a href="/">Home</a><a href="/dashboard/?demo=1">Live demo</a><a href="{$e(REPOSITORY)}" target="_blank" rel="noopener">GitHub</a>
@@ -111,7 +111,7 @@ HTML;
 }
 
 /**
- * What Minilytics is, then a card for each guide.
+ * What Petitstats is, then a card for each guide.
  *
  * @param array<string, mixed> $page
  * @param list<array<string, mixed>> $guides
@@ -131,10 +131,10 @@ function docs_home(array $page, array $guides): string
     foreach ($guides as $guide) {
         $cards .= '<a class="guide-card" href="' . $e($guide['url']) . '"><span class="guide-icon"><svg viewBox="0 0 24 24" aria-hidden="true">' . ($icons[$guide['slug']] ?? '') . '</svg></span><strong>' . $e($guide['title']) . '</strong><span>' . $e($guide['summary']) . '</span></a>';
     }
-    // The first paragraph of docs/README.md says what Minilytics is.
-    return '<h1 id="minilytics-documentation">Minilytics documentation</h1>'
+    // The first paragraph of docs/README.md says what Petitstats is.
+    return '<h1 id="petitstats-documentation">Petitstats documentation</h1>'
         . str_replace('<p>', '<p class="lead">', $intro[0] ?? '')
-        . '<div class="hero-actions"><a class="button button-primary" href="/install.html">Install Minilytics</a><a class="button" href="/dashboard/?demo=1">Try the live demo</a></div>'
+        . '<div class="hero-actions"><a class="button button-primary" href="/install.html">Install Petitstats</a><a class="button" href="/dashboard/?demo=1">Try the live demo</a></div>'
         . '<div class="guide-grid">' . $cards . '</div>';
 }
 

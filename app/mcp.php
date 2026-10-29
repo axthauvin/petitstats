@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\McpTokens;
-use Minilytics\Auth\BearerTokens;
-use Minilytics\Http\Http;
-use Minilytics\Mcp\AnalyticsTools;
-use Minilytics\Mcp\McpServer;
-use Minilytics\OAuth\OAuthServer;
+use Petitstats\Auth\McpTokens;
+use Petitstats\Auth\BearerTokens;
+use Petitstats\Http\Http;
+use Petitstats\Mcp\AnalyticsTools;
+use Petitstats\Mcp\McpServer;
+use Petitstats\OAuth\OAuthServer;
 
 /**
  * MCP endpoint giving AI assistants access to the analytics. They only read,
@@ -35,7 +35,7 @@ if ($user === null) {
     // The 401 points clients to the OAuth metadata, which starts the sign-in flow.
     http_response_code(401);
     header('WWW-Authenticate: Bearer resource_metadata="' . OAuthServer::resourceMetadataUrl() . '", scope="' . OAuthServer::SCOPE . '"' . ($token === null ? '' : ', error="invalid_token"'));
-    echo json_encode(['error' => 'Sign in to Minilytics, or send an access token: Authorization: Bearer <token>.']);
+    echo json_encode(['error' => 'Sign in to Petitstats, or send an access token: Authorization: Bearer <token>.']);
     exit;
 }
 

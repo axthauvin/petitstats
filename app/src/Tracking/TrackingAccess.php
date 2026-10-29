@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Sites\SiteRegistry;
 
 /**
  * Accepts events only from a website's allowed domains, signed with its key.
@@ -24,7 +24,7 @@ final class TrackingAccess
     {
         $site = SiteRegistry::find($payload->siteId);
         if (!$site) {
-            throw new TrackingException("Unknown website \"{$payload->siteId}\". Copy the snippet again from the Websites page of your Minilytics dashboard.", 404);
+            throw new TrackingException("Unknown website \"{$payload->siteId}\". Copy the snippet again from the Websites page of your Petitstats dashboard.", 404);
         }
         $originHost = self::host($origin);
         if ($originHost === '') {
@@ -36,7 +36,7 @@ final class TrackingAccess
                 : "{$originHost} is not an allowed domain for this website. Add it in Settings → Tracking → Allowed domains.", 403);
         }
         if (!hash_equals((string) ($site['write_key'] ?? ''), $payload->siteKey)) {
-            throw new TrackingException('Invalid tracking key. Copy the current snippet from the Websites page of your Minilytics dashboard.', 403);
+            throw new TrackingException('Invalid tracking key. Copy the current snippet from the Websites page of your Petitstats dashboard.', 403);
         }
         return $site;
     }

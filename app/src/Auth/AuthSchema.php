@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Auth;
+namespace Petitstats\Auth;
 
 use Delight\Auth\Auth as AuthEngine;
 use ReflectionClass;

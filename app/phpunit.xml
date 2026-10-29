@@ -7,7 +7,7 @@
          failOnWarning="true"
          failOnRisky="true">
     <testsuites>
-        <testsuite name="Minilytics">
+        <testsuite name="Petitstats">
             <directory>tests/php</directory>
         </testsuite>
     </testsuites>

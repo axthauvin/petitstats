@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Database;
+namespace Petitstats\Database;
 
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Sites\SiteRegistry;
 use PDO;
 use SQLite3;
 

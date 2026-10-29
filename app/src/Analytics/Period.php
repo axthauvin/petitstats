@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics;
+namespace Petitstats\Analytics;
 
 /**
  * Reporting period shared by every analytics endpoint.

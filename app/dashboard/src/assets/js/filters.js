@@ -1,5 +1,5 @@
 /**
- * Minilytics shared dashboard filters
+ * Petitstats shared dashboard filters
  *
  * One filter state shared by the Overview and Sessions pages, persisted per
  * website in sessionStorage. Values of the same dimension are OR-ed, different
@@ -39,7 +39,7 @@ const Filters = {
   },
 
   storageKey() {
-    return `minilytics_filters_${this.siteId || "default"}`;
+    return `petitstats_filters_${this.siteId || "default"}`;
   },
 
   persist() {

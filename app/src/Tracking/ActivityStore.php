@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
-use Minilytics\Database\DatabaseConnection;
-use Minilytics\Database\Schema;
+use Petitstats\Database\DatabaseConnection;
+use Petitstats\Database\Schema;
 use Throwable;
 
 /** Writes tracked and ignored events to a website's database. */
@@ -47,7 +47,7 @@ final class ActivityStore
             return;
         }
         // MySQL locks are shared by the whole server, hence the website in the name (64 characters at most).
-        $lock = 'minilytics:' . sha1($this->db->siteId() . ':' . $visitorId);
+        $lock = 'petitstats:' . sha1($this->db->siteId() . ':' . $visitorId);
         $stmt = $this->db->prepare('SELECT GET_LOCK(:lock, 5)');
         $stmt->bindValue(':lock', $lock, SQLITE3_TEXT);
         $stmt->execute();

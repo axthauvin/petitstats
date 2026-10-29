@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
 /** Turns the `data` object sent by the tracker into what is stored with the event. */
 final class EventData

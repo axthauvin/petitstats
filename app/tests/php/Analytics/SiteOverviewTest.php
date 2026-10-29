@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Analytics;
+namespace Petitstats\Tests\Analytics;
 
-use Minilytics\Analytics\SiteOverview;
-use Minilytics\Database\Connections;
+use Petitstats\Analytics\SiteOverview;
+use Petitstats\Database\Connections;
 use PHPUnit\Framework\TestCase;
 
 final class SiteOverviewTest extends TestCase

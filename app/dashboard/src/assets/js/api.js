@@ -1,5 +1,5 @@
 /**
- * Minilytics API Client Helper
+ * Petitstats API Client Helper
  */
 
 // Session token the API requires on every state-changing request (see Csrf.php).
@@ -14,7 +14,7 @@ async function apiFetch(url, init = {}) {
   }
   const res = await fetch(url, init);
   if (res.status === 401) showSessionBanner("signed-out");
-  else if (res.status === 403 && res.headers.get("X-Minilytics-Error") === "csrf") showSessionBanner("stale");
+  else if (res.status === 403 && res.headers.get("X-Petitstats-Error") === "csrf") showSessionBanner("stale");
   return res;
 }
 
@@ -222,7 +222,7 @@ const Api = {
 
   async getTrackingConfig(id) {
     // Tracking secrets are admin-only; skip the request entirely in the live demo.
-    if (window.MINILYTICS_GUEST) throw new Error("Not available in demo mode.");
+    if (window.PETITSTATS_GUEST) throw new Error("Not available in demo mode.");
     const res = await apiFetch(`${this.base}/sites.php?action=tracking-config&id=${encodeURIComponent(id)}`); const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`); return data;
   },

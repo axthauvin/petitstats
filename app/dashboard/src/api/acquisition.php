@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Minilytics\Analytics\Period;
-use Minilytics\Analytics\SiteAnalytics;
-use Minilytics\Auth\Auth;
+use Petitstats\Analytics\Period;
+use Petitstats\Analytics\SiteAnalytics;
+use Petitstats\Auth\Auth;
 
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../../vendor/autoload.php';

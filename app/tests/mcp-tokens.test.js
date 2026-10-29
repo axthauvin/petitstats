@@ -16,11 +16,11 @@ let token;
 let revokedToken;
 let writerToken;
 
-const phpEnv = () => ({ ...process.env, MINILYTICS_DATA_DIR: path.join(workdir, 'data') });
+const phpEnv = () => ({ ...process.env, PETITSTATS_DATA_DIR: path.join(workdir, 'data') });
 
 /** Isolated copy of the app with two private websites and one administrator owning two tokens. */
 function prepareInstall() {
-  workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'minilytics-tokens-'));
+  workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'petitstats-tokens-'));
   for (const dir of ['dashboard', 'src', 'templates', 'vendor']) {
     fs.cpSync(path.join(root, dir), path.join(workdir, dir), { recursive: true });
   }
@@ -45,8 +45,8 @@ function prepareInstall() {
   const dir = workdir.replace(/\\/g, '/');
   const setup = spawnSync('php', ['-r', `
     require '${dir}/vendor/autoload.php';
-    Minilytics\\Auth\\AuthDatabase::connection()->exec("INSERT INTO users (email, password, verified, roles_mask, registered) VALUES ('a@b.c', 'x', 1, 1, 0)");
-    $db = Minilytics\\Database\\Connections::forSite('private_site');
+    Petitstats\\Auth\\AuthDatabase::connection()->exec("INSERT INTO users (email, password, verified, roles_mask, registered) VALUES ('a@b.c', 'x', 1, 1, 0)");
+    $db = Petitstats\\Database\\Connections::forSite('private_site');
     $insert = $db->prepare("INSERT INTO user_activity (session_id, visitor_id, action) VALUES (:session, 'v1', :action)");
     foreach (json_decode(file_get_contents('${dir}/activity.json'), true) as [$session, $name, $data]) {
       $insert->bindValue(':session', $session);
@@ -57,11 +57,11 @@ function prepareInstall() {
     $funnel = $db->prepare("INSERT INTO funnels (name, steps) VALUES ('Pricing to signup', :steps)");
     $funnel->bindValue(':steps', json_encode([['type' => 'pageview', 'value' => '/pricing', 'label' => '/pricing'], ['type' => 'event', 'value' => 'Signup', 'label' => 'Signup']]));
     $funnel->execute();
-    $revoked = Minilytics\\Auth\\McpTokens::create(1, 'revoked');
-    Minilytics\\Auth\\McpTokens::revoke(1, $revoked['id']);
-    $writer = Minilytics\\Auth\\McpTokens::create(1, 'writer');
-    Minilytics\\Auth\\McpTokens::allowWrite(1, $writer['id'], true);
-    echo json_encode([Minilytics\\Auth\\McpTokens::create(1, 'test')['token'], $revoked['token'], $writer['token']]);
+    $revoked = Petitstats\\Auth\\McpTokens::create(1, 'revoked');
+    Petitstats\\Auth\\McpTokens::revoke(1, $revoked['id']);
+    $writer = Petitstats\\Auth\\McpTokens::create(1, 'writer');
+    Petitstats\\Auth\\McpTokens::allowWrite(1, $writer['id'], true);
+    echo json_encode([Petitstats\\Auth\\McpTokens::create(1, 'test')['token'], $revoked['token'], $writer['token']]);
   `], { env: phpEnv() });
   assert.equal(setup.status, 0, setup.stdout.toString() + setup.stderr.toString());
   [token, revokedToken, writerToken] = JSON.parse(setup.stdout.toString().trim().split('\n').pop());
@@ -148,7 +148,7 @@ test('the MCP endpoint requires POST and a valid token', { skip: !hasPhp }, asyn
 test('MCP initialize negotiates the protocol and notifications get 202', { skip: !hasPhp }, async () => {
   const { body } = await mcp('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'test', version: '1' } });
   assert.equal(body.result.protocolVersion, '2025-06-18');
-  assert.equal(body.result.serverInfo.name, 'minilytics');
+  assert.equal(body.result.serverInfo.name, 'petitstats');
   assert.ok(body.result.capabilities.tools);
 
   const unknown = await mcp('initialize', { protocolVersion: '1999-01-01' });
@@ -273,7 +273,7 @@ test('MCP computes funnels from steps or saved funnels', { skip: !hasPhp }, asyn
 });
 
 test('MCP Apps show charts for the time series and funnels', { skip: !hasPhp }, async () => {
-  const uri = 'ui://minilytics/charts.html';
+  const uri = 'ui://petitstats/charts.html';
   const { body } = await mcp('tools/list', {});
   const withChart = body.result.tools.filter((tool) => tool._meta?.ui?.resourceUri === uri).map((tool) => tool.name);
   assert.deepEqual(withChart.sort(), ['get_funnel', 'get_timeseries', 'preview_funnel']);
@@ -283,7 +283,7 @@ test('MCP Apps show charts for the time series and funnels', { skip: !hasPhp }, 
   const read = await mcp('resources/read', { uri });
   assert.equal(read.body.result.contents[0].mimeType, 'text/html;profile=mcp-app');
   assert.match(read.body.result.contents[0].text, /ui\/initialize/);
-  for (const unknown of ['ui://minilytics/../../mcp.php', 'ui://minilytics/other.html', 'file:///etc/passwd']) {
+  for (const unknown of ['ui://petitstats/../../mcp.php', 'ui://petitstats/other.html', 'file:///etc/passwd']) {
     assert.equal((await mcp('resources/read', { uri: unknown })).body.error.code, -32002, unknown);
   }
 
@@ -366,7 +366,7 @@ test('a token allowed to edit creates and edits funnels, goals and journeys', { 
   assert.deepEqual(journeys.data.saved_journeys, [{ id: journey.data.saved.id, name: 'Pricing journey', entry: 'Page /pricing', exit: 'Event Signup' }]);
   const dashboard = spawnSync('php', ['-r', `
     require '${workdir.replace(/\\/g, '/')}/vendor/autoload.php';
-    $rows = Minilytics\\Database\\Connections::forSite('private_site')->query('SELECT name, kind, steps FROM funnels ORDER BY id');
+    $rows = Petitstats\\Database\\Connections::forSite('private_site')->query('SELECT name, kind, steps FROM funnels ORDER BY id');
     $out = []; while ($row = $rows->fetchArray(SQLITE3_ASSOC)) { $out[] = $row; } echo json_encode($out);
   `], { env: phpEnv() });
   const rows = JSON.parse(dashboard.stdout.toString());

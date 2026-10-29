@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics\Reports;
+namespace Petitstats\Analytics\Reports;
 
-use Minilytics\Analytics\ReportQuery;
+use Petitstats\Analytics\ReportQuery;
 use Throwable;
 
 /** Funnels, goals and journeys: the saved ones and how far visits went through them. */

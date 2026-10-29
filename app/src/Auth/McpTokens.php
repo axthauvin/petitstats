@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Auth;
+namespace Petitstats\Auth;
 
 /**
  * Access tokens for the MCP server, used by AI assistants that cannot sign in

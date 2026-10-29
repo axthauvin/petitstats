@@ -3,7 +3,7 @@
  * The choice is kept in this browser; by default it follows the browser's language.
  */
 const TimeFormat = {
-  STORAGE_KEY: "minilytics_time_format",
+  STORAGE_KEY: "petitstats_time_format",
 
   /** "12h" or "24h". */
   get() {

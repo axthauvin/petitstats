@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Analytics;
+namespace Petitstats\Tests\Analytics;
 
-use Minilytics\Analytics\Period;
+use Petitstats\Analytics\Period;
 use PHPUnit\Framework\TestCase;
 
 final class PeriodTest extends TestCase

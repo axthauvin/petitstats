@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics\Reports;
+namespace Petitstats\Analytics\Reports;
 
-use Minilytics\Analytics\ReportQuery;
+use Petitstats\Analytics\ReportQuery;
 
 /** Headline numbers: visitors, returning visitors, visits, pageviews, bounce rate and duration, live visitors. */
 final class SummaryReport

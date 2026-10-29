@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Tracking;
+namespace Petitstats\Tests\Tracking;
 
-use Minilytics\Database\DataDirectory;
-use Minilytics\Tracking\VisitorIdentity;
+use Petitstats\Database\DataDirectory;
+use Petitstats\Tracking\VisitorIdentity;
 use PHPUnit\Framework\TestCase;
 
 final class VisitorIdentityTest extends TestCase

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics\Reports;
+namespace Petitstats\Analytics\Reports;
 
-use Minilytics\Analytics\ReportQuery;
+use Petitstats\Analytics\ReportQuery;
 
 /** Traffic over time, for the dashboard chart. */
 final class TimeseriesReport

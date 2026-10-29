@@ -1,5 +1,5 @@
 /**
- * Minilytics Main Application Controller
+ * Petitstats Main Application Controller
  * Enforces per-site navigation via GET URL parameter (?site=<site_id>),
  * ensuring analytics are ALWAYS scoped to an active individual website (never 'all').
  */
@@ -11,8 +11,8 @@ const App = {
   currentSiteId: null,
   refreshInterval: null,
   // Live demo: anonymous, read-only access pinned to one public website.
-  isGuest: window.MINILYTICS_GUEST === true,
-  guestSiteId: window.MINILYTICS_PUBLIC_SITE || null,
+  isGuest: window.PETITSTATS_GUEST === true,
+  guestSiteId: window.PETITSTATS_PUBLIC_SITE || null,
 
   /**
    * Warns administrators when the web server ignores the .htaccess rules
@@ -31,13 +31,13 @@ const App = {
   },
 
   /**
-   * Marks the Settings link and the Updates tab when a newer Minilytics release
+   * Marks the Settings link and the Updates tab when a newer Petitstats release
    * is available (administrators only), and says what changed after an update.
    */
   checkForUpdate() {
     if (this.isGuest) return;
     Api.getVersion().then((data) => {
-      if (window.MINILYTICS_ADMIN === true) this.showUpdateDots(data.update_available);
+      if (window.PETITSTATS_ADMIN === true) this.showUpdateDots(data.update_available);
       Changelog.showWhatsNewOnce(data.installed);
     }).catch(() => {});
   },
@@ -93,7 +93,7 @@ const App = {
     if (backBtn) {
       backBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        sessionStorage.removeItem("minilytics_current_site");
+        sessionStorage.removeItem("petitstats_current_site");
         this.currentSiteId = null;
         const url = new URL(window.location);
         url.searchParams.delete("site");
@@ -114,7 +114,7 @@ const App = {
         if (page !== "sessions") url.searchParams.delete("session_id");
         if (page === "settings") {
           this.currentSiteId = null;
-          sessionStorage.removeItem("minilytics_current_site");
+          sessionStorage.removeItem("petitstats_current_site");
           url.searchParams.delete("site");
           url.searchParams.delete("site_id");
         } else if (this.currentSiteId) {
@@ -148,7 +148,7 @@ const App = {
 
     let collapsedByUser = false;
     try {
-      collapsedByUser = localStorage.getItem("minilytics_sidebar_collapsed") === "true";
+      collapsedByUser = localStorage.getItem("petitstats_sidebar_collapsed") === "true";
     } catch (e) {}
     let isOpen = false;
     let opener = null;
@@ -190,7 +190,7 @@ const App = {
       }
       collapsedByUser = !collapsedByUser;
       try {
-        localStorage.setItem("minilytics_sidebar_collapsed", collapsedByUser ? "true" : "false");
+        localStorage.setItem("petitstats_sidebar_collapsed", collapsedByUser ? "true" : "false");
       } catch (e) {}
       render();
 
@@ -273,8 +273,8 @@ const App = {
     const cancelCustomBtn = document.getElementById("btnCancelCustomRange");
     const closeCustomBtn = document.getElementById("btnCloseCustomRange");
 
-    this.customRangeStartPicker = new MinilyticsCalendarPicker(customStart);
-    this.customRangeEndPicker = new MinilyticsCalendarPicker(customEnd);
+    this.customRangeStartPicker = new PetitstatsCalendarPicker(customStart);
+    this.customRangeEndPicker = new PetitstatsCalendarPicker(customEnd);
 
     if (rangeSelect) {
       rangeSelect.addEventListener("change", (e) => {
@@ -320,7 +320,7 @@ const App = {
 
         const customOpt = rangeSelect?.querySelector('option[value="custom"]');
         if (customOpt) {
-          customOpt.textContent = `${MinilyticsCalendarPicker.formatIsoDate(fromVal)} — ${MinilyticsCalendarPicker.formatIsoDate(toVal)}`;
+          customOpt.textContent = `${PetitstatsCalendarPicker.formatIsoDate(fromVal)} — ${PetitstatsCalendarPicker.formatIsoDate(toVal)}`;
         }
         if (rangeSelect) rangeSelect.value = "custom";
         if (customPopover) customPopover.style.display = "none";
@@ -369,7 +369,7 @@ const App = {
   },
 
   dateRangeStorageKey() {
-    return "minilytics_date_range";
+    return "petitstats_date_range";
   },
 
   /** Restore the user's last selected reporting period after a page reload. */
@@ -414,7 +414,7 @@ const App = {
       this.customRangeEndPicker?.setValue(to);
       const customOption = rangeSelect.querySelector('option[value="custom"]');
       if (customOption) {
-        customOption.textContent = `${MinilyticsCalendarPicker.formatIsoDate(from)} — ${MinilyticsCalendarPicker.formatIsoDate(to)}`;
+        customOption.textContent = `${PetitstatsCalendarPicker.formatIsoDate(from)} — ${PetitstatsCalendarPicker.formatIsoDate(to)}`;
       }
     }
     rangeSelect.value = this.currentRange;
@@ -470,7 +470,7 @@ const App = {
   selectSiteAndOpen(siteId) {
     if (!siteId) return;
     this.currentSiteId = siteId;
-    sessionStorage.setItem("minilytics_current_site", siteId);
+    sessionStorage.setItem("petitstats_current_site", siteId);
     this.updateSidebarSiteInfo(siteId);
 
     const url = new URL(window.location);
@@ -568,7 +568,7 @@ const App = {
     // If explicit back to websites
     if (hash === "websites") {
       this.currentSiteId = null;
-      sessionStorage.removeItem("minilytics_current_site");
+      sessionStorage.removeItem("petitstats_current_site");
       const url = new URL(window.location);
       url.searchParams.delete("site");
       url.searchParams.delete("site_id");
@@ -579,7 +579,7 @@ const App = {
 
     if (hash === "settings") {
       this.currentSiteId = null;
-      sessionStorage.removeItem("minilytics_current_site");
+      sessionStorage.removeItem("petitstats_current_site");
       const url = new URL(window.location);
       url.searchParams.delete("site");
       url.searchParams.delete("site_id");
@@ -596,7 +596,7 @@ const App = {
 
     // Check memory or sessionStorage if not in query string
     if (!siteParam || siteParam === "all") {
-      const saved = this.currentSiteId || sessionStorage.getItem("minilytics_current_site");
+      const saved = this.currentSiteId || sessionStorage.getItem("petitstats_current_site");
       if (saved && saved !== "all") {
         siteParam = saved;
       }
@@ -616,7 +616,7 @@ const App = {
       }
 
       this.currentSiteId = siteParam;
-      sessionStorage.setItem("minilytics_current_site", siteParam);
+      sessionStorage.setItem("petitstats_current_site", siteParam);
 
       // Keep ?site= parameter in the browser URL
       const url = new URL(window.location);
@@ -644,7 +644,7 @@ const App = {
         }
         const firstSite = sites[0].id;
         this.currentSiteId = firstSite;
-        sessionStorage.setItem("minilytics_current_site", firstSite);
+        sessionStorage.setItem("petitstats_current_site", firstSite);
 
         const url = new URL(window.location);
         url.searchParams.set("site", firstSite);
@@ -752,7 +752,7 @@ const App = {
       return;
     }
     this.currentSiteId = null;
-    sessionStorage.removeItem("minilytics_current_site");
+    sessionStorage.removeItem("petitstats_current_site");
     const url = new URL(window.location);
     url.searchParams.delete("site");
     url.searchParams.delete("site_id");
@@ -831,7 +831,7 @@ const App = {
 
     const host = window.location.host;
     const protocol = window.location.protocol;
-    const scriptUrl = `${protocol}//${host}/minilytics.js`;
+    const scriptUrl = `${protocol}//${host}/petitstats.js`;
     let key = "";
     try { key = (await Api.getTrackingConfig(siteId)).site.write_key; } catch (e) { return; }
     const snippet = `<script defer src="${scriptUrl}" data-site-id="${siteId}" data-site-key="${key}" data-privacy-mode="strict"></script>`;

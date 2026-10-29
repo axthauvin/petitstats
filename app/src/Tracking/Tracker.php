@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
-use Minilytics\Database\Connections;
+use Petitstats\Database\Connections;
 use Throwable;
 
 /**
@@ -63,7 +63,7 @@ final class Tracker
         try {
             $data = array_merge($data, VisitorLocation::resolve($server, $ip));
         } catch (Throwable $error) {
-            error_log('[Minilytics] GeoIP enrichment failed: ' . $error->getMessage());
+            error_log('[Petitstats] GeoIP enrichment failed: ' . $error->getMessage());
             $data = array_merge($data, ['country' => 'Unknown', 'country_code' => 'UN', 'region' => '', 'city' => '']);
         }
 

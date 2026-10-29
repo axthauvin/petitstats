@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Updates;
+namespace Petitstats\Updates;
 
 use RuntimeException;
 

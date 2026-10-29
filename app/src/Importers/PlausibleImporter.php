@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Importers;
+namespace Petitstats\Importers;
 
 use RuntimeException;
 

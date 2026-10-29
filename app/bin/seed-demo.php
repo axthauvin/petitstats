@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-use Minilytics\Database\Connections;
-use Minilytics\Database\DatabaseConnection;
-use Minilytics\Sites\DemoTraffic;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Database\Connections;
+use Petitstats\Database\DatabaseConnection;
+use Petitstats\Sites\DemoTraffic;
+use Petitstats\Sites\SiteRegistry;
 
 /**
- * Minilytics live demo seeder.
+ * Petitstats live demo seeder.
  *
  * Turns a website into the public demo: anonymous visitors can browse it and
  * it holds a rolling window of made-up traffic so every dashboard tab
  * (Overview, Acquisition, Events, Sessions, Funnels, Revenue) has data. Run it once:
  * the website then fills itself in each time someone looks at it, and drops
- * the visits older than the window (see Minilytics\Sites\DemoTraffic).
+ * the visits older than the window (see Petitstats\Sites\DemoTraffic).
  *
  * Usage:
  *   php bin/seed-demo.php [--site=demo_site] [--days=30] [--reset]
@@ -46,7 +46,7 @@ $extraDomains = array_filter((array) ($options['domain'] ?? []), 'is_string');
 // 1. Website configuration: create if missing, flag as public demo, allow local hosts
 // ---------------------------------------------------------------------------
 if (!SiteRegistry::find($siteId)) {
-    SiteRegistry::create($siteId, 'Minilytics Demo', 'localhost');
+    SiteRegistry::create($siteId, 'Petitstats Demo', 'localhost');
     fwrite(STDOUT, "Created website '{$siteId}'.\n");
 }
 $site = SiteRegistry::find($siteId);
@@ -79,7 +79,7 @@ $funnels = [
         ['type' => 'event', 'value' => 'download_zip', 'label' => 'Downloaded'],
     ]],
     ['Download', 'goal', [
-        ['type' => 'event', 'value' => 'download_zip', 'label' => 'Downloaded Minilytics'],
+        ['type' => 'event', 'value' => 'download_zip', 'label' => 'Downloaded Petitstats'],
     ]],
     ['Docs to install', 'journey', [
         ['type' => 'pageview', 'value' => '/docs/', 'label' => 'Documentation'],

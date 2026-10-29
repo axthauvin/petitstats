@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Sites;
+namespace Petitstats\Sites;
 
 use InvalidArgumentException;
-use Minilytics\Database\Connections;
-use Minilytics\Database\DatabaseConfig;
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\Connections;
+use Petitstats\Database\DatabaseConfig;
+use Petitstats\Database\DataDirectory;
 use RuntimeException;
 
 /** The tracked websites and their settings, kept in sites.json. */

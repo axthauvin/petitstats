@@ -1,6 +1,6 @@
 # Import from Umami
 
-Minilytics imports the pageviews and custom events of your Umami website, with the data attached to each event. Each one shows up in your dashboard like the data Minilytics collects itself, so your charts continue where Umami stopped.
+Petitstats imports the pageviews and custom events of your Umami website, with the data attached to each event. Each one shows up in your dashboard like the data Petitstats collects itself, so your charts continue where Umami stopped.
 
 ## 1. Export your data from Umami
 
@@ -10,19 +10,19 @@ Minilytics imports the pageviews and custom events of your Umami website, with t
 
 The ZIP holds a `website_event.csv` file with your pageviews and events, and an `event_data.csv` file with the details of your custom events.
 
-## 2. Import the file into Minilytics
+## 2. Import the file into Petitstats
 
-1. In Minilytics, click **Import Data** and choose **Umami**.
-2. Upload the ZIP file. Minilytics shows how many visits it found, the period they cover and the website they come from.
+1. In Petitstats, click **Import Data** and choose **Umami**.
+2. Upload the ZIP file. Petitstats shows how many visits it found, the period they cover and the website they come from.
 3. Create a new website for this data, or add it to one you already track. For a new website, the name and domain are filled in from the export, so you only need to check them.
 4. If your export goes back further than the website keeps its visits, choose whether to keep them longer (see [Keeping all your history](README.md#keeping-all-your-history)).
 5. Click **Import data**. A new website also gets its tracking tag, ready to replace the Umami one on your pages.
 
-You can import a newer export of the same website later, for example to catch up on the visits Umami recorded while you were switching. Visits that are already in Minilytics are not added twice.
+You can import a newer export of the same website later, for example to catch up on the visits Umami recorded while you were switching. Visits that are already in Petitstats are not added twice.
 
-## What you find in Minilytics
+## What you find in Petitstats
 
-| In Umami      | In Minilytics                                                   |
+| In Umami      | In Petitstats                                                   |
 | ------------- | --------------------------------------------------------------- |
 | Pageviews     | Pageviews, with their title, referrer and campaign              |
 | Custom events | Custom events with the same name                                |
@@ -32,7 +32,7 @@ Visitors keep their browser, operating system, device, screen size, language, co
 
 ## If something goes wrong
 
-**Minilytics cannot find `website_event.csv`.** The ZIP does not come from the Umami export, or its files were renamed. Export your website again, or check the file names if you created them from the database.
+**Petitstats cannot find `website_event.csv`.** The ZIP does not come from the Umami export, or its files were renamed. Export your website again, or check the file names if you created them from the database.
 
 **The oldest visits are missing.** Check the history choice you made during the import, as visits older than the website keeps are left out.
 
@@ -40,7 +40,7 @@ Visitors keep their browser, operating system, device, screen size, language, co
 
 ## From the command line
 
-If you can open a terminal on your server, run this command from the Minilytics folder.
+If you can open a terminal on your server, run this command from the Petitstats folder.
 
 ```bash
 php bin/import.php --zip umami-export.zip --site-id my_site

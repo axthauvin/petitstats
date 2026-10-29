@@ -1,5 +1,5 @@
 /**
- * Minilytics Overview Page Controller
+ * Petitstats Overview Page Controller
  * Umami-inspired layout featuring:
  * - Five core metric cards with trend pills
  * - Full-width chart, switchable between line and vertical bars
@@ -14,11 +14,11 @@ const OverviewPage = {
   activeEnvTab: "browsers",
 
   init() {
-    this.chart = new MinilyticsChart("overviewChart", "chartTooltip", {
+    this.chart = new PetitstatsChart("overviewChart", "chartTooltip", {
       activeSeries: ["pageviews", "visitors"],
       onPointClick: (item) => this.openSessionsForPoint(item),
     });
-    this.botsChart = new MinilyticsChart("botsChart", "botsChartTooltip", {
+    this.botsChart = new PetitstatsChart("botsChart", "botsChartTooltip", {
       sortTooltipMetrics: true,
       hideZeroTooltipMetrics: true,
       seriesConfig: {},

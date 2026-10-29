@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Updates\Changelog;
+use Petitstats\Auth\Auth;
+use Petitstats\Updates\Changelog;
 
 /** What changed in the releases newer than `after`, up to and including `up_to` (both optional). */
 header('Content-Type: application/json; charset=utf-8');

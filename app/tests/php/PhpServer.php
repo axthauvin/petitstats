@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests;
+namespace Petitstats\Tests;
 
 use RuntimeException;
 

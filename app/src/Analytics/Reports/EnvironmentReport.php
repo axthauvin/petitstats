@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics\Reports;
+namespace Petitstats\Analytics\Reports;
 
 use InvalidArgumentException;
-use Minilytics\Analytics\ReportQuery;
+use Petitstats\Analytics\ReportQuery;
 
 /** Browsers, operating systems and devices. */
 final class EnvironmentReport

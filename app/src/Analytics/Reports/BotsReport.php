@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics\Reports;
+namespace Petitstats\Analytics\Reports;
 
-use Minilytics\Analytics\ReportQuery;
-use Minilytics\Database\Schema;
-use Minilytics\Tracking\KnownBots;
+use Petitstats\Analytics\ReportQuery;
+use Petitstats\Database\Schema;
+use Petitstats\Tracking\KnownBots;
 
 /** Requests rejected as bot traffic. */
 final class BotsReport

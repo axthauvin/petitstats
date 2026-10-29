@@ -31,7 +31,7 @@
             : "strict";
     var consentGranted =
         !!script && script.getAttribute("data-consent") === "granted";
-    var SESSION_KEY = "minilytics_session_v2_" + siteId;
+    var SESSION_KEY = "petitstats_session_v2_" + siteId;
     var LAST_KEY = SESSION_KEY + "_last";
     var lastPath = null,
         engaged = false,
@@ -39,16 +39,20 @@
 
     function reportError(message, details) {
         if (debug && window.console && window.console.error)
-            window.console.error("[Minilytics] " + message, details || "");
+            window.console.error("[Petitstats] " + message, details || "");
     }
     function reportDebug(message, details) {
         if (debug && window.console && window.console.debug)
-            window.console.debug("[Minilytics] " + message, details || "");
+            window.console.debug("[Petitstats] " + message, details || "");
     }
 
     function localOptOutReason() {
         try {
-            if (localStorage.getItem("minilytics_opt_out") === "true")
+            // "minilytics_opt_out" was set before the project was renamed.
+            if (
+                localStorage.getItem("petitstats_opt_out") === "true" ||
+                localStorage.getItem("minilytics_opt_out") === "true"
+            )
                 return "local_storage";
         } catch (_) {}
         return null;
@@ -347,7 +351,7 @@
                 reason: optOutReason,
                 resolution:
                     optOutReason === "local_storage"
-                        ? "For this browser profile, run minilytics.optIn() and reload the page."
+                        ? "For this browser profile, run petitstats.optIn() and reload the page."
                         : "Disable this browser privacy preference only if you want to test tracking.",
             });
             return false;
@@ -371,7 +375,7 @@
                 {
                     event: name,
                     resolution:
-                        "Call minilytics.consent() from your cookie banner after the user accepts analytics cookies.",
+                        "Call petitstats.consent() from your cookie banner after the user accepts analytics cookies.",
                 },
             );
             return false;
@@ -503,7 +507,7 @@
             if (send("pageview", data)) lastPath = path;
         }
     }
-    window.minilytics = {
+    var api = {
         track: function (name, data) {
             name === "pageview" || !name ? pageview(data) : send(name, data);
         },
@@ -514,7 +518,7 @@
             var value = Number(amount);
             if (!name || !isFinite(value) || value <= 0) {
                 reportError(
-                    "minilytics.revenue() expects an event name and a positive amount.",
+                    "petitstats.revenue() expects an event name and a positive amount.",
                     { event: name, amount: amount },
                 );
                 return;
@@ -525,11 +529,12 @@
         },
         optOut: function () {
             try {
-                localStorage.setItem("minilytics_opt_out", "true");
+                localStorage.setItem("petitstats_opt_out", "true");
             } catch (_) {}
         },
         optIn: function () {
             try {
+                localStorage.removeItem("petitstats_opt_out");
                 localStorage.removeItem("minilytics_opt_out");
             } catch (_) {}
         },
@@ -553,6 +558,9 @@
         sessionId: sessionId,
         siteId: siteId,
     };
+    window.petitstats = api;
+    // Snippets written before the project was renamed call window.minilytics.
+    window.minilytics = api;
     var automated = automatedBrowserReason();
     if (automated && autoTrack) reportBot(automated);
     if (!autoTrack || optedOut()) return;
@@ -582,17 +590,21 @@
         }
     });
     document.addEventListener("click", function (e) {
-        var el = e.target.closest("[data-minilytics-event]");
+        // data-minilytics-* attributes come from pages tagged before the project was renamed.
+        var el = e.target.closest("[data-petitstats-event], [data-minilytics-event]");
         if (el) {
+            var prefix = el.hasAttribute("data-petitstats-event")
+                ? "data-petitstats-"
+                : "data-minilytics-";
             var d = {};
             Array.prototype.forEach.call(el.attributes, function (a) {
                 if (
-                    a.name.indexOf("data-minilytics-") === 0 &&
-                    a.name !== "data-minilytics-event"
+                    a.name.indexOf(prefix) === 0 &&
+                    a.name !== prefix + "event"
                 )
-                    d[a.name.slice(17)] = a.value;
+                    d[a.name.slice(prefix.length)] = a.value;
             });
-            send(el.getAttribute("data-minilytics-event"), d);
+            send(el.getAttribute(prefix + "event"), d);
             return;
         }
         var link = e.target.closest("a");

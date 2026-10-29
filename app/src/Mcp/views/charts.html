@@ -2,7 +2,7 @@
 <!--
   Charts shown by AI assistants supporting MCP Apps, next to the result of
   get_timeseries, get_funnel and preview_funnel, drawn like the dashboard's.
-  McpServer serves this file as ui://minilytics/charts.html; the assistant runs
+  McpServer serves this file as ui://petitstats/charts.html; the assistant runs
   it in a sandboxed frame and talks to it over postMessage (JSON-RPC).
   Self-contained: the sandbox loads nothing from the network.
 -->
@@ -10,7 +10,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Minilytics</title>
+<title>Petitstats</title>
 <style>
     :root {
         --bg: #ffffff;
@@ -162,7 +162,7 @@
     new ResizeObserver(reportSize).observe(document.documentElement);
 
     request('ui/initialize', {
-        appInfo: { name: 'Minilytics charts', version: '1.0.0' },
+        appInfo: { name: 'Petitstats charts', version: '1.0.0' },
         appCapabilities: {},
         protocolVersion: '2026-01-26',
     }).then((initialized) => {

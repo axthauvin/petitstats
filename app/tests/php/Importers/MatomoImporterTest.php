@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Importers;
+namespace Petitstats\Tests\Importers;
 
-use Minilytics\Database\Connections;
-use Minilytics\Importers\MatomoImporter;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Database\Connections;
+use Petitstats\Importers\MatomoImporter;
+use Petitstats\Sites\SiteRegistry;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;

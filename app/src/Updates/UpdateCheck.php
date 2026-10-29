@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Updates;
+namespace Petitstats\Updates;
 
 use Closure;
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\DataDirectory;
 use Throwable;
 
 /**
- * The installed Minilytics version and the latest one published on GitHub.
+ * The installed Petitstats version and the latest one published on GitHub.
  *
  * Release archives carry their tag in src/VERSION (see scripts/build-archive.sh);
  * a Git checkout has none and is reported as a development version. GitHub is
@@ -18,8 +18,8 @@ use Throwable;
  */
 final class UpdateCheck
 {
-    public const RELEASES_URL = 'https://github.com/axthauvin/minilytics/releases';
-    private const LATEST_RELEASE_API = 'https://api.github.com/repos/axthauvin/minilytics/releases/latest';
+    public const RELEASES_URL = 'https://github.com/axthauvin/petitstats/releases';
+    private const LATEST_RELEASE_API = 'https://api.github.com/repos/axthauvin/petitstats/releases/latest';
     private const CACHE_SECONDS = 12 * 3600;
     private const RETRY_SECONDS = 3600;
 
@@ -75,7 +75,7 @@ final class UpdateCheck
     private static function fetchFromGitHub(): ?array
     {
         $context = stream_context_create(['http' => [
-            'header' => "User-Agent: Minilytics\r\nAccept: application/vnd.github+json",
+            'header' => "User-Agent: Petitstats\r\nAccept: application/vnd.github+json",
             'timeout' => 5,
             'ignore_errors' => true,
         ]]);

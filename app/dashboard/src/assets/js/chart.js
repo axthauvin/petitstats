@@ -1,5 +1,5 @@
 /**
- * Minilytics time-series chart, drawn by Apache ECharts.
+ * Petitstats time-series chart, drawn by Apache ECharts.
  * Renders time-series data as a line/area chart or vertical bars.
  * Features:
  * - Smooth curves with a gradient fill for all active series
@@ -11,7 +11,7 @@
 
 const CHART_FONT = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-class MinilyticsChart {
+class PetitstatsChart {
     constructor(containerId, tooltipId, options = {}) {
         this.container = document.getElementById(containerId);
         this.tooltip = document.getElementById(tooltipId);
@@ -444,4 +444,4 @@ class MinilyticsChart {
 
 }
 
-window.MinilyticsChart = MinilyticsChart;
+window.PetitstatsChart = PetitstatsChart;

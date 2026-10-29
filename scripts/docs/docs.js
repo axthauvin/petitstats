@@ -1,4 +1,4 @@
-/* Minilytics documentation: mobile menu, copy buttons, table of contents and search. No dependency. */
+/* Petitstats documentation: mobile menu, copy buttons, table of contents and search. No dependency. */
 (function () {
     "use strict";
 
@@ -50,7 +50,7 @@
     var results = [];
 
     function loadIndex(callback) {
-        if (window.MINILYTICS_DOCS_INDEX) return callback();
+        if (window.PETITSTATS_DOCS_INDEX) return callback();
         var script = document.createElement("script");
         script.src = "/docs/_static/search-index.js";
         script.onload = callback;
@@ -88,7 +88,7 @@
     function render() {
         var query = input.value.trim().toLowerCase();
         var terms = query.split(/\s+/).filter(Boolean);
-        var index = window.MINILYTICS_DOCS_INDEX || [];
+        var index = window.PETITSTATS_DOCS_INDEX || [];
         results = !terms.length ? [] : index.map(function (entry) {
             var heading = entry.h.toLowerCase(), text = entry.x.toLowerCase(), page = entry.p.toLowerCase();
             var score = 0;

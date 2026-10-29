@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Http;
+namespace Petitstats\Http;
 
 /**
  * URLs of the dashboard's scripts and stylesheets, versioned by the time each

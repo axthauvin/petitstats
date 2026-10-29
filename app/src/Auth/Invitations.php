@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Auth;
+namespace Petitstats\Auth;
 
 /**
  * Invitation links sent by administrators. Only a SHA-256 hash of each token

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Http;
+namespace Petitstats\Http;
 
 /** Links to the documentation website, built from docs/ by scripts/build-docs.php. */
 final class Docs

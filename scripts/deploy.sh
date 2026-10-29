@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------------------------------
-# Minilytics Deploy Script
+# Petitstats Deploy Script
 # -----------------------------------------------------------------------------
 # Meant to be copied into the web root (e.g. public_html) and run from there.
 # It extracts the dashboard and landing archives found in a dist/ folder into
 # the directory the script lives in, after verifying their SHA256 checksums.
 #
 # Runtime data (*.db, sites.json, ...) is never part of the archives, so it is
-# left untouched. It lives outside the web root: MINILYTICS_DATA_DIR if set,
-# otherwise ../minilytics-data. A backup is made before extracting anyway.
+# left untouched. It lives outside the web root: PETITSTATS_DATA_DIR if set,
+# otherwise ../petitstats-data. A backup is made before extracting anyway.
 #
 # Usage: ./deploy.sh [DIST_DIR]
 #   DIST_DIR  folder holding the archives
-#             (default: ../minilytics-source-code/dist)
+#             (default: ../petitstats-source-code/dist)
 # -----------------------------------------------------------------------------
 
 WEB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DIST_DIR="${1:-${WEB_ROOT}/../minilytics-source-code/dist}"
-ARCHIVES=("minilytics.tar.gz" "minilytics-landing.tar.gz")
+DIST_DIR="${1:-${WEB_ROOT}/../petitstats-source-code/dist}"
+ARCHIVES=("petitstats.tar.gz" "petitstats-landing.tar.gz")
 
 if [ ! -d "${DIST_DIR}" ]; then
     echo "ERROR: dist folder not found: ${DIST_DIR}" >&2
@@ -43,7 +43,7 @@ for archive in "${ARCHIVES[@]}"; do
 done
 
 # 2. Back up runtime data
-DATA_DIR="${MINILYTICS_DATA_DIR:-${WEB_ROOT}/../minilytics-data}"
+DATA_DIR="${PETITSTATS_DATA_DIR:-${WEB_ROOT}/../petitstats-data}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 if [ -d "${DATA_DIR}" ]; then
     BACKUP="${WEB_ROOT}/../data-backup-${STAMP}.tar.gz"

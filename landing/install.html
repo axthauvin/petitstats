@@ -5,9 +5,9 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta
             name="description"
-            content="Install Minilytics on your local machine or PHP server."
+            content="Install Petitstats on your local machine or PHP server."
         />
-        <title>Install Minilytics</title>
+        <title>Install Petitstats</title>
         <link rel="stylesheet" href="style.css" />
         <link rel="stylesheet" href="install.css" />
         <link rel="icon" type="image/png" sizes="512x512" href="favicon.png" />
@@ -15,8 +15,8 @@
         <link rel="apple-touch-icon" href="favicon.png" />
         <script
             defer
-            src="https://minilytics.axthauvin.fr/minilytics.js"
-            data-site-id="minilytics_landing"
+            src="https://minilytics.axthauvin.fr/petitstats.js"
+            data-site-id="petitstats_landing"
             data-site-key="2211ebf1d2edb11b201de997cfaf48cd1dee0ed231bace06"
             data-privacy-mode="strict"
         ></script>
@@ -24,21 +24,21 @@
     <body>
         <header class="nav wrap">
             <a class="brand" href="index.html"
-                ><img src="favicon.svg" alt="" /><span>Minilytics</span></a
+                ><img src="favicon.svg" alt="" /><span>Petitstats</span></a
             >
             <a
                 class="back-link"
                 href="index.html"
-                data-minilytics-event="back_to_site_click"
-                data-minilytics-location="install_header"
+                data-petitstats-event="back_to_site_click"
+                data-petitstats-location="install_header"
                 ><i data-lucide="arrow-left"></i>Back to site</a
             >
         </header>
         <main>
             <section class="install-hero wrap">
-                <h1>Run Minilytics<br /><em>where you want.</em></h1>
+                <h1>Run Petitstats<br /><em>where you want.</em></h1>
                 <p>
-                    Minilytics needs PHP 8.1 or newer with SQLite enabled.
+                    Petitstats needs PHP 8.1 or newer with SQLite enabled.
                     <br />
                     <strong
                         >No Node.js runtime or database server is required.
@@ -46,10 +46,10 @@
                 </p>
                 <a
                     class="button"
-                    href="https://github.com/axthauvin/minilytics/releases/latest/download/minilytics.tar.gz"
-                    data-minilytics-event="download_archive"
-                    data-minilytics-location="install_hero"
-                    ><i data-lucide="download"></i>Download minilytics.tar.gz</a
+                    href="https://github.com/axthauvin/petitstats/releases/latest/download/petitstats.tar.gz"
+                    data-petitstats-event="download_archive"
+                    data-petitstats-location="install_hero"
+                    ><i data-lucide="download"></i>Download petitstats.tar.gz</a
                 >
             </section>
 
@@ -70,11 +70,11 @@
                             <li>
                                 Make sure your web server can write to
                                 <code style="color: var(--blue)"
-                                    >../minilytics-data/</code
+                                    >../petitstats-data/</code
                                 >
                                 (outside the web root), or set
                                 <code style="color: var(--blue)"
-                                    >MINILYTICS_DATA_DIR</code
+                                    >PETITSTATS_DATA_DIR</code
                                 >.
                             </li>
                             <li>
@@ -141,16 +141,16 @@
                                 enabled in WAMP.
                             </li>
                             <li>
-                                Extract Minilytics into
+                                Extract Petitstats into
                                 <code style="color: var(--blue)"
-                                    >C:\wamp64\www\minilytics</code
+                                    >C:\wamp64\www\petitstats</code
                                 >.
                             </li>
                             <li>Start Apache from the WAMP control panel.</li>
                             <li>
                                 Visit
                                 <code style="color: var(--blue)"
-                                    >http://localhost/minilytics/dashboard/</code
+                                    >http://localhost/petitstats/dashboard/</code
                                 >.
                             </li>
                         </ol>
@@ -159,8 +159,8 @@
                             ><span
                                 >Apache must be able to write to
                                 <code style="color: var(--blue)"
-                                    >C:\wamp64\www\minilytics-data</code
-                                >, created next to the Minilytics
+                                    >C:\wamp64\www\petitstats-data</code
+                                >, created next to the Petitstats
                                 folder.</span
                             >
                         </aside>
@@ -181,7 +181,7 @@
                     <div>
                         <strong>Write access</strong
                         ><span
-                            >for the <code>minilytics-data/</code> folder,
+                            >for the <code>petitstats-data/</code> folder,
                             outside the web root</span
                         >
                     </div>
@@ -216,20 +216,20 @@
                 <a
                     class="button"
                     href="/docs/"
-                    data-minilytics-event="docs_click"
-                    data-minilytics-location="install_footer_cta"
+                    data-petitstats-event="docs_click"
+                    data-petitstats-location="install_footer_cta"
                     ><i data-lucide="book-open"></i>Read the documentation</a
                 >
             </section>
         </main>
         <footer class="wrap">
             <a class="brand" href="index.html"
-                ><img src="favicon.svg" alt="" /><span>Minilytics</span></a
+                ><img src="favicon.svg" alt="" /><span>Petitstats</span></a
             ><span>Minimal, self-hosted web analytics.</span
             ><a
-                href="https://github.com/axthauvin/minilytics"
-                data-minilytics-event="github_click"
-                data-minilytics-location="footer"
+                href="https://github.com/axthauvin/petitstats"
+                data-petitstats-event="github_click"
+                data-petitstats-location="footer"
                 >GitHub <i data-lucide="arrow-up-right"></i
             ></a>
         </footer>

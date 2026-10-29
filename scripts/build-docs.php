@@ -14,7 +14,7 @@ declare(strict_types=1);
 require __DIR__ . '/docs/Markdown.php';
 require __DIR__ . '/docs/template.php';
 
-const REPOSITORY = 'https://github.com/axthauvin/minilytics';
+const REPOSITORY = 'https://github.com/axthauvin/petitstats';
 
 $root = dirname(__DIR__);
 $source = $root . '/docs';
@@ -25,11 +25,11 @@ $pages = [
     '' => ['Getting started', 'README.md'],
     'tracking' => ['Getting started', 'tracking/README.md'],
     'privacy' => ['Getting started', 'privacy/README.md'],
-    'operations' => ['Running Minilytics', 'operations/README.md'],
-    'importing' => ['Running Minilytics', 'importing/README.md'],
-    'importing/umami' => ['Running Minilytics', 'importing/umami.md'],
-    'importing/matomo' => ['Running Minilytics', 'importing/matomo.md'],
-    'mcp' => ['Running Minilytics', 'mcp/README.md'],
+    'operations' => ['Running Petitstats', 'operations/README.md'],
+    'importing' => ['Running Petitstats', 'importing/README.md'],
+    'importing/umami' => ['Running Petitstats', 'importing/umami.md'],
+    'importing/matomo' => ['Running Petitstats', 'importing/matomo.md'],
+    'mcp' => ['Running Petitstats', 'mcp/README.md'],
 ];
 $slugByFile = array_flip(array_map(static fn(array $page): string => $page[1], $pages));
 
@@ -116,7 +116,7 @@ foreach ($order as $index => $page) {
 foreach (['docs.css', 'docs.js'] as $asset) {
     copy(__DIR__ . '/docs/' . $asset, $output . '/_static/' . $asset);
 }
-file_put_contents($output . '/_static/search-index.js', 'window.MINILYTICS_DOCS_INDEX=' . json_encode($search, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ";\n");
+file_put_contents($output . '/_static/search-index.js', 'window.PETITSTATS_DOCS_INDEX=' . json_encode($search, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ";\n");
 
 @mkdir($output . '/assets', 0775, true);
 foreach (glob($source . '/assets/*') ?: [] as $asset) {

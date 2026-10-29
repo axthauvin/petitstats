@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Minilytics\Importers\ImporterRegistry;
+use Petitstats\Importers\ImporterRegistry;
 
 /**
- * Minilytics Pure-PHP CLI Import Tool
+ * Petitstats Pure-PHP CLI Import Tool
  * Runs in terminal via `php bin/import.php --zip export.zip`
  * 100% PHP, zero Python dependency!
  */
@@ -18,7 +18,7 @@ if (php_sapi_name() !== 'cli') {
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 echo "\n" . str_repeat('=', 60) . "\n";
-echo "   Minilytics CLI Data Importer (100% Pure PHP)\n";
+echo "   Petitstats CLI Data Importer (100% Pure PHP)\n";
 echo str_repeat('=', 60) . "\n\n";
 
 $options = getopt('', ['provider:', 'zip:', 'file:', 'folder:', 'site-id:', 'site-name:', 'domain:', 'retention-days:', 'help']);
@@ -30,7 +30,7 @@ if (isset($options['help'])) {
     echo "  --zip <path>        Path to a .zip export archive\n";
     echo "  --file <path>       Path to a single export file (Matomo .json or .csv)\n";
     echo "  --folder <path>     Path to a folder of export files\n";
-    echo "  --site-id <id>      Target Minilytics site ID (e.g. example)\n";
+    echo "  --site-id <id>      Target Petitstats site ID (e.g. example)\n";
     echo "  --site-name <name>  Display name for the website (e.g. Example)\n";
     echo "  --domain <domain>   Domain name (e.g. example.com)\n";
     echo "  --retention-days <n>  Days of visits the website keeps, up to 760. Older visits are not imported\n";

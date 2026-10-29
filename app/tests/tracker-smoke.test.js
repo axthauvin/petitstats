@@ -5,7 +5,7 @@ const test = require("node:test");
 const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "..");
-const tracker = fs.readFileSync(path.join(root, "minilytics.js"), "utf8");
+const tracker = fs.readFileSync(path.join(root, "petitstats.js"), "utf8");
 
 function storage() {
     const values = new Map();
@@ -24,7 +24,7 @@ function loadTracker(options = {}) {
     const documentListeners = {};
     const timers = [];
     const script = {
-        src: "http://localhost:8080/minilytics.js",
+        src: "http://localhost:8080/petitstats.js",
         getAttribute(name) {
             return (
                 {
@@ -94,14 +94,14 @@ function loadTracker(options = {}) {
         fetch: options.fetch,
     };
     context.window = context;
-    vm.runInNewContext(tracker, context, { filename: "minilytics.js" });
+    vm.runInNewContext(tracker, context, { filename: "petitstats.js" });
     const interact = (type = "pointermove", isTrusted = true) =>
         [...(listeners[type] || [])].forEach((listener) =>
             listener({ type, isTrusted }),
         );
-    const dispatch = (type) =>
+    const dispatch = (type, event = {}) =>
         [...(documentListeners[type] || []), ...(listeners[type] || [])].forEach(
-            (listener) => listener({ type, isTrusted: true }),
+            (listener) => listener({ type, isTrusted: true, ...event }),
         );
     // Runs the pending timers set for the given delay.
     const tick = (delay) =>
@@ -139,17 +139,17 @@ test("tracker auto-records a pageview and custom events on the script origin", a
         },
     });
 
-    context.minilytics.track("signup_click", { plan: "pro" });
+    context.petitstats.track("signup_click", { plan: "pro" });
     assert.equal(beacons.length, 2);
     assert.equal(beacons[1].endpoint, "http://localhost:8080/track.php");
     assert.equal((await payload(beacons[1].body)).name, "signup_click");
     assert.equal((await payload(beacons[1].body)).data.plan, "pro");
 });
 
-test("minilytics.revenue sends the amount in its reserved field, and only a positive one", async () => {
+test("petitstats.revenue sends the amount in its reserved field, and only a positive one", async () => {
     const { beacons, context } = loadTracker();
 
-    context.minilytics.revenue("purchase", "49.90", { currency: "EUR", order_id: "1042" });
+    context.petitstats.revenue("purchase", "49.90", { currency: "EUR", order_id: "1042" });
     assert.equal(beacons.length, 2);
     const sent = await payload(beacons[1].body);
     assert.equal(sent.name, "purchase");
@@ -157,8 +157,8 @@ test("minilytics.revenue sends the amount in its reserved field, and only a posi
     assert.equal(sent.data.currency, "EUR");
     assert.equal(sent.data.order_id, "1042");
 
-    context.minilytics.revenue("purchase", 0);
-    context.minilytics.revenue("purchase", "free");
+    context.petitstats.revenue("purchase", 0);
+    context.petitstats.revenue("purchase", "free");
     assert.equal(beacons.length, 2, "an amount that is not positive is not sent");
 });
 
@@ -197,7 +197,7 @@ test("tracker reports a rejected endpoint response in the browser console in deb
     assert.equal(errors.length, 1);
     assert.equal(
         errors[0][0],
-        "[Minilytics] Tracking endpoint rejected an event.",
+        "[Petitstats] Tracking endpoint rejected an event.",
     );
     assert.deepEqual(JSON.parse(JSON.stringify(errors[0][1])), {
         status: 403,
@@ -212,23 +212,69 @@ test("tracker explains the local opt-out and does not send an event", () => {
     const { beacons, context } = loadTracker({
         attributes: { "data-debug": "true" },
     });
-    context.localStorage.setItem("minilytics_opt_out", "true");
+    context.localStorage.setItem("petitstats_opt_out", "true");
     const logs = [];
     context.console.debug = (...args) => logs.push(args);
 
-    context.minilytics.track("button_click");
+    context.petitstats.track("button_click");
     assert.equal(beacons.length, 1, "the custom event must not be sent");
     assert.equal(
         logs[0][0],
-        "[Minilytics] Event was not sent because tracking is opted out.",
+        "[Petitstats] Event was not sent because tracking is opted out.",
     );
     assert.deepEqual(JSON.parse(JSON.stringify(logs[0][1])), {
         event: "button_click",
         reason: "local_storage",
         resolution:
-            "For this browser profile, run minilytics.optIn() and reload the page.",
+            "For this browser profile, run petitstats.optIn() and reload the page.",
     });
 });
+
+test("an opt-out saved before the rename still applies, and optIn() clears it", () => {
+    const { beacons, context } = loadTracker();
+    context.localStorage.setItem("minilytics_opt_out", "true");
+
+    context.petitstats.track("button_click");
+    assert.equal(beacons.length, 1, "the custom event must not be sent");
+
+    context.petitstats.optIn();
+    assert.equal(context.localStorage.getItem("minilytics_opt_out"), null);
+    context.petitstats.track("button_click");
+    assert.equal(beacons.length, 2);
+});
+
+test("snippets written before the rename can still call window.minilytics", () => {
+    const { context } = loadTracker();
+
+    assert.equal(context.minilytics, context.petitstats);
+});
+
+// A clickable element carrying the given attributes, as closest() finds it.
+function taggedElement(attributes) {
+    const element = {
+        closest: (selector) =>
+            Object.keys(attributes).some((name) => selector.includes(`[${name}]`)) ? element : null,
+        hasAttribute: (name) => name in attributes,
+        getAttribute: (name) => attributes[name] ?? null,
+        attributes: Object.entries(attributes).map(([name, value]) => ({ name, value })),
+    };
+    return element;
+}
+
+for (const prefix of ["data-petitstats-", "data-minilytics-"]) {
+    test(`a click on an element tagged with ${prefix}event sends its other attributes`, async () => {
+        const { beacons, dispatch } = loadTracker();
+        const attributes = { [`${prefix}event`]: "signup_click", [`${prefix}plan`]: "pro", class: "button" };
+        const element = taggedElement(attributes);
+
+        dispatch("click", { target: element });
+        assert.equal(beacons.length, 2);
+        const sent = await payload(beacons[1].body);
+        assert.equal(sent.name, "signup_click");
+        assert.equal(sent.data.plan, "pro");
+        assert.equal(sent.data.class, undefined);
+    });
+}
 
 test("strict mode sends an event without any identifier despite GPC, and without web storage", async () => {
     const { beacons, context } = loadTracker({
@@ -250,7 +296,7 @@ test("enriched mode waits for consent and remains blocked by GPC", async () => {
         attributes: { "data-privacy-mode": "enriched" },
     });
     assert.equal(pending.beacons.length, 0);
-    assert.equal(pending.context.minilytics.consent(), true);
+    assert.equal(pending.context.petitstats.consent(), true);
     assert.equal(pending.beacons.length, 1);
     const event = await payload(pending.beacons[0].body);
     assert.equal(event.session_id, "00000000000040008000000000000000");
@@ -260,7 +306,7 @@ test("enriched mode waits for consent and remains blocked by GPC", async () => {
         attributes: { "data-privacy-mode": "enriched" },
         navigator: { globalPrivacyControl: true },
     });
-    assert.equal(protectedBrowser.context.minilytics.consent(), false);
+    assert.equal(protectedBrowser.context.petitstats.consent(), false);
     assert.equal(protectedBrowser.beacons.length, 0);
 });
 
@@ -277,7 +323,7 @@ test("automated browser with navigator.webdriver is ignored", () => {
         0,
         "auto pageview must not be sent for webdriver",
     );
-    context.minilytics.track("bot_event");
+    context.petitstats.track("bot_event");
     assert.equal(
         beacons.length,
         0,
@@ -285,7 +331,7 @@ test("automated browser with navigator.webdriver is ignored", () => {
     );
     assert.equal(
         logs[0][0],
-        "[Minilytics] Event was not sent because an automated browser was detected.",
+        "[Petitstats] Event was not sent because an automated browser was detected.",
     );
     assert.deepEqual(JSON.parse(JSON.stringify(logs[0][1])), {
         event: "bot_event",
@@ -297,7 +343,7 @@ test("page views and events wait for the first trusted interaction", async () =>
     const { beacons, context, interact } = loadTracker({
         attributes: { "data-require-interaction": "true" },
     });
-    context.minilytics.track("signup", { plan: "pro" });
+    context.petitstats.track("signup", { plan: "pro" });
     assert.equal(beacons.length, 0);
 
     interact("keydown", false);

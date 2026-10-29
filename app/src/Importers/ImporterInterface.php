@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Importers;
+namespace Petitstats\Importers;
 
 /**
- * Minilytics Importer Interface
+ * Petitstats Importer Interface
  * Contract for all analytics platform data importers.
  */
 interface ImporterInterface

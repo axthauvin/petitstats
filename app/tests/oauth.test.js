@@ -13,17 +13,17 @@ const BASE = `http://127.0.0.1:${PORT}`;
 const MCP_URL = `${BASE}/mcp.php`;
 const REDIRECT_URI = 'https://claude.ai/api/mcp/auth_callback';
 // Test-only account created in the isolated install below.
-const EMAIL = 'owner@minilytics.test';
+const EMAIL = 'owner@petitstats.test';
 const PASSWORD = 'Test-Passw0rd!';
 
 let workdir;
 let server;
 let cookie = '';
 
-const phpEnv = () => ({ ...process.env, MINILYTICS_DATA_DIR: path.join(workdir, 'data') });
+const phpEnv = () => ({ ...process.env, PETITSTATS_DATA_DIR: path.join(workdir, 'data') });
 
 function prepareInstall() {
-  workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'minilytics-oauth-'));
+  workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'petitstats-oauth-'));
   for (const entry of ['dashboard', 'src', 'templates', 'vendor', 'oauth', '.well-known', 'mcp.php']) {
     fs.cpSync(path.join(root, entry), path.join(workdir, entry), { recursive: true });
   }
@@ -35,8 +35,8 @@ function prepareInstall() {
   }]));
   const setup = spawnSync('php', ['-r', `
     require '${workdir.replace(/\\/g, '/')}/vendor/autoload.php';
-    Minilytics\\Auth\\Auth::createUser('${EMAIL}', '${PASSWORD}', 'admin');
-    Minilytics\\Database\\Connections::forSite('private_site')->exec("INSERT INTO user_activity (session_id, visitor_id, action) VALUES ('s1', 'v1', '{\\"name\\":\\"pageview\\",\\"data\\":{\\"path\\":\\"/\\"}}')");
+    Petitstats\\Auth\\Auth::createUser('${EMAIL}', '${PASSWORD}', 'admin');
+    Petitstats\\Database\\Connections::forSite('private_site')->exec("INSERT INTO user_activity (session_id, visitor_id, action) VALUES ('s1', 'v1', '{\\"name\\":\\"pageview\\",\\"data\\":{\\"path\\":\\"/\\"}}')");
   `], { env: phpEnv() });
   assert.equal(setup.status, 0, setup.stdout.toString() + setup.stderr.toString());
 }
@@ -45,7 +45,7 @@ function prepareInstall() {
 async function browser(url, init = {}) {
   const res = await fetch(url.startsWith('http') ? url : BASE + url, { redirect: 'manual', ...init, headers: { ...(init.headers || {}), Cookie: cookie } });
   for (const value of res.headers.getSetCookie()) {
-    if (value.startsWith('minilytics_session=')) cookie = value.split(';')[0];
+    if (value.startsWith('petitstats_session=')) cookie = value.split(';')[0];
   }
   return res;
 }
@@ -292,7 +292,7 @@ test('dashboard API writes require the session CSRF token', { skip: !hasPhp }, a
   const create = (headers) => browser('/dashboard/src/api/tokens.php', { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({ name: 'csrf' }) });
   const missing = await create({});
   assert.equal(missing.status, 403);
-  assert.equal(missing.headers.get('x-minilytics-error'), 'csrf');
+  assert.equal(missing.headers.get('x-petitstats-error'), 'csrf');
   assert.equal((await create({ 'X-CSRF-Token': 'forged' })).status, 403);
   assert.equal((await create({ 'X-CSRF-Token': await csrfToken('/dashboard/') })).status, 200);
 });

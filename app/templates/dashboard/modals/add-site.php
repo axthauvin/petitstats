@@ -1,7 +1,7 @@
 <?php
 // One window to add a website: start from scratch or bring the history of another analytics service.
 // The steps shown depend on the path, see dashboard/src/assets/js/site-setup.js.
-$docsImport = \Minilytics\Http\Docs::url('importing');
+$docsImport = \Petitstats\Http\Docs::url('importing');
 
 // Services to import from. Logos and brand colours from Simple Icons (simpleicons.org, CC0).
 $importSources = [
@@ -91,8 +91,8 @@ $importSources = [
                     <?php endforeach; ?>
                 </div>
                 <p class="setup-help setup-contribute">
-                    Don't see your analytics service? <a href="https://github.com/axthauvin/minilytics/issues/new" target="_blank" rel="noopener">Suggest it</a>
-                    or <a href="https://github.com/axthauvin/minilytics" target="_blank" rel="noopener">contribute an importer</a> on GitHub ↗
+                    Don't see your analytics service? <a href="https://github.com/axthauvin/petitstats/issues/new" target="_blank" rel="noopener">Suggest it</a>
+                    or <a href="https://github.com/axthauvin/petitstats" target="_blank" rel="noopener">contribute an importer</a> on GitHub ↗
                 </p>
 
                 <div class="setup-upload" id="ssUpload" hidden>

@@ -2,9 +2,9 @@
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
         <div class="sidebar-header-row">
-            <a href="<?php echo !empty($isGuest) ? '/' : '#websites'; ?>" class="sidebar-brand-link" id="sidebarBrandLink" title="<?php echo !empty($isGuest) ? 'Minilytics | Home' : 'Minilytics | All Websites'; ?>">
-                <img src="/dashboard/src/assets/logo.svg" class="sidebar-brand-icon" width="28" height="28" alt="Minilytics Logo">
-                <span class="sidebar-brand-text">Minilytics</span>
+            <a href="<?php echo !empty($isGuest) ? '/' : '#websites'; ?>" class="sidebar-brand-link" id="sidebarBrandLink" title="<?php echo !empty($isGuest) ? 'Petitstats | Home' : 'Petitstats | All Websites'; ?>">
+                <img src="/dashboard/src/assets/logo.svg" class="sidebar-brand-icon" width="28" height="28" alt="Petitstats Logo">
+                <span class="sidebar-brand-text">Petitstats</span>
             </a>
             <button type="button" class="btn-sidebar-collapse" id="btnSidebarCollapse" title="Collapse navigation (Ctrl+B)" aria-label="Collapse navigation" aria-controls="sidebar" aria-expanded="true">
                 <svg class="icon-collapse-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -136,7 +136,7 @@
             <p class="demo-mode-text">Read-only mock data. Settings and imports are disabled.</p>
             <a class="demo-mode-cta" href="/install.html" target="_top">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                <span>Get Minilytics</span>
+                <span>Get Petitstats</span>
             </a>
         </div>
         <?php else: ?>
@@ -146,11 +146,11 @@
                 <circle cx="12" cy="12" r="3" />
             </svg>
             <span>Settings</span>
-            <span class="update-dot" data-update-dot title="A new Minilytics version is available" hidden></span>
+            <span class="update-dot" data-update-dot title="A new Petitstats version is available" hidden></span>
         </a>
 
         <div class="sidebar-user-row">
-            <div class="user-avatar"><?php $authUser = \Minilytics\Auth\Auth::user();
+            <div class="user-avatar"><?php $authUser = \Petitstats\Auth\Auth::user();
             echo htmlspecialchars(strtoupper(substr($authUser['email'] ?? 'A', 0, 1))); ?></div>
             <div class="user-info">
                 <span class="user-name" title="<?php echo htmlspecialchars($authUser['email'] ?? 'Admin'); ?>"><?php echo htmlspecialchars($authUser['email'] ?? 'Admin'); ?></span>

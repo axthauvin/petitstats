@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
 use Locale;
-use Minilytics\Geo\GeoLocation;
+use Petitstats\Geo\GeoLocation;
 use Throwable;
 
 /** Server-side, privacy-preserving location of a visitor: country, region and city only. */
@@ -50,7 +50,7 @@ final class VisitorLocation
                 return $location;
             }
         } catch (Throwable $error) {
-            error_log('[Minilytics] GeoIP lookup failed: ' . $error->getMessage());
+            error_log('[Petitstats] GeoIP lookup failed: ' . $error->getMessage());
         }
         return self::UNKNOWN;
     }

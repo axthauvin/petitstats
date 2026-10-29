@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Updates;
+namespace Petitstats\Tests\Updates;
 
-use Minilytics\Database\DataDirectory;
-use Minilytics\Tests\PhpServer;
-use Minilytics\Updates\Updater;
+use Petitstats\Database\DataDirectory;
+use Petitstats\Tests\PhpServer;
+use Petitstats\Updates\Updater;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
@@ -67,7 +67,7 @@ final class UpdateEndpointTest extends TestCase
         $response = $this->request('/track.php', 'POST');
 
         $this->assertSame(503, $response['status']);
-        $this->assertSame("Minilytics is being updated. Try again in a few seconds.\n", $response['body']);
+        $this->assertSame("Petitstats is being updated. Try again in a few seconds.\n", $response['body']);
     }
 
     public function testLetsTheHealthCheckOfTheRunningUpdateThrough(): void
@@ -176,11 +176,11 @@ final class UpdateEndpointTest extends TestCase
     /** A server answering the health check in every way a real server might. */
     private static function startAnswers(): PhpServer
     {
-        self::$answersDir = sys_get_temp_dir() . '/minilytics-health-' . bin2hex(random_bytes(4));
+        self::$answersDir = sys_get_temp_dir() . '/petitstats-health-' . bin2hex(random_bytes(4));
         mkdir(self::$answersDir);
         $autoload = var_export(dirname(__DIR__, 3) . '/vendor/autoload.php', true);
         $scripts = [
-            'answer.php' => "<?php require {$autoload};\necho \"Deprecated: something in the new version\\n\";\necho json_encode(Minilytics\\Updates\\Updater::healthAnswer(\$_GET['health'], 'v2.0.0'));",
+            'answer.php' => "<?php require {$autoload};\necho \"Deprecated: something in the new version\\n\";\necho json_encode(Petitstats\\Updates\\Updater::healthAnswer(\$_GET['health'], 'v2.0.0'));",
             'fatal.php' => '<?php echo "<b>Fatal error</b>: Uncaught Error in update.php";',
             'error.php' => '<?php http_response_code(500);',
             'proxy.php' => '<?php http_response_code(502);',

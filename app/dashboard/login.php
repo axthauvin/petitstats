@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use Delight\Auth\AuthException;
 use Delight\Auth\TooManyRequestsException;
-use Minilytics\Auth\Auth;
-use Minilytics\Auth\Csrf;
-use Minilytics\Http\View;
+use Petitstats\Auth\Auth;
+use Petitstats\Auth\Csrf;
+use Petitstats\Http\View;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 Auth::startSession();
@@ -40,4 +40,4 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && !Csrf::isValid()) {
         $error = 'Incorrect email address or password.';
     }
 }
-echo View::render('auth/login', ['title' => 'Sign in | Minilytics', 'error' => $error], 'layouts/auth');
+echo View::render('auth/login', ['title' => 'Sign in | Petitstats', 'error' => $error], 'layouts/auth');

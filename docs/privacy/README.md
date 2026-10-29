@@ -1,10 +1,10 @@
 # Privacy and data protection
 
-Minilytics is private without any setting. It uses no cookies, stores nothing in your visitors' browsers, never keeps their IP address and never sends their data to another company.
+Petitstats is private without any setting. It uses no cookies, stores nothing in your visitors' browsers, never keeps their IP address and never sends their data to another company.
 
 ## Two tracking modes
 
-**Strict mode** is the default, and it works without a consent banner. Minilytics keeps nothing on the visitor's device: your server recognizes them with an anonymous code, computed from their IP address and browser. The code changes every month, so a visitor who comes back during the month is counted once and their visits are shown together, but nobody can be followed from one month to the next. The only downsides are that a visitor who changes networks, for example from Wi-Fi to mobile data, is counted twice, and that two people sharing the same network and the same browser are counted once.
+**Strict mode** is the default, and it works without a consent banner. Petitstats keeps nothing on the visitor's device: your server recognizes them with an anonymous code, computed from their IP address and browser. The code changes every month, so a visitor who comes back during the month is counted once and their visits are shown together, but nobody can be followed from one month to the next. The only downsides are that a visitor who changes networks, for example from Wi-Fi to mobile data, is counted twice, and that two people sharing the same network and the same browser are counted once.
 
 The code is computed with a random value that your server draws at the start of each month and deletes at the end of it. Once it is gone, even someone with full access to your server cannot tell which visitor a past code belonged to.
 
@@ -16,41 +16,41 @@ In both modes, the end of page addresses, after a `?` or a `#`, is removed becau
 
 ## Turning on enriched mode
 
-In the tracking snippet, replace `data-privacy-mode="strict"` with `data-privacy-mode="enriched"`. Then, in your consent banner, call `minilytics.consent()` when the visitor accepts, and `minilytics.withdrawConsent()` if they change their mind.
+In the tracking snippet, replace `data-privacy-mode="strict"` with `data-privacy-mode="enriched"`. Then, in your consent banner, call `petitstats.consent()` when the visitor accepts, and `petitstats.withdrawConsent()` if they change their mind.
 
 ```html
 <script
   defer
-  src="https://analytics.example.com/minilytics.js"
+  src="https://analytics.example.com/petitstats.js"
   data-site-id="my_site"
   data-site-key="your-private-key"
   data-privacy-mode="enriched"
 ></script>
 <script>
   // When the visitor accepts analytics
-  minilytics.consent();
+  petitstats.consent();
 
   // When the visitor withdraws their consent
-  minilytics.withdrawConsent();
+  petitstats.withdrawConsent();
 </script>
 ```
 
-If your page already knows that the visitor accepted, add `data-consent="granted"` to the snippet instead of calling `minilytics.consent()`.
+If your page already knows that the visitor accepted, add `data-consent="granted"` to the snippet instead of calling `petitstats.consent()`.
 
-Your consent banner remembers the visitor's choice. Minilytics does not store it.
+Your consent banner remembers the visitor's choice. Petitstats does not store it.
 
 ## Letting visitors opt out
 
-You can offer visitors a way to stop being counted, for example with a link in your privacy policy. Call `minilytics.optOut()` to stop counting them and `minilytics.optIn()` to start again. The choice applies to the browser they use.
+You can offer visitors a way to stop being counted, for example with a link in your privacy policy. Call `petitstats.optOut()` to stop counting them and `petitstats.optIn()` to start again. The choice applies to the browser they use.
 
 ```js
-minilytics.optOut();
-minilytics.optIn();
+petitstats.optOut();
+petitstats.optIn();
 ```
 
 ## Visitor location
 
-Minilytics shows the country, region and city of your visitors. It finds them from the visitor's IP address, without storing that address and without asking another service. If your website already runs behind a service that provides the location, such as Cloudflare, Minilytics uses it instead. Locations are approximate, especially cities.
+Petitstats shows the country, region and city of your visitors. It finds them from the visitor's IP address, without storing that address and without asking another service. If your website already runs behind a service that provides the location, such as Cloudflare, Petitstats uses it instead. Locations are approximate, especially cities.
 
 The location comes from [MaxMind GeoLite2 City](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data), a free database also used by Umami. Your server downloads it from a [public mirror on GitHub](https://github.com/GitSquared/node-geolite2-redist) the first time it is needed, then once a week. No visitor information is ever sent with this download.
 

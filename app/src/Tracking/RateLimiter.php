@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
-use Minilytics\Database\DatabaseConnection;
+use Petitstats\Database\DatabaseConnection;
 
 /** Caps the events accepted from one IP address per minute. */
 final class RateLimiter

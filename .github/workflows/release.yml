@@ -49,21 +49,22 @@ jobs:
       - name: Package deployable application
         run: |
           chmod +x scripts/build-archive.sh
-          MINILYTICS_VERSION="${{ steps.vars.outputs.tag }}" ./scripts/build-archive.sh dist minilytics.tar.gz
-          cp dist/minilytics.tar.gz "dist/minilytics-${{ steps.vars.outputs.tag }}.tar.gz"
+          # Also writes minilytics.tar.gz for installs made before the rename.
+          PETITSTATS_VERSION="${{ steps.vars.outputs.tag }}" ./scripts/build-archive.sh dist petitstats.tar.gz
+          cp dist/petitstats.tar.gz "dist/petitstats-${{ steps.vars.outputs.tag }}.tar.gz"
           cd dist
-          sha256sum "minilytics-${{ steps.vars.outputs.tag }}.tar.gz" > "minilytics-${{ steps.vars.outputs.tag }}.tar.gz.sha256"
+          sha256sum "petitstats-${{ steps.vars.outputs.tag }}.tar.gz" > "petitstats-${{ steps.vars.outputs.tag }}.tar.gz.sha256"
 
       - name: Package landing page
         run: |
           chmod +x scripts/build-landing.sh
-          ./scripts/build-landing.sh dist minilytics-landing.tar.gz
+          ./scripts/build-landing.sh dist petitstats-landing.tar.gz
 
       - name: Generate Release Notes
         run: |
           TAG="${{ steps.vars.outputs.tag }}"
           REPO="${{ github.repository }}"
-          CHECKSUM=$(awk '{print $1}' dist/minilytics.tar.gz.sha256)
+          CHECKSUM=$(awk '{print $1}' dist/petitstats.tar.gz.sha256)
 
           cat << EOF > release_notes.md
           ### Quick Install
@@ -71,30 +72,32 @@ jobs:
           Extract into your website directory:
 
           \`\`\`bash
-          curl -LO "https://github.com/${REPO}/releases/download/${TAG}/minilytics.tar.gz"
-          tar -xzf minilytics.tar.gz && rm minilytics.tar.gz
+          curl -LO "https://github.com/${REPO}/releases/download/${TAG}/petitstats.tar.gz"
+          tar -xzf petitstats.tar.gz && rm petitstats.tar.gz
           \`\`\`
 
-          Ensure your web server can write to \`../minilytics-data/\` (or the folder set in \`MINILYTICS_DATA_DIR\`), then open \`/dashboard/\` to create the administrator account.
+          Ensure your web server can write to \`../petitstats-data/\` (or the folder set in \`PETITSTATS_DATA_DIR\`), then open \`/dashboard/\` to create the administrator account.
 
           ### Checksum
 
           \`\`\`text
-          ${CHECKSUM}  minilytics.tar.gz
+          ${CHECKSUM}  petitstats.tar.gz
           \`\`\`
           EOF
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: minilytics-${{ steps.vars.outputs.tag }}
+          name: petitstats-${{ steps.vars.outputs.tag }}
           path: |
+            dist/petitstats.tar.gz
+            dist/petitstats.tar.gz.sha256
+            dist/petitstats-${{ steps.vars.outputs.tag }}.tar.gz
+            dist/petitstats-${{ steps.vars.outputs.tag }}.tar.gz.sha256
+            dist/petitstats-landing.tar.gz
+            dist/petitstats-landing.tar.gz.sha256
             dist/minilytics.tar.gz
             dist/minilytics.tar.gz.sha256
-            dist/minilytics-${{ steps.vars.outputs.tag }}.tar.gz
-            dist/minilytics-${{ steps.vars.outputs.tag }}.tar.gz.sha256
-            dist/minilytics-landing.tar.gz
-            dist/minilytics-landing.tar.gz.sha256
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -107,11 +110,13 @@ jobs:
           draft: false
           prerelease: false
           files: |
+            dist/petitstats.tar.gz
+            dist/petitstats.tar.gz.sha256
+            dist/petitstats-${{ steps.vars.outputs.tag }}.tar.gz
+            dist/petitstats-${{ steps.vars.outputs.tag }}.tar.gz.sha256
+            dist/petitstats-landing.tar.gz
+            dist/petitstats-landing.tar.gz.sha256
             dist/minilytics.tar.gz
             dist/minilytics.tar.gz.sha256
-            dist/minilytics-${{ steps.vars.outputs.tag }}.tar.gz
-            dist/minilytics-${{ steps.vars.outputs.tag }}.tar.gz.sha256
-            dist/minilytics-landing.tar.gz
-            dist/minilytics-landing.tar.gz.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics\Reports;
+namespace Petitstats\Analytics\Reports;
 
-use Minilytics\Analytics\ReportQuery;
+use Petitstats\Analytics\ReportQuery;
 
 /** Custom events, overall and one at a time. */
 final class EventsReport
 {
-    /** Fields every event carries (see minilytics.js and track.php): the other `data` fields are the event's own properties. */
+    /** Fields every event carries (see petitstats.js and track.php): the other `data` fields are the event's own properties. */
     private const CONTEXT_FIELDS = [
         'tracking_mode', '_ml_tracking_mode', '_ml_revenue', 'path', 'title', 'hostname', 'referrer', 'language', 'screen', 'viewport',
         'utm', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',

@@ -1,5 +1,5 @@
 {
-    "name": "axthauvin/minilytics",
+    "name": "axthauvin/petitstats",
     "description": "Minimal, GDPR-friendly, self-hosted web analytics powered by PHP with SQLite, MySQL, or MariaDB",
     "type": "project",
     "license": "MIT",
@@ -22,7 +22,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Minilytics\\": "src/"
+            "Petitstats\\": "src/"
         },
         "files": [
             "src/Updates/guard.php"
@@ -30,7 +30,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Minilytics\\Tests\\": "tests/php/"
+            "Petitstats\\Tests\\": "tests/php/"
         }
     },
     "config": {

@@ -6,7 +6,7 @@
         </div>
         <div class="modal-body whats-new-body" id="whatsNewBody"></div>
         <div class="whats-new-footer">
-            <a class="btn-outline" href="https://github.com/axthauvin/minilytics/releases" target="_blank" rel="noopener">All releases ↗</a>
+            <a class="btn-outline" href="https://github.com/axthauvin/petitstats/releases" target="_blank" rel="noopener">All releases ↗</a>
             <button type="button" class="btn-primary" data-close-modal>Got it</button>
         </div>
     </div>
