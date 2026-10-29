@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics;
+namespace Petitstats\Analytics;
 
-use Minilytics\Database\DatabaseConnection;
+use Petitstats\Database\DatabaseConnection;
 
 /**
  * What every report queries: one website's database over one period, with the

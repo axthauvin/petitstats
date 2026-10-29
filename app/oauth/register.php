@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Http\Http;
-use Minilytics\OAuth\OAuthException;
-use Minilytics\OAuth\OAuthServer;
+use Petitstats\Auth\Auth;
+use Petitstats\Http\Http;
+use Petitstats\OAuth\OAuthException;
+use Petitstats\OAuth\OAuthServer;
 
 // RFC 7591 dynamic client registration: assistants register themselves before sending the user to the consent screen.
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -15,7 +15,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     Http::json(['error' => 'invalid_request', 'error_description' => 'Use POST.'], 405);
 }
 if (!Auth::hasDatabase()) {
-    Http::json(['error' => 'temporarily_unavailable', 'error_description' => 'Minilytics is not set up yet.'], 503);
+    Http::json(['error' => 'temporarily_unavailable', 'error_description' => 'Petitstats is not set up yet.'], 503);
 }
 $request = json_decode((string) file_get_contents('php://input'), true);
 try {

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Auth;
+namespace Petitstats\Auth;
 
 use Delight\Auth\Auth as AuthEngine;
 use Delight\Auth\Role;
-use Minilytics\Sites\DemoTraffic;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Sites\DemoTraffic;
+use Petitstats\Sites\SiteRegistry;
 use PDO;
 use Throwable;
 
@@ -57,7 +57,7 @@ final class Auth
     private static function configureSession(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
-            session_name('minilytics_session');
+            session_name('petitstats_session');
             session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax', 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off']);
         }
     }
@@ -109,7 +109,7 @@ final class Auth
         try {
             DemoTraffic::refresh((string) $siteId);
         } catch (Throwable $e) {
-            error_log('Minilytics demo refresh failed: ' . $e->getMessage());
+            error_log('Petitstats demo refresh failed: ' . $e->getMessage());
         }
     }
     public static function isGuest(): bool

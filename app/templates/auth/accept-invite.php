@@ -5,14 +5,14 @@
  * @var string $token
  */
 
-use Minilytics\Auth\Csrf;
+use Petitstats\Auth\Csrf;
 
 ?>
 <h1>Create your access</h1>
 <?php if ($error): ?>
     <div class="auth-error"><?= htmlspecialchars($error) ?></div>
 <?php else: ?>
-    <p>You are joining Minilytics as <strong><?= htmlspecialchars($email) ?></strong>.</p>
+    <p>You are joining Petitstats as <strong><?= htmlspecialchars($email) ?></strong>.</p>
     <form method="post">
         <?= Csrf::field() ?>
         <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">

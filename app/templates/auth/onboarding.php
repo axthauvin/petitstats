@@ -7,12 +7,12 @@
  * @var array{host: string, port: string, database: string, username: string, create_database: bool} $server
  */
 
-use Minilytics\Auth\Csrf;
+use Petitstats\Auth\Csrf;
 
 ?>
 <?php if ($step === 'welcome'): ?>
     <span class="eyebrow">Step 1 of 3</span>
-    <h1>Welcome to Minilytics !</h1>
+    <h1>Welcome to Petitstats !</h1>
     <p>Private, lightweight web analytics for your websites. Let’s secure your workspace with an administrator account.</p>
     <form method="get">
         <input type="hidden" name="step" value="account"><button class="btn-primary" type="submit">Get started</button>
@@ -52,7 +52,7 @@ use Minilytics\Auth\Csrf;
         <input type="hidden" name="driver" value="<?= htmlspecialchars($databaseDriver) ?>" id="databaseDriver">
         <section id="storageChoiceStage" <?= $databaseStage === 'config' ? ' hidden' : '' ?>>
             <h1>Choose your analytics storage</h1>
-            <p>Minilytics needs a database to store your visitors, pageviews, and events. Start instantly with a local database or connect an external server.</p>
+            <p>Petitstats needs a database to store your visitors, pageviews, and events. Start instantly with a local database or connect an external server.</p>
             <div class="storage-options" role="radiogroup" aria-label="Analytics storage">
                 <label class="storage-option<?= $databaseDriver === 'sqlite' ? ' is-selected' : '' ?>" data-storage-option="sqlite">
                     <input type="radio" name="storage" value="sqlite" <?= $databaseDriver === 'sqlite' ? ' checked' : '' ?>>
@@ -73,7 +73,7 @@ use Minilytics\Auth\Csrf;
         </section>
         <section id="storageConfigStage" <?= $databaseStage === 'choice' ? ' hidden' : '' ?>>
             <h1>Configure your database server</h1>
-            <p>Enter the connection information provided by your hosting provider. Minilytics will test it before continuing.</p>
+            <p>Enter the connection information provided by your hosting provider. Petitstats will test it before continuing.</p>
             <div class="remote-storage-fields" id="remoteStorageFields">
                 <label>Database engine
                     <select id="remoteDriver">
@@ -83,11 +83,11 @@ use Minilytics\Auth\Csrf;
                 </label>
                 <label>Host<input required name="host" autocomplete="off" placeholder="localhost" value="<?= htmlspecialchars($server['host']) ?>"></label>
                 <label>Port<input name="port" type="number" min="1" max="65535" value="<?= htmlspecialchars($server['port']) ?>"></label>
-                <label>Database name<input required name="database" autocomplete="off" placeholder="minilytics" value="<?= htmlspecialchars($server['database']) ?>"></label>
+                <label>Database name<input required name="database" autocomplete="off" placeholder="petitstats" value="<?= htmlspecialchars($server['database']) ?>"></label>
                 <label>Username<input required name="username" autocomplete="username" placeholder="db_user" value="<?= htmlspecialchars($server['username']) ?>"></label>
                 <label>Password<input name="password" type="password" autocomplete="new-password"></label>
                 <label class="storage-checkbox"><input name="create_database" type="checkbox" <?= $server['create_database'] ? ' checked' : '' ?>><span><strong>Create the database if it is missing</strong><small>Requires the database user to have the CREATE permission.</small></span></label>
-                <p class="storage-guidance"><strong>Before continuing:</strong> Minilytics tests this connection before saving it. The database user needs CREATE, ALTER, INDEX, SELECT, INSERT, UPDATE and DELETE permissions.</p>
+                <p class="storage-guidance"><strong>Before continuing:</strong> Petitstats tests this connection before saving it. The database user needs CREATE, ALTER, INDEX, SELECT, INSERT, UPDATE and DELETE permissions.</p>
             </div>
             <button type="submit">Test connection and continue</button>
             <button type="button" class="back-button" id="backToStorageChoice">Choose a different storage option</button>

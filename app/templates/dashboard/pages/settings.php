@@ -2,7 +2,7 @@
     <div class="settings-page-header">
         <div>
             <h2>Settings</h2>
-            <p>Manage the people who are allowed to access Minilytics, as well as the settings for each website and where to store the data.</p>
+            <p>Manage the people who are allowed to access Petitstats, as well as the settings for each website and where to store the data.</p>
         </div><a class="btn-outline" href="#websites">Back to websites</a>
     </div>
     <div class="settings-tabs" role="tablist" aria-label="Settings sections">
@@ -11,7 +11,7 @@
         <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settingsDatabasePanel" id="settingsDatabaseTab" data-settings-tab="database">Database</button>
         <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settingsAssistantsPanel" id="settingsAssistantsTab" data-settings-tab="assistants">AI assistants</button>
         <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settingsDisplayPanel" id="settingsDisplayTab" data-settings-tab="display">Display</button>
-        <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settingsUpdatesPanel" id="settingsUpdatesTab" data-settings-tab="updates">Updates<span class="update-dot update-dot--tab" data-update-dot title="A new Minilytics version is available" hidden></span></button>
+        <button class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settingsUpdatesPanel" id="settingsUpdatesTab" data-settings-tab="updates">Updates<span class="update-dot update-dot--tab" data-update-dot title="A new Petitstats version is available" hidden></span></button>
     </div>
     <div class="settings-panel" id="settingsAccessPanel" role="tabpanel" aria-labelledby="settingsAccessTab" data-settings-panel="access">
         <section class="settings-card" id="inviteUserCard">
@@ -89,7 +89,7 @@
                     <p>Applies to every website. IP addresses are never stored, and only serve for the rate limit, the visitor key and the internal traffic filter.</p>
                 </div>
             </div>
-            <label class="tracking-checkbox"><input id="trackingTrustCloudflare" type="checkbox"><span><strong>Minilytics is behind Cloudflare</strong><small id="trackingTrustCloudflareHelp">Turn on when this Minilytics domain goes through Cloudflare, whatever your tracked websites use. Visitor addresses are then read from Cloudflare's CF-Connecting-IP header. Leave it off otherwise, since anyone can send this header with a fake address.</small></span></label>
+            <label class="tracking-checkbox"><input id="trackingTrustCloudflare" type="checkbox"><span><strong>Petitstats is behind Cloudflare</strong><small id="trackingTrustCloudflareHelp">Turn on when this Petitstats domain goes through Cloudflare, whatever your tracked websites use. Visitor addresses are then read from Cloudflare's CF-Connecting-IP header. Leave it off otherwise, since anyone can send this header with a fake address.</small></span></label>
             <p class="settings-feedback" id="trackingServerFeedback" role="status"></p>
         </section>
     </div>
@@ -98,7 +98,7 @@
             <div class="settings-card-heading">
                 <div>
                     <h3>Analytics database</h3>
-                    <p>Choose where Minilytics stores new analytics data. SQLite remains local; MySQL and MariaDB use one shared database with isolated websites.</p>
+                    <p>Choose where Petitstats stores new analytics data. SQLite remains local; MySQL and MariaDB use one shared database with isolated websites.</p>
                 </div>
             </div>
             <div class="database-engine-field"><label for="databaseDriver">Database engine</label><select id="databaseDriver">
@@ -110,7 +110,7 @@
                 <div class="database-remote-fields" id="databaseRemoteFields">
                     <div class="tracking-field"><label for="databaseHost">Host</label><input id="databaseHost" autocomplete="off" placeholder="localhost"></div>
                     <div class="tracking-field"><label for="databasePort">Port</label><input id="databasePort" type="number" min="1" max="65535" value="3306"></div>
-                    <div class="tracking-field"><label for="databaseName">Database name</label><input id="databaseName" autocomplete="off" placeholder="minilytics"></div>
+                    <div class="tracking-field"><label for="databaseName">Database name</label><input id="databaseName" autocomplete="off" placeholder="petitstats"></div>
                     <div class="tracking-field"><label for="databaseUsername">Username</label><input id="databaseUsername" autocomplete="username" placeholder="db_user"></div>
                     <div class="tracking-field database-password"><label for="databasePassword">Password</label><input id="databasePassword" type="password" autocomplete="new-password" placeholder="Leave blank to keep the saved password"><small>Your password is never returned to the browser after it is saved.</small></div>
                 </div>
@@ -127,7 +127,7 @@
             <div class="settings-card-heading">
                 <div>
                     <h3>Connect an AI assistant</h3>
-                    <p>Ask Claude, ChatGPT, Cursor and others about your traffic. They sign in with your Minilytics account and only read your analytics, unless you let one edit your funnels below.</p>
+                    <p>Ask Claude, ChatGPT, Cursor and others about your traffic. They sign in with your Petitstats account and only read your analytics, unless you let one edit your funnels below.</p>
                 </div>
             </div>
             <div class="mcp-tiles" id="mcpClientTiles" role="tablist" aria-label="Assistants"></div>
@@ -163,7 +163,7 @@
         <section class="settings-card" id="updatesCard">
             <div class="settings-card-heading">
                 <div>
-                    <h3>Minilytics version</h3>
+                    <h3>Petitstats version</h3>
                     <p>Your server asks GitHub for the latest release at most twice a day, and only while an administrator uses the dashboard.</p>
                 </div>
             </div>
@@ -179,8 +179,8 @@
             </div>
             <div class="update-actions">
                 <button type="button" class="btn-primary" id="updateInstall" hidden>Install update</button>
-                <a class="btn-outline" id="updateReleaseLink" href="https://github.com/axthauvin/minilytics/releases" target="_blank" rel="noopener" hidden>Release on GitHub ↗</a>
-                <a class="btn-outline" id="updateManualLink" href="<?= \Minilytics\Http\Docs::url('operations', 'updating-by-hand') ?>" target="_blank" rel="noopener" hidden>How to update by hand ↗</a>
+                <a class="btn-outline" id="updateReleaseLink" href="https://github.com/axthauvin/petitstats/releases" target="_blank" rel="noopener" hidden>Release on GitHub ↗</a>
+                <a class="btn-outline" id="updateManualLink" href="<?= \Petitstats\Http\Docs::url('operations', 'updating-by-hand') ?>" target="_blank" rel="noopener" hidden>How to update by hand ↗</a>
                 <button type="button" class="btn-outline" id="updateCheckNow" hidden>Check now</button>
                 <button type="button" class="btn-outline" id="updateRollback" hidden>Go back to the previous version</button>
             </div>

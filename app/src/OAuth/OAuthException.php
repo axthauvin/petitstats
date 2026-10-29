@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\OAuth;
+namespace Petitstats\OAuth;
 
 use RuntimeException;
 

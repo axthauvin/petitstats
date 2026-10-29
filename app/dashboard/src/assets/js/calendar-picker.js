@@ -2,7 +2,7 @@
  * Small dependency-free calendar used by the dashboard's date controls.
  * Values remain ISO dates (YYYY-MM-DD), so the existing API contract is unchanged.
  */
-class MinilyticsCalendarPicker {
+class PetitstatsCalendarPicker {
   constructor(input) {
     this.input = typeof input === "string" ? document.getElementById(input) : input;
     if (!this.input) return;
@@ -57,7 +57,7 @@ class MinilyticsCalendarPicker {
     const date = this.parse(value);
     if (!date) return this.clear();
     this.input.dataset.isoValue = value;
-    this.input.value = MinilyticsCalendarPicker.formatIsoDate(value);
+    this.input.value = PetitstatsCalendarPicker.formatIsoDate(value);
   }
 
   clear() {
@@ -141,4 +141,4 @@ class MinilyticsCalendarPicker {
   }
 }
 
-window.MinilyticsCalendarPicker = MinilyticsCalendarPicker;
+window.PetitstatsCalendarPicker = PetitstatsCalendarPicker;

@@ -2,12 +2,12 @@
 set -euo pipefail
 
 # -----------------------------------------------------------------------------
-# Minilytics Landing Packaging Script
+# Petitstats Landing Packaging Script
 # -----------------------------------------------------------------------------
 # Packages the landing page (landing/ directory) into a .tar.gz archive meant to
 # be extracted into the same web root as the application, next to it:
 #
-#   tar -xzf minilytics-landing.tar.gz -C /path/to/web-root
+#   tar -xzf petitstats-landing.tar.gz -C /path/to/web-root
 # -----------------------------------------------------------------------------
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -15,7 +15,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 LANDING_DIR="${PROJECT_ROOT}/landing"
 
 DIST_DIR="${1:-${PROJECT_ROOT}/dist}"
-ARCHIVE_NAME="${2:-minilytics-landing.tar.gz}"
+ARCHIVE_NAME="${2:-petitstats-landing.tar.gz}"
 OUTPUT_ARCHIVE="${DIST_DIR}/${ARCHIVE_NAME}"
 
 echo "==> Packaging landing page from: ${LANDING_DIR}"

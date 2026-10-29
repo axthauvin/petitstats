@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Updates;
+namespace Petitstats\Updates;
 
 use Closure;
 use FilesystemIterator;
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\DataDirectory;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
@@ -16,7 +16,7 @@ use Throwable;
 /**
  * Installs a new release from the dashboard, one step per request.
  *
- *  1. problems() checks that PHP can rewrite every Minilytics file.
+ *  1. problems() checks that PHP can rewrite every Petitstats file.
  *  2. download() fetches the archive, then checks its SHA-256 and every file in it.
  *  3. backup() copies the current files to the data folder and checks the copy.
  *  4. install() replaces the files, then asks the new version to answer.
@@ -32,10 +32,10 @@ use Throwable;
  */
 final class Updater
 {
-    public const DOWNLOAD_URL = 'https://github.com/axthauvin/minilytics/releases/download/%s/minilytics.tar.gz';
+    public const DOWNLOAD_URL = 'https://github.com/axthauvin/petitstats/releases/download/%s/petitstats.tar.gz';
     /** Requests are turned away for at most this long, even if the update never finishes. */
     private const MAINTENANCE_SECONDS = 600;
-    private const TEMP_SUFFIX = '.minilytics-update';
+    private const TEMP_SUFFIX = '.petitstats-update';
     /** Written last, so an interrupted update never reports a version whose files are not all in place. */
     private const VERSION_PATH = 'src/VERSION';
 
@@ -88,7 +88,7 @@ final class Updater
         header('Retry-After: 10');
         header('Cache-Control: no-store');
         header('Content-Type: text/plain; charset=utf-8');
-        echo "Minilytics is being updated. Try again in a few seconds.\n";
+        echo "Petitstats is being updated. Try again in a few seconds.\n";
         exit;
     }
 
@@ -152,7 +152,7 @@ final class Updater
                 throw new RuntimeException('PHP cannot write to the data folder.');
             }
 
-            $archive = $staging . '/minilytics.tar.gz';
+            $archive = $staging . '/petitstats.tar.gz';
             $url = sprintf(self::DOWNLOAD_URL, rawurlencode($version));
             ($this->download)($url, $archive);
             ($this->download)($url . '.sha256', $archive . '.sha256');
@@ -270,7 +270,7 @@ final class Updater
                 $this->saveState(['status' => 'installed', 'from' => $from, 'to' => $to, 'verified' => $served !== null]);
             } catch (Throwable $e) {
                 $this->undo($e->getMessage());
-                throw new RuntimeException(sprintf('The update failed, so Minilytics went back to %s. %s', $from, $e->getMessage()), 0, $e);
+                throw new RuntimeException(sprintf('The update failed, so Petitstats went back to %s. %s', $from, $e->getMessage()), 0, $e);
             }
             $this->stopMaintenance();
             $this->removeDir($this->stagingDir());
@@ -371,7 +371,7 @@ final class Updater
         /** @var SplFileInfo $file */
         foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS)) as $file) {
             if ($file->isLink()) {
-                throw new RuntimeException('The archive contains a symbolic link, which Minilytics releases never do.');
+                throw new RuntimeException('The archive contains a symbolic link, which Petitstats releases never do.');
             }
             if ($file->isFile()) {
                 $found[] = strtr(substr($file->getPathname(), strlen($dir) + 1), '\\', '/');
@@ -411,7 +411,7 @@ final class Updater
         }
         foreach (array_keys($dirs) as $dir) {
             if (!is_writable($this->appDir . '/' . $dir)) {
-                $blocked[] = $dir === '.' ? 'the Minilytics folder' : $dir . '/';
+                $blocked[] = $dir === '.' ? 'the Petitstats folder' : $dir . '/';
             }
         }
         if ($blocked === []) {
@@ -420,7 +420,7 @@ final class Updater
         sort($blocked);
         $examples = implode(', ', array_slice($blocked, 0, 3));
         return [count($blocked) > 3
-            ? sprintf('PHP is not allowed to change %d Minilytics files and folders, such as %s.', count($blocked), $examples)
+            ? sprintf('PHP is not allowed to change %d Petitstats files and folders, such as %s.', count($blocked), $examples)
             : sprintf('PHP is not allowed to change %s.', $examples)];
     }
 
@@ -684,7 +684,7 @@ final class Updater
 
     private static function downloadFile(string $url, string $target): void
     {
-        $context = stream_context_create(['http' => ['timeout' => 30, 'header' => "User-Agent: Minilytics\r\n"]]);
+        $context = stream_context_create(['http' => ['timeout' => 30, 'header' => "User-Agent: Petitstats\r\n"]]);
         $in = @fopen($url, 'rb', false, $context);
         $out = $in !== false ? @fopen($target, 'wb') : false;
         $copied = $in !== false && $out !== false ? stream_copy_to_stream($in, $out) : false;
@@ -725,7 +725,7 @@ final class Updater
         $url = ($https ? 'https' : 'http') . '://' . $host . $script . '?health=' . $token;
         // The server calls itself to read a version number, so a self-signed certificate is fine.
         $context = stream_context_create([
-            'http' => ['timeout' => 15, 'ignore_errors' => true, 'header' => "User-Agent: Minilytics\r\n"],
+            'http' => ['timeout' => 15, 'ignore_errors' => true, 'header' => "User-Agent: Petitstats\r\n"],
             'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
         ]);
         $stream = @fopen($url, 'rb', false, $context);

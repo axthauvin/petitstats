@@ -1,8 +1,8 @@
 # Downloads the two release archives from GitHub Releases and verifies them
 # against their SHA256 checksums:
 #
-#   - minilytics.tar.gz          the Analytics dashboard (app/)
-#   - minilytics-landing.tar.gz  the landing page (landing/)
+#   - petitstats.tar.gz          the Analytics dashboard (app/)
+#   - petitstats-landing.tar.gz  the landing page (landing/)
 #
 # Usage: download-archives.sh [DEST_DIR] [TAG]
 #   DEST_DIR  where to save the archives (default: ./dist)
@@ -12,10 +12,10 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-REPO="${MINILYTICS_REPO:-axthauvin/minilytics}"
+REPO="${PETITSTATS_REPO:-axthauvin/petitstats}"
 DEST_DIR="${1:-${PROJECT_ROOT}/dist}"
 TAG="${2:-latest}"
-ARCHIVES=("minilytics.tar.gz" "minilytics-landing.tar.gz")
+ARCHIVES=("petitstats.tar.gz" "petitstats-landing.tar.gz")
 
 if [ "${TAG}" = "latest" ]; then
     BASE_URL="https://github.com/${REPO}/releases/latest/download"
@@ -48,4 +48,4 @@ for archive in "${ARCHIVES[@]}"; do
 done
 
 echo "==> Archives saved in: ${DEST_DIR}"
-ls -lh "${DEST_DIR}"/minilytics*.tar.gz
+ls -lh "${DEST_DIR}"/petitstats*.tar.gz

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Auth\Csrf;
-use Minilytics\Http\View;
-use Minilytics\OAuth\OAuthException;
-use Minilytics\OAuth\OAuthServer;
+use Petitstats\Auth\Auth;
+use Petitstats\Auth\Csrf;
+use Petitstats\Http\View;
+use Petitstats\OAuth\OAuthException;
+use Petitstats\OAuth\OAuthServer;
 
 /**
  * OAuth consent screen: the signed-in user allows an AI assistant to read the
@@ -57,7 +57,7 @@ if ($request !== null && $isPost) {
 }
 
 echo View::render('auth/oauth-authorize', [
-    'title' => 'Connect an assistant | Minilytics',
+    'title' => 'Connect an assistant | Petitstats',
     'error' => $error,
     'params' => $params,
     'clientName' => $request['client']['client_name'] ?? '',

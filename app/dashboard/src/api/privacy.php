@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Database\Connections;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Auth\Auth;
+use Petitstats\Database\Connections;
+use Petitstats\Sites\SiteRegistry;
 
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../../vendor/autoload.php';

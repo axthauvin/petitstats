@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Database;
+namespace Petitstats\Database;
 
 use PDO;
 use SQLite3;

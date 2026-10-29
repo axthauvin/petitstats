@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Sites;
+namespace Petitstats\Tests\Sites;
 
-use Minilytics\Database\Connections;
-use Minilytics\Database\DatabaseConnection;
-use Minilytics\Database\DataDirectory;
-use Minilytics\Sites\DemoTraffic;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Database\Connections;
+use Petitstats\Database\DatabaseConnection;
+use Petitstats\Database\DataDirectory;
+use Petitstats\Sites\DemoTraffic;
+use Petitstats\Sites\SiteRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class DemoTrafficTest extends TestCase

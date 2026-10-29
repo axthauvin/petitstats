@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Updates;
+namespace Petitstats\Updates;
 
 use RuntimeException;
 
@@ -10,7 +10,7 @@ use RuntimeException;
  * The files of a release and their SHA-256, as listed in src/MANIFEST.
  *
  * scripts/build-archive.sh writes it in the `sha256sum` format. It tells the
- * updater which files belong to Minilytics, so it never touches anything else
+ * updater which files belong to Petitstats, so it never touches anything else
  * in the folder (such as a landing page), and which files a release dropped.
  */
 final class Manifest

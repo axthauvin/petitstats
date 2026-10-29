@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Updates\UpdateCheck;
-use Minilytics\Updates\Updater;
+use Petitstats\Auth\Auth;
+use Petitstats\Updates\UpdateCheck;
+use Petitstats\Updates\Updater;
 
 /** The installed version, and for administrators whether a newer release exists. */
 header('Content-Type: application/json; charset=utf-8');

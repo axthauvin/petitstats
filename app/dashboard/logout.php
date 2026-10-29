@@ -1,6 +1,6 @@
 <?php
 
-use Minilytics\Auth\Auth;
+use Petitstats\Auth\Auth;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 Auth::logout();

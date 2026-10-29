@@ -3,12 +3,12 @@
     <div><h1>Revenue</h1><p>How much your website earns, and which channels, campaigns and pages bring the money in.</p></div>
   </div>
 
-  <!-- Shown until the website sends an event with minilytics.revenue() -->
+  <!-- Shown until the website sends an event with petitstats.revenue() -->
   <div class="revenue-setup" id="revenueSetup" hidden>
     <h2>No revenue in this period</h2>
-    <p>Call <code>minilytics.revenue</code> when someone pays. Give it an <code>order_id</code> so that reloading the confirmation page does not count the order twice.</p>
-    <pre><code>minilytics.revenue("purchase", 49.90, { currency: "EUR", order_id: "1042" });</code></pre>
-    <a href="<?= \Minilytics\Http\Docs::url('tracking', 'measure-revenue') ?>" target="_blank" rel="noopener">How to measure revenue ↗</a>
+    <p>Call <code>petitstats.revenue</code> when someone pays. Give it an <code>order_id</code> so that reloading the confirmation page does not count the order twice.</p>
+    <pre><code>petitstats.revenue("purchase", 49.90, { currency: "EUR", order_id: "1042" });</code></pre>
+    <a href="<?= \Petitstats\Http\Docs::url('tracking', 'measure-revenue') ?>" target="_blank" rel="noopener">How to measure revenue ↗</a>
   </div>
 
   <div id="revenueContent">

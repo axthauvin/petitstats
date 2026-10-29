@@ -38,7 +38,7 @@ function loadOverview(initialStorage) {
 
 test('restores a persisted custom reporting range', () => {
   const context = loadApp({
-    minilytics_date_range: JSON.stringify({
+    petitstats_date_range: JSON.stringify({
       range: 'custom',
       customDates: { from: '2026-10-04', to: '2026-10-01' },
     }),
@@ -54,7 +54,7 @@ test('restores a persisted custom reporting range', () => {
 test('formats hourly overview labels in the browser timezone and the chosen time format', () => {
   const timestamp = 1791216000;
   const date = new Date(timestamp * 1000);
-  const label = (format) => loadOverview({ minilytics_time_format: format }).localizeHourlyChartLabels([
+  const label = (format) => loadOverview({ petitstats_time_format: format }).localizeHourlyChartLabels([
     { timestamp, interval_hours: 1, label: '12 AM', full_label: 'UTC label' },
   ])[0];
 

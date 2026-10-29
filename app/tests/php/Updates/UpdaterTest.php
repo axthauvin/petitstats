@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Updates;
+namespace Petitstats\Tests\Updates;
 
 use Closure;
 use FilesystemIterator;
-use Minilytics\Updates\Updater;
+use Petitstats\Updates\Updater;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -52,7 +52,7 @@ final class UpdaterTest extends TestCase
                 sleep(60);
             }
         };
-        $updater = new Minilytics\Updates\Updater($app, $work, static fn() => null, static fn() => null, $stop);
+        $updater = new Petitstats\Updates\Updater($app, $work, static fn() => null, static fn() => null, $stop);
         $updater->install();
 
         PHP;
@@ -69,13 +69,13 @@ final class UpdaterTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->root = sys_get_temp_dir() . '/minilytics-updater-' . bin2hex(random_bytes(4));
+        $this->root = sys_get_temp_dir() . '/petitstats-updater-' . bin2hex(random_bytes(4));
         $this->app = $this->root . '/app';
         foreach (self::INSTALLED + ['src/VERSION' => "v1.0.0\n"] as $path => $content) {
             $this->write($path, $content);
         }
         $this->write('src/MANIFEST', self::manifest(self::INSTALLED + ['src/VERSION' => "v1.0.0\n"]));
-        $this->write('index.html', 'A landing page that is not part of Minilytics');
+        $this->write('index.html', 'A landing page that is not part of Petitstats');
         $this->before = $this->snapshot();
 
         $this->release('v2.0.0', self::RELEASE);
@@ -110,7 +110,7 @@ final class UpdaterTest extends TestCase
         $expected = self::RELEASE + [
             'src/VERSION' => "v2.0.0\n",
             'src/MANIFEST' => self::manifest(self::RELEASE + ['src/VERSION' => "v2.0.0\n"]),
-            'index.html' => 'A landing page that is not part of Minilytics',
+            'index.html' => 'A landing page that is not part of Petitstats',
         ];
         ksort($expected);
         $this->assertSame($expected, $this->snapshot());
@@ -143,7 +143,7 @@ final class UpdaterTest extends TestCase
 
     public function testRefusesAnArchiveWhoseChecksumDoesNotMatch(): void
     {
-        $this->remote[sprintf(Updater::DOWNLOAD_URL, 'v2.0.0') . '.sha256'] = str_repeat('0', 64) . "  minilytics.tar.gz\n";
+        $this->remote[sprintf(Updater::DOWNLOAD_URL, 'v2.0.0') . '.sha256'] = str_repeat('0', 64) . "  petitstats.tar.gz\n";
 
         $this->assertUpdateFails('SHA-256 does not match');
         $this->assertSame('idle', $this->updater->status()['status']);
@@ -193,7 +193,7 @@ final class UpdaterTest extends TestCase
             }
         });
 
-        $this->assertUpdateFails('The update failed, so Minilytics went back to v1.0.0. Disk full.');
+        $this->assertUpdateFails('The update failed, so Petitstats went back to v1.0.0. Disk full.');
         $this->assertEquals(['status' => 'failed', 'from' => 'v1.0.0', 'to' => 'v2.0.0', 'error' => 'Disk full.', 'previous' => null], $this->updater->status());
         $this->assertFalse($this->updater->isUnderMaintenance());
     }
@@ -405,7 +405,7 @@ final class UpdaterTest extends TestCase
         $archive = (string) gzencode($tar . $extra . str_repeat("\0", 1024));
         $url = sprintf(Updater::DOWNLOAD_URL, $tag);
         $this->remote[$url] = $archive;
-        $this->remote[$url . '.sha256'] = hash('sha256', $archive) . "  minilytics.tar.gz\n";
+        $this->remote[$url . '.sha256'] = hash('sha256', $archive) . "  petitstats.tar.gz\n";
     }
 
     /** @param array<string, string> $files */

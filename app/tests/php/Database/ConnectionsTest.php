@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Database;
+namespace Petitstats\Tests\Database;
 
-use Minilytics\Database\Connections;
-use Minilytics\Database\DataDirectory;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Database\Connections;
+use Petitstats\Database\DataDirectory;
+use Petitstats\Sites\SiteRegistry;
 use PHPUnit\Framework\TestCase;
 use SQLite3;
 

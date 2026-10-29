@@ -6,7 +6,7 @@
  */
 declare(strict_types=1);
 
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\DataDirectory;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\OAuth;
+namespace Petitstats\OAuth;
 
-use Minilytics\Auth\AuthDatabase;
-use Minilytics\Auth\BearerTokens;
-use Minilytics\Http\Docs;
+use Petitstats\Auth\AuthDatabase;
+use Petitstats\Auth\BearerTokens;
+use Petitstats\Http\Docs;
 use SQLite3;
 
 /**
@@ -60,7 +60,7 @@ final class OAuthServer
             'authorization_servers' => [self::resource()],
             'scopes_supported' => [self::SCOPE],
             'bearer_methods_supported' => ['header'],
-            'resource_name' => 'Minilytics',
+            'resource_name' => 'Petitstats',
             'resource_documentation' => Docs::url('mcp'),
         ];
     }

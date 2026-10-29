@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Tracking;
+namespace Petitstats\Tests\Tracking;
 
-use Minilytics\Database\Connections;
-use Minilytics\Sites\SiteRegistry;
-use Minilytics\Tests\PhpServer;
-use Minilytics\Tracking\CloudflareTrust;
+use Petitstats\Database\Connections;
+use Petitstats\Sites\SiteRegistry;
+use Petitstats\Tests\PhpServer;
+use Petitstats\Tracking\CloudflareTrust;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
  * these tests keep passing however the endpoint is organised internally.
  *
  * The default server is a direct install; the "cloudflare" one sets
- * MINILYTICS_TRUST_CLOUDFLARE, like an install behind Cloudflare.
+ * PETITSTATS_TRUST_CLOUDFLARE, like an install behind Cloudflare.
  */
 final class TrackEndpointTest extends TestCase
 {
@@ -120,7 +120,7 @@ final class TrackEndpointTest extends TestCase
             'path' => 'pricing',
             'url' => 'https://example.com/pricing?email=a@b.c',
             'search' => '?email=a@b.c',
-            'referrer' => 'https://www.google.com/search?q=minilytics',
+            'referrer' => 'https://www.google.com/search?q=petitstats',
             'email' => 'visitor@example.com',
             'plan' => 'pro',
         ]]));
@@ -369,9 +369,9 @@ final class TrackEndpointTest extends TestCase
     {
         if (!isset(self::$servers[$name])) {
             $env = getenv();
-            unset($env['MINILYTICS_TRUST_CLOUDFLARE']);
+            unset($env['PETITSTATS_TRUST_CLOUDFLARE']);
             if ($name === 'cloudflare') {
-                $env['MINILYTICS_TRUST_CLOUDFLARE'] = '1';
+                $env['PETITSTATS_TRUST_CLOUDFLARE'] = '1';
             }
             if ($name === 'workers') {
                 $env['PHP_CLI_SERVER_WORKERS'] = '8';

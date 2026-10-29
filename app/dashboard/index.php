@@ -1,8 +1,8 @@
 <?php
 
-use Minilytics\Auth\Auth;
-use Minilytics\Http\View;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Auth\Auth;
+use Petitstats\Http\View;
+use Petitstats\Sites\SiteRegistry;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 Auth::startSession();

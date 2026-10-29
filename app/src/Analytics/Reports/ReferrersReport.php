@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics\Reports;
+namespace Petitstats\Analytics\Reports;
 
-use Minilytics\Analytics\ReportQuery;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Analytics\ReportQuery;
+use Petitstats\Sites\SiteRegistry;
 use Throwable;
 
 /** Referring domains. */

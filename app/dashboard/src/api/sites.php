@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Minilytics\Analytics\SiteOverview;
-use Minilytics\Auth\Auth;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Analytics\SiteOverview;
+use Petitstats\Auth\Auth;
+use Petitstats\Sites\SiteRegistry;
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Methods: GET, POST, PATCH, DELETE, OPTIONS');
@@ -41,7 +41,7 @@ try {
         $site = SiteRegistry::update((string) ($body['id'] ?? $_GET['id'] ?? ''), $body);
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        echo json_encode(['success' => true, 'site' => $site, 'snippet' => SiteRegistry::trackingSnippet($site, "$scheme://$host/minilytics.js")], JSON_UNESCAPED_SLASHES);
+        echo json_encode(['success' => true, 'site' => $site, 'snippet' => SiteRegistry::trackingSnippet($site, "$scheme://$host/petitstats.js")], JSON_UNESCAPED_SLASHES);
         exit;
     }
     // 1. DELETE site
@@ -90,7 +90,7 @@ try {
 
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
-        $scriptUrl = "{$protocol}{$host}/minilytics.js";
+        $scriptUrl = "{$protocol}{$host}/petitstats.js";
         $trackingSnippet = SiteRegistry::trackingSnippet($site, $scriptUrl);
 
         echo json_encode([

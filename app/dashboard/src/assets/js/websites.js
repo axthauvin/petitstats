@@ -1,5 +1,5 @@
 /**
- * Minilytics Websites Management Page Controller
+ * Petitstats Websites Management Page Controller
  * Inspired by Image 1 table aesthetic: Favicon retrieval, 7d sparklines, relative creation date.
  */
 
@@ -256,7 +256,7 @@ const WebsitesPage = {
         let snippet = '';
         try {
             const config = await Api.getTrackingConfig(siteId);
-            const scriptUrl = `${window.location.protocol}//${window.location.host}/minilytics.js`;
+            const scriptUrl = `${window.location.protocol}//${window.location.host}/petitstats.js`;
             snippet = `<script defer src="${scriptUrl}" data-site-id="${siteId}" data-site-key="${config.site.write_key}" data-privacy-mode="strict"></script>`;
         } catch (error) {
             alert(`Could not load the protected tracking snippet: ${error.message}`);

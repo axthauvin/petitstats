@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # -----------------------------------------------------------------------------
-# Minilytics Release Packaging Script
+# Petitstats Release Packaging Script
 # -----------------------------------------------------------------------------
 # Packages the deployable application (the app/ directory) into a .tar.gz
 # archive. The landing page, docs and repository tooling live outside app/ and
@@ -15,10 +15,10 @@ APP_DIR="${PROJECT_ROOT}/app"
 
 # Output configuration
 DIST_DIR="${1:-${PROJECT_ROOT}/dist}"
-ARCHIVE_NAME="${2:-minilytics.tar.gz}"
+ARCHIVE_NAME="${2:-petitstats.tar.gz}"
 OUTPUT_ARCHIVE="${DIST_DIR}/${ARCHIVE_NAME}"
 
-echo "==> Packaging Minilytics from: ${APP_DIR}"
+echo "==> Packaging Petitstats from: ${APP_DIR}"
 echo "==> Target archive: ${OUTPUT_ARCHIVE}"
 
 mkdir -p "${DIST_DIR}"
@@ -70,20 +70,28 @@ for pattern in "${EXCLUDES[@]}"; do
 done
 # Data folder of older versions: data now lives outside the web root.
 rm -rf "${STAGING_DIR}/data"
+# Sites tagged before the project was renamed load minilytics.js.
+cp "${STAGING_DIR}/petitstats.js" "${STAGING_DIR}/minilytics.js"
 
 # Record the release tag, so the dashboard can show the installed version and
 # tell administrators about newer releases (src/ is not publicly served).
-if [ -n "${MINILYTICS_VERSION:-}" ]; then
+if [ -n "${PETITSTATS_VERSION:-}" ]; then
     printf '%s
-' "${MINILYTICS_VERSION}" > "${STAGING_DIR}/src/VERSION"
+' "${PETITSTATS_VERSION}" > "${STAGING_DIR}/src/VERSION"
 fi
 
 # List every file with its SHA-256 in src/MANIFEST. Updates from the dashboard
 # only replace these files, check each one, and remove those a release drops.
+# They write them in this order, and src/Updates/guard.php comes first: once
+# it is in place, an update from a Minilytics version that is killed halfway
+# can still be undone (see the loader in that file).
 (
     cd "${STAGING_DIR}"
     if command -v sha256sum >/dev/null 2>&1; then HASH=(sha256sum); else HASH=(shasum -a 256); fi
-    find . -type f ! -path ./src/MANIFEST -print0 | LC_ALL=C sort -z | xargs -0 "${HASH[@]}" | sed -E 's#^([0-9a-f]{64}) [ *]\./#\1  #' > src/MANIFEST
+    UNORDERED="$(mktemp)"
+    find . -type f ! -path ./src/MANIFEST -print0 | LC_ALL=C sort -z | xargs -0 "${HASH[@]}" | sed -E 's#^([0-9a-f]{64}) [ *]\./#\1  #' > "${UNORDERED}"
+    { grep '  src/Updates/guard\.php$' "${UNORDERED}"; grep -v '  src/Updates/guard\.php$' "${UNORDERED}"; } > src/MANIFEST
+    rm "${UNORDERED}"
 )
 
 # Ensure .htaccess at root exists
@@ -108,6 +116,14 @@ if command -v sha256sum >/dev/null 2>&1; then
     (cd "${DIST_DIR}" && sha256sum "$(basename "${OUTPUT_ARCHIVE}")" > "$(basename "${CHECKSUM_FILE}")")
 elif command -v shasum >/dev/null 2>&1; then
     (cd "${DIST_DIR}" && shasum -a 256 "$(basename "${OUTPUT_ARCHIVE}")" > "$(basename "${CHECKSUM_FILE}")")
+fi
+
+# Installs made before the project was renamed download minilytics.tar.gz
+# (and its .sha256) when they update from the dashboard, so every release
+# must publish that copy too.
+if [ "${ARCHIVE_NAME}" = "petitstats.tar.gz" ]; then
+    cp "${OUTPUT_ARCHIVE}" "${DIST_DIR}/minilytics.tar.gz"
+    cp "${CHECKSUM_FILE}" "${DIST_DIR}/minilytics.tar.gz.sha256"
 fi
 
 echo "==> Archive successfully created:"

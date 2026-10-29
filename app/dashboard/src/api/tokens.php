@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\McpTokens;
-use Minilytics\Auth\Auth;
-use Minilytics\OAuth\OAuthServer;
+use Petitstats\Auth\McpTokens;
+use Petitstats\Auth\Auth;
+use Petitstats\OAuth\OAuthServer;
 
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../../vendor/autoload.php';

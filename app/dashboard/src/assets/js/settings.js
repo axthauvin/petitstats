@@ -217,10 +217,10 @@ const SettingsPage = {
       let message = ''; let tone = data.update_available ? 'success' : '';
       if (isAdmin && !data.latest) message = 'GitHub could not be reached. Try again later.';
       else if (last.status === 'broken') { message = `The update to ${last.to} failed and could not be undone. ${last.error} Restore the backup by hand, as the documentation explains.`; tone = 'error'; }
-      else if (last.status === 'failed' && data.update_available) { message = `The update to ${last.to} failed, so Minilytics went back to ${last.from}. ${last.error}`; tone = 'error'; }
+      else if (last.status === 'failed' && data.update_available) { message = `The update to ${last.to} failed, so Petitstats went back to ${last.from}. ${last.error}`; tone = 'error'; }
       else if (data.update_available) message = `Version ${data.latest.version} is available.`;
       else if (!data.installed) message = 'This copy runs from the source code, so it is not compared with releases.';
-      else if (last.status === 'installed' && last.to === data.installed && !last.verified) message = `Minilytics was updated to ${last.to}, but your server could not reach itself to check that the new version runs. If something looks wrong, go back to ${last.from}.`;
+      else if (last.status === 'installed' && last.to === data.installed && !last.verified) message = `Petitstats was updated to ${last.to}, but your server could not reach itself to check that the new version runs. If something looks wrong, go back to ${last.from}.`;
       else if (isAdmin) message = 'You are using the latest version.';
       status.className = 'settings-feedback' + (tone ? ` settings-${tone}` : '');
       status.textContent = message;
@@ -241,11 +241,11 @@ const SettingsPage = {
   /** Installs the latest release, one step per request so that no request runs long (see Updater.php). */
   async installUpdate() {
     const version = this.latestVersion; if (!version) return;
-    if (!confirm(`Install Minilytics ${version}? Your analytics and settings are not touched, and a backup of the current files is kept. Minilytics is unavailable for a few seconds while the files are replaced.`)) return;
+    if (!confirm(`Install Petitstats ${version}? Your analytics and settings are not touched, and a backup of the current files is kept. Petitstats is unavailable for a few seconds while the files are replaced.`)) return;
     const status = document.getElementById('updateStatus'); const problems = document.getElementById('updateProblems');
     const buttons = ['updateInstall', 'updateCheckNow', 'updateRollback'].map((id) => document.getElementById(id));
     buttons.forEach((b) => { b.disabled = true; }); problems.hidden = true;
-    const steps = [['check', 'Checking that Minilytics can update itself…'], ['download', `Downloading ${version} and checking its files…`], ['backup', 'Backing up the current files…'], ['install', `Installing ${version}…`]];
+    const steps = [['check', 'Checking that Petitstats can update itself…'], ['download', `Downloading ${version} and checking its files…`], ['backup', 'Backing up the current files…'], ['install', `Installing ${version}…`]];
     try {
       for (const [step, text] of steps) {
         status.className = 'settings-feedback'; status.textContent = text;
@@ -253,11 +253,11 @@ const SettingsPage = {
         if (step === 'check' && data.problems.length) {
           problems.replaceChildren(...data.problems.map((problem) => Object.assign(document.createElement('li'), { textContent: problem })));
           problems.hidden = false; document.getElementById('updateManualLink').hidden = false;
-          status.className = 'settings-feedback settings-error'; status.textContent = 'Minilytics cannot update itself on this server, so update it by hand instead.';
+          status.className = 'settings-feedback settings-error'; status.textContent = 'Petitstats cannot update itself on this server, so update it by hand instead.';
           return;
         }
       }
-      status.className = 'settings-feedback settings-success'; status.textContent = `Minilytics ${version} is installed. Reloading the page…`;
+      status.className = 'settings-feedback settings-success'; status.textContent = `Petitstats ${version} is installed. Reloading the page…`;
       setTimeout(() => window.location.reload(), 1500);
     } catch (e) { status.className = 'settings-feedback settings-error'; status.textContent = e.message; }
     finally { buttons.forEach((b) => { b.disabled = false; }); }
@@ -265,12 +265,12 @@ const SettingsPage = {
 
   async rollbackUpdate() {
     const version = this.previousVersion; if (!version) return;
-    if (!confirm(`Go back to Minilytics ${version}? The files of the current version are replaced with the backup taken before the last update. Your analytics and settings are not touched.`)) return;
+    if (!confirm(`Go back to Petitstats ${version}? The files of the current version are replaced with the backup taken before the last update. Your analytics and settings are not touched.`)) return;
     const status = document.getElementById('updateStatus'); const rollback = document.getElementById('updateRollback');
     rollback.disabled = true; status.className = 'settings-feedback'; status.textContent = `Going back to ${version}…`;
     try {
       await Api.runUpdateStep('rollback');
-      status.className = 'settings-feedback settings-success'; status.textContent = `Minilytics ${version} is back. Reloading the page…`;
+      status.className = 'settings-feedback settings-success'; status.textContent = `Petitstats ${version} is back. Reloading the page…`;
       setTimeout(() => window.location.reload(), 1500);
     } catch (e) { status.className = 'settings-feedback settings-error'; status.textContent = e.message; rollback.disabled = false; }
   },
@@ -345,7 +345,7 @@ const SettingsPage = {
       card.hidden = false;
       checkbox.checked = data.trust_cloudflare; checkbox.disabled = data.forced_by_environment;
       let message = body ? 'Saved.' : '';
-      if (data.forced_by_environment) message = 'Turned on by the MINILYTICS_TRUST_CLOUDFLARE environment variable.';
+      if (data.forced_by_environment) message = 'Turned on by the PETITSTATS_TRUST_CLOUDFLARE environment variable.';
       else if (data.request_via_cloudflare && !data.trust_cloudflare) message = 'This dashboard is reaching you through Cloudflare: turn this on.';
       feedback.className = message === 'Saved.' ? 'settings-feedback settings-success' : 'settings-feedback';
       feedback.textContent = message;
@@ -477,7 +477,7 @@ const SettingsPage = {
    */
   mcpClients() {
     const url = this.mcpUrl;
-    const name = 'minilytics';
+    const name = 'petitstats';
     const vscode = JSON.stringify({ name, type: 'http', url });
     const steps = (items) => `<ol class="mcp-steps">${items.map((item) => `<li>${item}</li>`).join('')}</ol>`;
     const note = (html) => `<p class="mcp-note">${html}</p>`;
@@ -487,29 +487,29 @@ const SettingsPage = {
       // claude.ai opens its "Add custom connector" dialog with these fields filled in.
       // A connector added on claude.ai also reaches Claude Code when it is signed in with a Claude account.
       { id: 'claude', label: 'Claude', detail: 'App, desktop, mobile and Claude Code', icon: { brand: 'claude' }, guide: () => steps([
-        `Open Claude with the connector ready to add: ${install(`https://claude.ai/customize/connectors?${new URLSearchParams({ modal: 'add-custom-connector', connectorName: 'Minilytics', connectorUrl: url })}`, 'Add to Claude', 'claude', true)}`,
-        'Click <strong>Add</strong>, then <strong>Connect</strong>, and allow access in Minilytics.',
-      ]) + note('Minilytics then works in every Claude app on your account, including Claude Code signed in with your Claude account. Claude connects from the internet, so your Minilytics must be reachable over HTTPS. On Team and Enterprise plans, an Owner adds the connector in <strong>Organization settings → Connectors</strong>.')
+        `Open Claude with the connector ready to add: ${install(`https://claude.ai/customize/connectors?${new URLSearchParams({ modal: 'add-custom-connector', connectorName: 'Petitstats', connectorUrl: url })}`, 'Add to Claude', 'claude', true)}`,
+        'Click <strong>Add</strong>, then <strong>Connect</strong>, and allow access in Petitstats.',
+      ]) + note('Petitstats then works in every Claude app on your account, including Claude Code signed in with your Claude account. Claude connects from the internet, so your Petitstats must be reachable over HTTPS. On Team and Enterprise plans, an Owner adds the connector in <strong>Organization settings → Connectors</strong>.')
         + byHand('Add it by hand: Customize → Connectors → Add custom connector, with this URL', url)
         + byHand('Using Claude Code with an API key? Run this, then /mcp → Authenticate', `claude mcp add --transport http ${name} ${url}`) },
       { id: 'chatgpt', label: 'ChatGPT', detail: 'Paid plans', icon: { brand: 'openai' }, guide: () => steps([
         'In <strong>Settings → Apps → Advanced settings</strong>, turn on <strong>Developer mode</strong>.',
-        `Click <strong>Create app</strong>, name it <strong>Minilytics</strong>, choose <strong>OAuth</strong> and paste this URL:${this.mcpCode(url)}`,
-        'Click <strong>Create</strong>, then allow access in Minilytics.',
+        `Click <strong>Create app</strong>, name it <strong>Petitstats</strong>, choose <strong>OAuth</strong> and paste this URL:${this.mcpCode(url)}`,
+        'Click <strong>Create</strong>, then allow access in Petitstats.',
       ]) + note('In a chat, turn the app on from the <strong>+</strong> menu.') },
       { id: 'codex', label: 'Codex', detail: 'App, CLI and IDE extension', icon: { brand: 'openai' }, guide: () => steps([
         'In Codex, open <strong>Settings → MCP</strong> and add a custom MCP server.',
-        `Name it <strong>minilytics</strong>, choose <strong>Streamable HTTP</strong> and paste this URL:${this.mcpCode(url)}`,
-        'Click <strong>Save</strong>, then <strong>Authenticate</strong>, and allow access in Minilytics.',
+        `Name it <strong>petitstats</strong>, choose <strong>Streamable HTTP</strong> and paste this URL:${this.mcpCode(url)}`,
+        'Click <strong>Save</strong>, then <strong>Authenticate</strong>, and allow access in Petitstats.',
       ]) + byHand('Using the Codex CLI? Run these commands', `codex mcp add ${name} --url ${url}\ncodex mcp login ${name}`)
         + note('The Codex app, CLI and IDE extension share this configuration.') },
       { id: 'cursor', label: 'Cursor', detail: 'Editor', icon: { brand: 'cursor' }, guide: () => steps([
         `Add the server to Cursor: ${install(`cursor://anysphere.cursor-deeplink/mcp/install?name=${name}&config=${encodeURIComponent(btoa(JSON.stringify({ url })))}`, 'Add to Cursor', 'cursor')}`,
-        'In Cursor’s MCP settings, click <strong>Connect</strong> next to minilytics, then allow access in Minilytics.',
+        'In Cursor’s MCP settings, click <strong>Connect</strong> next to petitstats, then allow access in Petitstats.',
       ]) + byHand('Add it by hand to ~/.cursor/mcp.json', JSON.stringify({ mcpServers: { [name]: { url } } }, null, 2)) },
       { id: 'vscode', label: 'VS Code', detail: 'GitHub Copilot', icon: { brand: 'vscode' }, guide: () => steps([
         `Add the server to VS Code: ${install(`vscode:mcp/install?${encodeURIComponent(vscode)}`, 'Add to VS Code', 'vscode')}`,
-        'When VS Code starts the server, sign in to Minilytics and allow access.',
+        'When VS Code starts the server, sign in to Petitstats and allow access.',
       ]) + byHand('Add it from the command line', `code --add-mcp '${vscode}'`) },
       { id: 'other', label: 'Other tools', detail: 'Your agent sets itself up', icon: { lucide: 'layout-grid' }, guide: () => this.otherToolsGuide(url) },
     ];
@@ -523,7 +523,7 @@ const SettingsPage = {
     return `
       <div class="mcp-prompt">
         <div class="mcp-tool-name"><strong>Let your agent set itself up</strong></div>
-        <p>Paste this into Gemini CLI, Windsurf, Antigravity or any agent that can edit its own configuration. It adds Minilytics and tells you how to sign in.</p>
+        <p>Paste this into Gemini CLI, Windsurf, Antigravity or any agent that can edit its own configuration. It adds Petitstats and tells you how to sign in.</p>
         ${this.mcpCode(this.agentPrompt(url))}
       </div>
       <p class="mcp-lead">Or add this URL to your assistant’s MCP settings yourself:</p>
@@ -541,13 +541,13 @@ const SettingsPage = {
 
   agentPrompt(url) {
     return [
-      'Add the Minilytics MCP server to your MCP configuration:',
-      '- Name: minilytics',
+      'Add the Petitstats MCP server to your MCP configuration:',
+      '- Name: petitstats',
       `- URL: ${url}`,
       '- Transport: Streamable HTTP',
-      '- Authentication: OAuth. Do not add an API key or an Authorization header: the server asks me to sign in to Minilytics the first time it is used.',
+      '- Authentication: OAuth. Do not add an API key or an Authorization header: the server asks me to sign in to Petitstats the first time it is used.',
       'Use the command or configuration file of the tool you are running in (Claude Code, Codex, Gemini CLI, Cursor, VS Code, Windsurf, Antigravity…), then tell me how to complete the sign-in.',
-      'If your tool cannot sign in to remote MCP servers with OAuth, or still gets "Unauthorized" after signing in, ask me for an access token (Minilytics, Settings → AI assistants → Other tools) and send it as an "Authorization: Bearer <token>" header instead. Do not write your own OAuth client.',
+      'If your tool cannot sign in to remote MCP servers with OAuth, or still gets "Unauthorized" after signing in, ask me for an access token (Petitstats, Settings → AI assistants → Other tools) and send it as an "Authorization: Bearer <token>" header instead. Do not write your own OAuth client.',
     ].join('\n');
   },
 
@@ -633,7 +633,7 @@ const SettingsPage = {
     try {
       const { token } = await Api.accessTokens('POST', { name: input.value.trim() || 'Access token' });
       input.value = '';
-      const config = JSON.stringify({ mcpServers: { minilytics: { type: 'http', url: this.mcpUrl, headers: { Authorization: `Bearer ${token.token}` } } } }, null, 2);
+      const config = JSON.stringify({ mcpServers: { petitstats: { type: 'http', url: this.mcpUrl, headers: { Authorization: `Bearer ${token.token}` } } } }, null, 2);
       result.innerHTML = `
         <div class="mcp-token-result">
           <strong>Copy your token now: it will not be shown again.</strong>

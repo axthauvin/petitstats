@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Minilytics\Analytics\AnalyticsFilters;
-use Minilytics\Analytics\Period;
-use Minilytics\Auth\Auth;
-use Minilytics\Database\Connections;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Analytics\AnalyticsFilters;
+use Petitstats\Analytics\Period;
+use Petitstats\Auth\Auth;
+use Petitstats\Database\Connections;
+use Petitstats\Sites\SiteRegistry;
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');

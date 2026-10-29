@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Importers\ImporterRegistry;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Auth\Auth;
+use Petitstats\Importers\ImporterRegistry;
+use Petitstats\Sites\SiteRegistry;
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');

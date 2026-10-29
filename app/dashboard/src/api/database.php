@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Database\DatabaseConfig;
+use Petitstats\Auth\Auth;
+use Petitstats\Database\DatabaseConfig;
 
 require_once __DIR__ . '/../../../vendor/autoload.php';
 

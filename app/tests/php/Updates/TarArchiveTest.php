@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Updates;
+namespace Petitstats\Tests\Updates;
 
 use FilesystemIterator;
-use Minilytics\Updates\TarArchive;
+use Petitstats\Updates\TarArchive;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -18,7 +18,7 @@ final class TarArchiveTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->dir = sys_get_temp_dir() . '/minilytics-tar-' . bin2hex(random_bytes(4));
+        $this->dir = sys_get_temp_dir() . '/petitstats-tar-' . bin2hex(random_bytes(4));
         mkdir($this->dir . '/out', 0755, true);
     }
 

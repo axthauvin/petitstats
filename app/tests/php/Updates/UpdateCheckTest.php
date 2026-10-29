@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Updates;
+namespace Petitstats\Tests\Updates;
 
-use Minilytics\Updates\UpdateCheck;
+use Petitstats\Updates\UpdateCheck;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 final class UpdateCheckTest extends TestCase
 {
-    private const RELEASE = ['version' => 'v1.2.0', 'url' => 'https://github.com/axthauvin/minilytics/releases/tag/v1.2.0', 'published_at' => '2026-10-01T00:00:00Z'];
+    private const RELEASE = ['version' => 'v1.2.0', 'url' => 'https://github.com/axthauvin/petitstats/releases/tag/v1.2.0', 'published_at' => '2026-10-01T00:00:00Z'];
 
     private string $dir;
     private int $fetches = 0;
 
     protected function setUp(): void
     {
-        $this->dir = sys_get_temp_dir() . '/minilytics-update-' . bin2hex(random_bytes(4));
+        $this->dir = sys_get_temp_dir() . '/petitstats-update-' . bin2hex(random_bytes(4));
         mkdir($this->dir);
     }
 

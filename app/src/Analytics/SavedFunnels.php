@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics;
+namespace Petitstats\Analytics;
 
 use InvalidArgumentException;
-use Minilytics\Database\DatabaseConnection;
+use Petitstats\Database\DatabaseConnection;
 
 /**
  * Saves the funnels, goals and journeys of a website, for the dashboard and

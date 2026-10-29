@@ -9,7 +9,7 @@
  * @var list<string>|null $scripts
  */
 
-use Minilytics\Http\Asset;
+use Petitstats\Http\Asset;
 
 ?><!doctype html>
 <html lang="en">
@@ -27,7 +27,7 @@ use Minilytics\Http\Asset;
     </head>
     <body>
         <main class="auth-card<?= isset($cardClass) ? ' ' . htmlspecialchars($cardClass) : '' ?>">
-            <img src="/dashboard/src/assets/logo.svg" width="44" height="44" alt="Minilytics">
+            <img src="/dashboard/src/assets/logo.svg" width="44" height="44" alt="Petitstats">
             <?= $content ?>
         </main>
         <?php foreach ($scripts ?? [] as $script): ?>

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
 /** What track.php sends back to the tracker. */
 final class TrackingResponse

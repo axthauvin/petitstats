@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="Minilytics">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="Petitstats">
   <rect x="1" y="1" width="30" height="30" rx="8" fill="#EFF6FF" stroke="#BFDBFE"/>
   <path d="M7 23.5V18.5C7 17.672 7.672 17 8.5 17H9.5C10.328 17 11 17.672 11 18.5V23.5H7Z" fill="#93C5FD"/>
   <path d="M13 23.5V13.5C13 12.672 13.672 12 14.5 12H15.5C16.328 12 17 12.672 17 13.5V23.5H13Z" fill="#60A5FA"/>

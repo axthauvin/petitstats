@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Tracking\CloudflareTrust;
+use Petitstats\Auth\Auth;
+use Petitstats\Tracking\CloudflareTrust;
 
 /** Server-wide tracking settings, shared by every website. */
 header('Content-Type: application/json; charset=utf-8');

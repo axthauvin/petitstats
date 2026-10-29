@@ -402,7 +402,7 @@ const SiteSetup = {
         const extended = this.extendedRetention();
         this.el('ssExtendTitle').textContent = `Keep ${extended.days} days of visits`;
         this.el('ssExtendDesc').textContent = extended.capped
-            ? `The longest Minilytics allows. Visits from before ${this.formatDate(new Date(Date.now() - extended.days * DAY_MS))} are still left out.`
+            ? `The longest Petitstats allows. Visits from before ${this.formatDate(new Date(Date.now() - extended.days * DAY_MS))} are still left out.`
             : 'Your whole history is imported. The oldest visits are deleted as they pass this age.';
         this.el('ssKeepTitle').textContent = `Keep ${dest.retention} days`;
         this.el('ssKeepDesc').textContent = `Visits from before ${this.formatDate(cutoff)} are not imported.`;
@@ -478,7 +478,7 @@ const SiteSetup = {
             : s.path === 'import' ? 'Import past data' : 'Add a website';
         const subtitle = s.snippetOnly ? 'Add this tag to your pages to collect visits.'
             : s.step === 'start' ? 'Start collecting visits, or bring your history from another analytics service.'
-            : s.path === 'import' ? 'Bring your history from another analytics service into Minilytics.'
+            : s.path === 'import' ? 'Bring your history from another analytics service into Petitstats.'
             : 'Create the website, then add its tracking tag to your pages.';
         this.el('siteSetupTitle').textContent = title;
         this.el('siteSetupSubtitle').textContent = subtitle;

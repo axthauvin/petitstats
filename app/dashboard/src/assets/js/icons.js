@@ -1,5 +1,5 @@
 /**
- * Minilytics Lucide Icons Helper
+ * Petitstats Lucide Icons Helper
  * Provides crisp SVG icons powered by Lucide with zero-dependency built-in fallbacks.
  */
 

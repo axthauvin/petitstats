@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Database;
+namespace Petitstats\Tests\Database;
 
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\DataDirectory;
 use PHPUnit\Framework\TestCase;
 
 final class DataDirectoryTest extends TestCase
@@ -14,9 +14,9 @@ final class DataDirectoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $base = sys_get_temp_dir() . '/minilytics-migrate-' . bin2hex(random_bytes(4));
+        $base = sys_get_temp_dir() . '/petitstats-migrate-' . bin2hex(random_bytes(4));
         $this->legacy = $base . '/data';
-        $this->dir = $base . '/minilytics-data';
+        $this->dir = $base . '/petitstats-data';
         mkdir($this->legacy, 0770, true);
         mkdir($this->dir, 0770, true);
         foreach (['site.db', 'sites.json', 'database.json', '.tracking-secret'] as $file) {
@@ -61,5 +61,21 @@ final class DataDirectoryTest extends TestCase
         DataDirectory::migrateLegacyData($this->legacy . '-missing', $this->dir);
 
         $this->assertSame([], glob($this->dir . '/*'));
+    }
+
+    public function testKeepsTheFolderOfAnInstallMadeBeforeTheRename(): void
+    {
+        $parent = dirname($this->dir);
+        $this->assertSame($parent . '/petitstats-data', DataDirectory::defaultPath($parent));
+
+        mkdir($parent . '/minilytics-data');
+        try {
+            $this->assertSame($parent . '/petitstats-data', DataDirectory::defaultPath($parent), 'the new folder wins once it exists');
+            rmdir($this->dir);
+            $this->assertSame($parent . '/minilytics-data', DataDirectory::defaultPath($parent));
+        } finally {
+            rmdir($parent . '/minilytics-data');
+            @mkdir($this->dir);
+        }
     }
 }

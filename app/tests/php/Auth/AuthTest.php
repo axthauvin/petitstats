@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Auth;
+namespace Petitstats\Tests\Auth;
 
 use Delight\Auth\UserAlreadyExistsException;
-use Minilytics\Auth\Auth;
-use Minilytics\Auth\Invitations;
-use Minilytics\Auth\McpTokens;
-use Minilytics\Auth\Users;
+use Petitstats\Auth\Auth;
+use Petitstats\Auth\Invitations;
+use Petitstats\Auth\McpTokens;
+use Petitstats\Auth\Users;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -35,14 +35,14 @@ final class AuthTest extends TestCase
 
     public function testEmailValidation(): void
     {
-        $this->assertTrue(Auth::validEmail('owner@minilytics.test'));
+        $this->assertTrue(Auth::validEmail('owner@petitstats.test'));
         $this->assertFalse(Auth::validEmail('not-an-email'));
     }
 
     public function testCreatesAdminsAndMembers(): void
     {
-        $admin = Auth::createUser('admin-' . uniqid() . '@minilytics.test', self::PASSWORD, 'admin');
-        $member = Auth::createUser('member-' . uniqid() . '@minilytics.test', self::PASSWORD, 'member');
+        $admin = Auth::createUser('admin-' . uniqid() . '@petitstats.test', self::PASSWORD, 'admin');
+        $member = Auth::createUser('member-' . uniqid() . '@petitstats.test', self::PASSWORD, 'member');
 
         $this->assertTrue($this->isAdmin($admin));
         $this->assertFalse($this->isAdmin($member));
@@ -50,7 +50,7 @@ final class AuthTest extends TestCase
 
     public function testRefusesADuplicateEmail(): void
     {
-        $email = 'twice-' . uniqid() . '@minilytics.test';
+        $email = 'twice-' . uniqid() . '@petitstats.test';
         Auth::createUser($email, self::PASSWORD, 'member');
 
         $this->expectException(UserAlreadyExistsException::class);
@@ -59,7 +59,7 @@ final class AuthTest extends TestCase
 
     public function testAnMcpTokenAuthenticatesItsOwner(): void
     {
-        $email = 'mcp-' . uniqid() . '@minilytics.test';
+        $email = 'mcp-' . uniqid() . '@petitstats.test';
         $userId = Auth::createUser($email, self::PASSWORD, 'member');
         $token = McpTokens::create($userId, 'Claude');
 
@@ -69,7 +69,7 @@ final class AuthTest extends TestCase
 
     public function testListedTokensNeverExposeTheirValue(): void
     {
-        $userId = Auth::createUser('list-' . uniqid() . '@minilytics.test', self::PASSWORD, 'member');
+        $userId = Auth::createUser('list-' . uniqid() . '@petitstats.test', self::PASSWORD, 'member');
         $token = McpTokens::create($userId, 'Cursor');
 
         $listed = McpTokens::forUser($userId);
@@ -80,8 +80,8 @@ final class AuthTest extends TestCase
 
     public function testOnlyTheOwnerCanRevokeAToken(): void
     {
-        $owner = Auth::createUser('owner-' . uniqid() . '@minilytics.test', self::PASSWORD, 'member');
-        $other = Auth::createUser('other-' . uniqid() . '@minilytics.test', self::PASSWORD, 'member');
+        $owner = Auth::createUser('owner-' . uniqid() . '@petitstats.test', self::PASSWORD, 'member');
+        $other = Auth::createUser('other-' . uniqid() . '@petitstats.test', self::PASSWORD, 'member');
         $token = McpTokens::create($owner, 'Codex');
 
         $this->assertFalse(McpTokens::revoke($other, $token['id']));
@@ -93,8 +93,8 @@ final class AuthTest extends TestCase
 
     public function testOnlyTheOwnerCanLetATokenEditFunnels(): void
     {
-        $owner = Auth::createUser('writer-' . uniqid() . '@minilytics.test', self::PASSWORD, 'member');
-        $other = Auth::createUser('intruder-' . uniqid() . '@minilytics.test', self::PASSWORD, 'member');
+        $owner = Auth::createUser('writer-' . uniqid() . '@petitstats.test', self::PASSWORD, 'member');
+        $other = Auth::createUser('intruder-' . uniqid() . '@petitstats.test', self::PASSWORD, 'member');
         $token = McpTokens::create($owner, 'Claude Code');
 
         $this->assertFalse(McpTokens::allowWrite($other, $token['id'], true));
@@ -110,8 +110,8 @@ final class AuthTest extends TestCase
 
     public function testAnInvitationCanBeAcceptedOnce(): void
     {
-        $email = 'invited-' . uniqid() . '@minilytics.test';
-        $invitation = Invitations::create($email, Auth::createUser('inviter-' . uniqid() . '@minilytics.test', self::PASSWORD, 'admin'));
+        $email = 'invited-' . uniqid() . '@petitstats.test';
+        $invitation = Invitations::create($email, Auth::createUser('inviter-' . uniqid() . '@petitstats.test', self::PASSWORD, 'admin'));
 
         $pending = Invitations::findPending($invitation['token']);
         $this->assertSame($email, $pending['email'] ?? null);
@@ -122,8 +122,8 @@ final class AuthTest extends TestCase
 
     public function testANewInvitationReplacesThePendingOne(): void
     {
-        $email = 'reinvited-' . uniqid() . '@minilytics.test';
-        $admin = Auth::createUser('admin-' . uniqid() . '@minilytics.test', self::PASSWORD, 'admin');
+        $email = 'reinvited-' . uniqid() . '@petitstats.test';
+        $admin = Auth::createUser('admin-' . uniqid() . '@petitstats.test', self::PASSWORD, 'admin');
         $first = Invitations::create($email, $admin);
         $second = Invitations::create($email, $admin);
 
@@ -134,15 +134,15 @@ final class AuthTest extends TestCase
 
     public function testUsersLookups(): void
     {
-        $email = 'lookup-' . uniqid() . '@minilytics.test';
+        $email = 'lookup-' . uniqid() . '@petitstats.test';
         $id = Auth::createUser($email, self::PASSWORD, 'member');
         $admins = Users::adminCount();
-        Auth::createUser('extra-admin-' . uniqid() . '@minilytics.test', self::PASSWORD, 'admin');
+        Auth::createUser('extra-admin-' . uniqid() . '@petitstats.test', self::PASSWORD, 'admin');
 
         $this->assertSame($email, Users::find($id)['email'] ?? null);
         $this->assertNull(Users::find(PHP_INT_MAX));
         $this->assertTrue(Users::emailExists($email));
-        $this->assertFalse(Users::emailExists('nobody-' . uniqid() . '@minilytics.test'));
+        $this->assertFalse(Users::emailExists('nobody-' . uniqid() . '@petitstats.test'));
         $this->assertSame($admins + 1, Users::adminCount());
         $this->assertContains($id, array_column(Users::all(), 'id'));
     }

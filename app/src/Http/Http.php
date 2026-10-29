@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Http;
+namespace Petitstats\Http;
 
 /** Response helpers for the endpoints called by AI assistants (MCP and OAuth). */
 final class Http

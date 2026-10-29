@@ -8,7 +8,7 @@
  * @var bool $isLocalApp
  */
 
-use Minilytics\Auth\Csrf;
+use Petitstats\Auth\Csrf;
 
 $h = static fn(?string $value): string => htmlspecialchars((string) $value, ENT_QUOTES);
 ?>

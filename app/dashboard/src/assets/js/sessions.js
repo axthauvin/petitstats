@@ -1,5 +1,5 @@
 /**
- * Minilytics Sessions Page Controller
+ * Petitstats Sessions Page Controller
  * Uses Lucide icons (no emojis), deterministic avatar SVGs, and real session data.
  */
 
@@ -25,7 +25,7 @@ const SessionsPage = {
   ]),
 
   init() {
-    this.datePicker = new MinilyticsCalendarPicker(document.getElementById("sessionDateFilter"));
+    this.datePicker = new PetitstatsCalendarPicker(document.getElementById("sessionDateFilter"));
     this.bindEvents();
     Filters.onChange(() => {
       if (window.App?.currentPage !== "sessions") return;

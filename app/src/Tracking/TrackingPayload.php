@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
-/** The JSON body sent by minilytics.js. */
+/** The JSON body sent by petitstats.js. */
 final class TrackingPayload
 {
     /** @param array<mixed> $data */

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Database;
+namespace Petitstats\Tests\Database;
 
 use InvalidArgumentException;
-use Minilytics\Database\Connections;
-use Minilytics\Database\DatabaseConfig;
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\Connections;
+use Petitstats\Database\DatabaseConfig;
+use Petitstats\Database\DataDirectory;
 use PHPUnit\Framework\TestCase;
 
 final class DatabaseConfigTest extends TestCase
 {
-    private const MYSQL = ['driver' => 'mysql', 'host' => 'db.example.com', 'port' => 3306, 'database' => 'analytics', 'username' => 'minilytics', 'password' => 'secret'];
+    private const MYSQL = ['driver' => 'mysql', 'host' => 'db.example.com', 'port' => 3306, 'database' => 'analytics', 'username' => 'petitstats', 'password' => 'secret'];
 
     protected function tearDown(): void
     {

@@ -13,12 +13,12 @@ const BASE = `http://127.0.0.1:${PORT}`;
 let workdir;
 let server;
 
-/** Points the app at the isolated data directory instead of ../minilytics-data. */
-const phpEnv = () => ({ ...process.env, MINILYTICS_DATA_DIR: path.join(workdir, 'data') });
+/** Points the app at the isolated data directory instead of ../petitstats-data. */
+const phpEnv = () => ({ ...process.env, PETITSTATS_DATA_DIR: path.join(workdir, 'data') });
 
 /** Isolated copy of the app with one public and one private website. */
 function prepareInstall() {
-  workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'minilytics-guest-'));
+  workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'petitstats-guest-'));
   fs.cpSync(path.join(root, 'dashboard'), path.join(workdir, 'dashboard'), { recursive: true });
   fs.cpSync(path.join(root, 'src'), path.join(workdir, 'src'), { recursive: true });
   fs.cpSync(path.join(root, 'templates'), path.join(workdir, 'templates'), { recursive: true });
@@ -36,9 +36,9 @@ function prepareInstall() {
   // Auth database (onboarding done) and one pageview per website.
   const setup = spawnSync('php', ['-r', `
     require '${workdir}/vendor/autoload.php';
-    Minilytics\\Auth\\AuthDatabase::connection()->exec("INSERT INTO users (email, password, verified, roles_mask, registered) VALUES ('a@b.c', 'x', 1, 1, 0)");
+    Petitstats\\Auth\\AuthDatabase::connection()->exec("INSERT INTO users (email, password, verified, roles_mask, registered) VALUES ('a@b.c', 'x', 1, 1, 0)");
     foreach (['demo_site', 'private_site'] as $id) {
-      $db = Minilytics\\Database\\Connections::forSite($id);
+      $db = Petitstats\\Database\\Connections::forSite($id);
       $db->exec("INSERT INTO user_activity (session_id, visitor_id, action) VALUES ('s1', 'v1', '{\\"name\\":\\"pageview\\",\\"data\\":{\\"path\\":\\"/\\"}}')");
       $db->exec("INSERT INTO user_activity (session_id, visitor_id, action) VALUES ('s1', 'v1', '{\\"name\\":\\"_ml_engaged\\",\\"data\\":{\\"path\\":\\"/\\"}}')");
       $db->exec("INSERT INTO user_activity (session_id, visitor_id, action) VALUES ('s1', 'v1', '{\\"name\\":\\"signup\\",\\"data\\":{\\"path\\":\\"/\\"}}')");
@@ -129,8 +129,8 @@ test('dashboard opens the demo for guests and keeps private sites behind login',
   const page = await fetch(`${BASE}/dashboard/?site=demo_site&embed=1`, { redirect: 'manual' });
   const html = await page.text();
   assert.equal(page.status, 200);
-  assert.match(html, /window\.MINILYTICS_GUEST = true/);
-  assert.match(html, /window\.MINILYTICS_EMBED = true/);
+  assert.match(html, /window\.PETITSTATS_GUEST = true/);
+  assert.match(html, /window\.PETITSTATS_EMBED = true/);
   assert.match(html, /class="guest-mode embed-mode"/);
   assert.ok(!html.includes('href="#settings" class="footer-link'), 'settings link must be hidden');
   assert.ok(!html.includes('btnSidebarImport'), 'import must be hidden');

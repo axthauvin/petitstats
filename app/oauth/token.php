@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Minilytics\Http\Http;
-use Minilytics\OAuth\OAuthException;
-use Minilytics\OAuth\OAuthServer;
+use Petitstats\Http\Http;
+use Petitstats\OAuth\OAuthException;
+use Petitstats\OAuth\OAuthServer;
 
 // OAuth token endpoint: authorization code (with PKCE) and refresh token grants.
 require_once __DIR__ . '/../vendor/autoload.php';

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\DataDirectory;
 use RuntimeException;
 
 /**
@@ -38,7 +38,7 @@ final class VisitorIdentity
         $dir = DataDirectory::path();
         $handle = @fopen($dir . '/' . self::SALT_FILE, 'c+');
         if ($handle === false) {
-            throw new RuntimeException('Unable to store the Minilytics visitor salt. Make the data directory writable.');
+            throw new RuntimeException('Unable to store the Petitstats visitor salt. Make the data directory writable.');
         }
         try {
             flock($handle, LOCK_EX);

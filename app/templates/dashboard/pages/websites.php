@@ -1,12 +1,12 @@
 <!-- Page: Websites Management (Inspired by Image 1 & Standalone Portal) -->
 <div class="page-view" id="page-websites">
-    <!-- Standalone Portal Header with Minilytics Brand Logo -->
+    <!-- Standalone Portal Header with Petitstats Brand Logo -->
     <div class="portal-header">
         <div class="portal-brand-block">
             <div class="brand-logo-emblem">
-                <img src="/dashboard/src/assets/logo.svg" alt="Minilytics" width="36" height="36" class="portal-brand-logo-img">
+                <img src="/dashboard/src/assets/logo.svg" alt="Petitstats" width="36" height="36" class="portal-brand-logo-img">
                 <div style="margin-left: 2px;">
-                    <div class="portal-brand-text">Minilytics</div>
+                    <div class="portal-brand-text">Petitstats</div>
                     <div class="portal-subtitle">Websites & Projects</div>
                 </div>
             </div>

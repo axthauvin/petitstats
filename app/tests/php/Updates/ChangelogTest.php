@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Updates;
+namespace Petitstats\Tests\Updates;
 
-use Minilytics\Updates\Changelog;
+use Petitstats\Updates\Changelog;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -16,15 +16,15 @@ final class ChangelogTest extends TestCase
         * not a change, only install instructions
 
         ## What's Changed
-        * feat: switch geolocation to MaxMind GeoLite2 (closes #101) by @axthauvin in https://github.com/axthauvin/minilytics/pull/106
-        * fix(tracker): count visitors who view a page without interacting by @axthauvin in https://github.com/axthauvin/minilytics/pull/109
-        * docs: explain the update by @someone in https://github.com/axthauvin/minilytics/pull/112
+        * feat: switch geolocation to MaxMind GeoLite2 (closes #101) by @axthauvin in https://github.com/axthauvin/petitstats/pull/106
+        * fix(tracker): count visitors who view a page without interacting by @axthauvin in https://github.com/axthauvin/petitstats/pull/109
+        * docs: explain the update by @someone in https://github.com/axthauvin/petitstats/pull/112
         * Plain title without a prefix
 
         ## New Contributors
-        * @someone made their first contribution in https://github.com/axthauvin/minilytics/pull/112
+        * @someone made their first contribution in https://github.com/axthauvin/petitstats/pull/112
 
-        **Full Changelog**: https://github.com/axthauvin/minilytics/compare/v1.4.0-beta...v1.5.0-beta
+        **Full Changelog**: https://github.com/axthauvin/petitstats/compare/v1.4.0-beta...v1.5.0-beta
         MD;
 
     private string $dir;
@@ -32,7 +32,7 @@ final class ChangelogTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->dir = sys_get_temp_dir() . '/minilytics-changelog-' . bin2hex(random_bytes(4));
+        $this->dir = sys_get_temp_dir() . '/petitstats-changelog-' . bin2hex(random_bytes(4));
         mkdir($this->dir);
     }
 
@@ -45,9 +45,9 @@ final class ChangelogTest extends TestCase
     public function testReadsTheChangesFromTheGeneratedReleaseNotes(): void
     {
         $this->assertSame([
-            ['type' => 'new', 'text' => 'Switch geolocation to MaxMind GeoLite2', 'url' => 'https://github.com/axthauvin/minilytics/pull/106'],
-            ['type' => 'fixed', 'text' => 'Count visitors who view a page without interacting', 'url' => 'https://github.com/axthauvin/minilytics/pull/109'],
-            ['type' => 'improved', 'text' => 'Explain the update', 'url' => 'https://github.com/axthauvin/minilytics/pull/112'],
+            ['type' => 'new', 'text' => 'Switch geolocation to MaxMind GeoLite2', 'url' => 'https://github.com/axthauvin/petitstats/pull/106'],
+            ['type' => 'fixed', 'text' => 'Count visitors who view a page without interacting', 'url' => 'https://github.com/axthauvin/petitstats/pull/109'],
+            ['type' => 'improved', 'text' => 'Explain the update', 'url' => 'https://github.com/axthauvin/petitstats/pull/112'],
             ['type' => 'improved', 'text' => 'Plain title without a prefix', 'url' => null],
         ], Changelog::parseNotes(self::NOTES));
     }
@@ -100,7 +100,7 @@ final class ChangelogTest extends TestCase
             $this->fetches++;
             $release = static fn(string $tag, array $extra = []): array => $extra + [
                 'tag_name' => $tag,
-                'html_url' => "https://github.com/axthauvin/minilytics/releases/tag/{$tag}",
+                'html_url' => "https://github.com/axthauvin/petitstats/releases/tag/{$tag}",
                 'published_at' => '2026-10-19T17:53:05Z',
                 'body' => self::NOTES,
             ];

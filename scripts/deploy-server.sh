@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # -----------------------------------------------------------------------------
-# Minilytics Server Deploy Script
+# Petitstats Server Deploy Script
 # -----------------------------------------------------------------------------
 # Placed in the web root (e.g. ~/public_html), it downloads the latest release
 # archives (application and landing page), empties the folder except for this
@@ -11,12 +11,12 @@ set -euo pipefail
 #   ./deploy-server.sh            # latest release
 #   ./deploy-server.sh v1.4.0     # a given release tag
 #
-# Data lives outside the web root (../minilytics-data), so it is kept.
+# Data lives outside the web root (../petitstats-data), so it is kept.
 # -----------------------------------------------------------------------------
 
-REPO="axthauvin/minilytics"
+REPO="axthauvin/petitstats"
 TAG="${1:-latest}"
-ARCHIVES=("minilytics.tar.gz" "minilytics-landing.tar.gz")
+ARCHIVES=("petitstats.tar.gz" "petitstats-landing.tar.gz")
 
 TARGET_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SELF="$(basename "${BASH_SOURCE[0]}")"

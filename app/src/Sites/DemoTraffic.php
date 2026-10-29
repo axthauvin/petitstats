@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Sites;
+namespace Petitstats\Sites;
 
-use Minilytics\Database\Connections;
-use Minilytics\Database\DatabaseConnection;
-use Minilytics\Database\DataDirectory;
-use Minilytics\Database\Schema;
+use Petitstats\Database\Connections;
+use Petitstats\Database\DatabaseConnection;
+use Petitstats\Database\DataDirectory;
+use Petitstats\Database\Schema;
 use Throwable;
 
 /**
@@ -33,16 +33,16 @@ final class DemoTraffic
     private const BOTS_PER_DAY = 6;
 
     private const PAGES = [
-        '/' => 'Minilytics: private, GDPR-friendly web analytics',
-        '/install.html' => 'Install Minilytics',
-        '/docs/' => 'Documentation · Minilytics',
-        '/docs/tracking/' => 'Tracking guide · Minilytics',
-        '/docs/importing/' => 'Importing data · Minilytics',
-        '/docs/privacy/' => 'Privacy & GDPR · Minilytics',
-        '/docs/mcp/' => 'MCP server · Minilytics',
-        '/blog/cookieless-analytics/' => 'Why cookieless analytics matter · Minilytics',
-        '/blog/shared-hosting/' => 'Self-hosting analytics on shared hosting · Minilytics',
-        '/changelog/' => 'Changelog · Minilytics',
+        '/' => 'Petitstats: private, GDPR-friendly web analytics',
+        '/install.html' => 'Install Petitstats',
+        '/docs/' => 'Documentation · Petitstats',
+        '/docs/tracking/' => 'Tracking guide · Petitstats',
+        '/docs/importing/' => 'Importing data · Petitstats',
+        '/docs/privacy/' => 'Privacy & GDPR · Petitstats',
+        '/docs/mcp/' => 'MCP server · Petitstats',
+        '/blog/cookieless-analytics/' => 'Why cookieless analytics matter · Petitstats',
+        '/blog/shared-hosting/' => 'Self-hosting analytics on shared hosting · Petitstats',
+        '/changelog/' => 'Changelog · Petitstats',
     ];
 
     // [weight, referrer host|null, utm parameters]
@@ -363,7 +363,7 @@ final class DemoTraffic
             if ($path === '/install.html' && mt_rand(1, 100) <= 55) {
                 $hits[] = [$time + mt_rand(15, 60), 'copy_snippet', $eventBase + ['snippet' => 'install-command']];
                 if (mt_rand(1, 100) <= 62) {
-                    $hits[] = [$time + mt_rand(61, 140), 'download_zip', $eventBase + ['file_name' => 'minilytics.tar.gz', 'version' => $this->version]];
+                    $hits[] = [$time + mt_rand(61, 140), 'download_zip', $eventBase + ['file_name' => 'petitstats.tar.gz', 'version' => $this->version]];
                 }
             }
             // Readers sponsor the project or buy a support plan, for the Revenue page.
@@ -380,7 +380,7 @@ final class DemoTraffic
                 $hits[] = [$time + mt_rand(5, 40), 'theme_toggle', $eventBase + ['theme' => mt_rand(0, 3) ? 'dark' : 'light']];
             }
             if (mt_rand(1, 100) <= 7) {
-                $hits[] = [$time + mt_rand(8, 50), 'outbound_click', $eventBase + ['target_url' => 'https://github.com/axthauvin/minilytics', 'target_host' => 'github.com', 'link_text' => 'Explore on GitHub']];
+                $hits[] = [$time + mt_rand(8, 50), 'outbound_click', $eventBase + ['target_url' => 'https://github.com/axthauvin/petitstats', 'target_host' => 'github.com', 'link_text' => 'Explore on GitHub']];
             }
 
             $previous = 'localhost';

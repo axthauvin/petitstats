@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Mcp;
+namespace Petitstats\Mcp;
 
 use Closure;
 use InvalidArgumentException;
-use Minilytics\Analytics\AnalyticsFilters;
-use Minilytics\Analytics\Period;
-use Minilytics\Analytics\SavedFunnels;
-use Minilytics\Analytics\SiteAnalytics;
-use Minilytics\Database\Connections;
-use Minilytics\Database\DatabaseConnection;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Analytics\AnalyticsFilters;
+use Petitstats\Analytics\Period;
+use Petitstats\Analytics\SavedFunnels;
+use Petitstats\Analytics\SiteAnalytics;
+use Petitstats\Database\Connections;
+use Petitstats\Database\DatabaseConnection;
+use Petitstats\Sites\SiteRegistry;
 
 /**
  * The analytics exposed to AI assistants over MCP.
@@ -27,7 +27,7 @@ final class AnalyticsTools
 {
     private const ACQUISITION_REPORTS = ['channels', 'sources', 'mediums', 'campaigns', 'contents', 'terms', 'landing_pages', 'exit_pages'];
     private const FILTER_DIMENSIONS = ['page', 'referrer', 'browser', 'os', 'device', 'country', 'event'];
-    private const CHARTS = 'ui://minilytics/charts.html';
+    private const CHARTS = 'ui://petitstats/charts.html';
 
     /** @return list<Tool> */
     public static function all(): array
@@ -39,7 +39,7 @@ final class AnalyticsTools
             new Tool(
                 'list_sites',
                 'List websites',
-                'Lists the websites tracked by this Minilytics instance. Call it first: every other tool takes one of these site_id values.',
+                'Lists the websites tracked by this Petitstats instance. Call it first: every other tool takes one of these site_id values.',
                 [],
                 [],
                 static fn(): array => ['sites' => array_map(static fn(array $site): array => [

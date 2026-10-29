@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Minilytics\Auth\Auth;
-use Minilytics\Auth\Csrf;
-use Minilytics\Database\DatabaseConfig;
-use Minilytics\Http\Asset;
-use Minilytics\Http\View;
+use Petitstats\Auth\Auth;
+use Petitstats\Auth\Csrf;
+use Petitstats\Database\DatabaseConfig;
+use Petitstats\Http\Asset;
+use Petitstats\Http\View;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 Auth::startSession();
@@ -64,7 +64,7 @@ if ($step === 'database') {
     $scripts[] = Asset::url('/dashboard/src/assets/js/onboarding-database.js');
 }
 echo View::render('auth/onboarding', [
-    'title' => 'Set up Minilytics',
+    'title' => 'Set up Petitstats',
     'step' => $step,
     'error' => $error,
     'databaseDriver' => $databaseDriver,

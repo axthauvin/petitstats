@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics\Reports;
+namespace Petitstats\Analytics\Reports;
 
-use Minilytics\Analytics\ReportQuery;
+use Petitstats\Analytics\ReportQuery;
 
 /**
  * Money brought in by the events sent with
- * `minilytics.revenue("purchase", 49.9, { currency: "EUR", order_id: "1042" })`,
+ * `petitstats.revenue("purchase", 49.9, { currency: "EUR", order_id: "1042" })`,
  * which store the amount as `_ml_revenue`. A plain `revenue` property is not money.
  */
 final class RevenueReport

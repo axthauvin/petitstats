@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Tracking;
+namespace Petitstats\Tests\Tracking;
 
-use Minilytics\Tracking\KnownBots;
+use Petitstats\Tracking\KnownBots;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

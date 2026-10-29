@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Docs;
+namespace Petitstats\Tests\Docs;
 
 use FilesystemIterator;
 use Markdown;
@@ -19,7 +19,7 @@ final class DocsSiteTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        self::$site = sys_get_temp_dir() . '/minilytics-docs-' . bin2hex(random_bytes(4));
+        self::$site = sys_get_temp_dir() . '/petitstats-docs-' . bin2hex(random_bytes(4));
         exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(dirname(__DIR__, 4) . '/scripts/build-docs.php') . ' ' . escapeshellarg(self::$site), $output, $status);
         self::assertSame(0, $status, implode("\n", $output));
     }
@@ -96,7 +96,7 @@ final class DocsSiteTest extends TestCase
         }
         $this->assertFileExists(self::$site . '/_static/search-index.js');
         // The pages carry their text, inline code included.
-        $this->assertStringContainsString('call <code>minilytics.track</code>', (string) file_get_contents(self::$site . '/tracking/index.html'));
+        $this->assertStringContainsString('call <code>petitstats.track</code>', (string) file_get_contents(self::$site . '/tracking/index.html'));
     }
 
     public function testNoMarkdownIsLeftUnconverted(): void

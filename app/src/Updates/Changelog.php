@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Updates;
+namespace Petitstats\Updates;
 
 use Closure;
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\DataDirectory;
 use Throwable;
 
 /**
@@ -18,7 +18,7 @@ use Throwable;
  */
 final class Changelog
 {
-    private const RELEASES_API = 'https://api.github.com/repos/axthauvin/minilytics/releases?per_page=30';
+    private const RELEASES_API = 'https://api.github.com/repos/axthauvin/petitstats/releases?per_page=30';
     private const CACHE_SECONDS = 12 * 3600;
     private const RETRY_SECONDS = 3600;
     private const MAX_RELEASES = 10;
@@ -135,7 +135,7 @@ final class Changelog
     private static function fetchFromGitHub(): ?array
     {
         $context = stream_context_create(['http' => [
-            'header' => "User-Agent: Minilytics\r\nAccept: application/vnd.github+json",
+            'header' => "User-Agent: Petitstats\r\nAccept: application/vnd.github+json",
             'timeout' => 5,
             'ignore_errors' => true,
         ]]);

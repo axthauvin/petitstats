@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Tracking;
+namespace Petitstats\Tests\Tracking;
 
-use Minilytics\Tracking\VisitorLocation;
+use Petitstats\Tracking\VisitorLocation;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

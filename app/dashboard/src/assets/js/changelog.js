@@ -3,7 +3,7 @@
  * once after it, in the "What's new" window.
  */
 const Changelog = {
-  STORAGE_KEY: "minilytics:seen-version",
+  STORAGE_KEY: "petitstats:seen-version",
   LABELS: { new: "New", fixed: "Fixed", improved: "Improved" },
 
   /** A list of releases, newest first, each with its changes grouped as new, fixed and improved. */
@@ -48,7 +48,7 @@ const Changelog = {
   },
 
   /**
-   * Opens "What's new" once after Minilytics was updated. Each browser remembers
+   * Opens "What's new" once after Petitstats was updated. Each browser remembers
    * the last version it saw; a first visit only records it.
    */
   async showWhatsNewOnce(installed) {
@@ -59,7 +59,7 @@ const Changelog = {
     const data = await Api.getChangelog({ after: seen, upTo: installed }).catch(() => null);
     if (!data || !data.releases.length) return;
     const modal = document.getElementById("whatsNewModal"); if (!modal) return;
-    document.getElementById("whatsNewTitle").textContent = `What's new in Minilytics ${installed}`;
+    document.getElementById("whatsNewTitle").textContent = `What's new in Petitstats ${installed}`;
     document.getElementById("whatsNewBody").replaceChildren(this.render(data.releases));
     modal.classList.add("active");
   },

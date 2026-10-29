@@ -4,7 +4,7 @@ const RevenuePage = {
   requestId: 0,
 
   init() {
-    this.chart = new MinilyticsChart("revenueTrendChart", "revenueTrendTooltip", {
+    this.chart = new PetitstatsChart("revenueTrendChart", "revenueTrendTooltip", {
       activeSeries: ["revenue"],
       seriesConfig: {
         revenue: {

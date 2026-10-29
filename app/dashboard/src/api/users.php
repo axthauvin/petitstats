@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use Delight\Auth\Role;
-use Minilytics\Auth\Auth;
-use Minilytics\Auth\Invitations;
-use Minilytics\Auth\McpTokens;
-use Minilytics\Auth\Users;
-use Minilytics\OAuth\OAuthServer;
+use Petitstats\Auth\Auth;
+use Petitstats\Auth\Invitations;
+use Petitstats\Auth\McpTokens;
+use Petitstats\Auth\Users;
+use Petitstats\OAuth\OAuthServer;
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');

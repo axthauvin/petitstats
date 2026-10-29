@@ -6,10 +6,10 @@
  * @var array<string, mixed>|null $publicSite Set for guests browsing the live demo
  */
 
-use Minilytics\Auth\Csrf;
-use Minilytics\Http\Asset;
-use Minilytics\Http\Docs;
-use Minilytics\Http\View;
+use Petitstats\Auth\Csrf;
+use Petitstats\Http\Asset;
+use Petitstats\Http\Docs;
+use Petitstats\Http\View;
 
 ?>
 <!DOCTYPE html>
@@ -19,7 +19,7 @@ use Minilytics\Http\View;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="/dashboard/">
     <meta name="csrf-token" content="<?= Csrf::token() ?>">
-    <title>Minilytics | Privacy-Friendly Web Analytics</title>
+    <title>Petitstats | Privacy-Friendly Web Analytics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -36,17 +36,17 @@ use Minilytics\Http\View;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/favicon.png">
     <script>
-        window.MINILYTICS_GUEST = <?php echo $isGuest ? 'true' : 'false'; ?>;
-        window.MINILYTICS_EMBED = <?php echo $isEmbed ? 'true' : 'false'; ?>;
-        window.MINILYTICS_ADMIN = <?php echo ($authUser['role'] ?? '') === 'admin' ? 'true' : 'false'; ?>;
-        window.MINILYTICS_PUBLIC_SITE = <?php echo $isGuest ? json_encode($publicSite['id']) : 'null'; ?>;
+        window.PETITSTATS_GUEST = <?php echo $isGuest ? 'true' : 'false'; ?>;
+        window.PETITSTATS_EMBED = <?php echo $isEmbed ? 'true' : 'false'; ?>;
+        window.PETITSTATS_ADMIN = <?php echo ($authUser['role'] ?? '') === 'admin' ? 'true' : 'false'; ?>;
+        window.PETITSTATS_PUBLIC_SITE = <?php echo $isGuest ? json_encode($publicSite['id']) : 'null'; ?>;
     </script>
     <script>
         // Same rule as App.bindSidebarCollapse(), applied before the first paint.
         (function() {
             var collapsed = false;
             try {
-                collapsed = localStorage.getItem('minilytics_sidebar_collapsed') === 'true';
+                collapsed = localStorage.getItem('petitstats_sidebar_collapsed') === 'true';
             } catch (e) {}
             if (window.matchMedia('(min-width: 768px) and (max-width: 1099px)').matches
                 || (collapsed && window.matchMedia('(min-width: 1100px)').matches)) {
@@ -78,14 +78,14 @@ use Minilytics\Http\View;
                 <a href="/dashboard/?site=<?php echo urlencode($publicSite['id']); ?>#overview" target="_blank" rel="noopener">Open full demo ↗</a>
                 <?php else: ?>
                 <span><strong>Live demo</strong> · read-only mock data.</span>
-                <a href="/install.html">Get Minilytics</a>
+                <a href="/install.html">Get Petitstats</a>
                 <?php endif; ?>
             </div>
             <?php endif; ?>
             <?php if (($authUser['role'] ?? '') === 'admin'): ?>
             <!-- Shown by App.checkServerConfig() when the .htaccess rules are not applied -->
             <div class="server-config-banner" id="serverConfigWarning" role="alert" hidden>
-                <span><strong>Your web server is not applying the Minilytics access rules:</strong> application files such as <code>composer.json</code> are publicly readable.</span>
+                <span><strong>Your web server is not applying the Petitstats access rules:</strong> application files such as <code>composer.json</code> are publicly readable.</span>
                 <a href="<?= Docs::url('operations', 'web-server-configuration') ?>" target="_blank" rel="noopener">Nginx &amp; Caddy setup ↗</a>
             </div>
             <?php endif; ?>

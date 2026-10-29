@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tracking;
+namespace Petitstats\Tracking;
 
 /** Coarse browser, OS and device read from a User-Agent header. The raw header is never stored. */
 final class UserAgent

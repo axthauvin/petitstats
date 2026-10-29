@@ -1,12 +1,12 @@
-# Minilytics Apache Configuration
+# Petitstats Apache Configuration
 Options -Indexes
 
 # The tracking script changes independently of the sites embedding it. Always
 # revalidate it so an existing snippet cannot keep sending an outdated payload.
 <IfModule mod_headers.c>
-    <Files "minilytics.js">
+    <FilesMatch "^(petitstats|minilytics)\.js$">
         Header set Cache-Control "no-cache, must-revalidate"
-    </Files>
+    </FilesMatch>
 </IfModule>
 
 # The site root serves a static index.html when a landing page is deployed next

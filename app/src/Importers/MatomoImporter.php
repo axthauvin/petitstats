@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Importers;
+namespace Petitstats\Importers;
 
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -163,7 +163,7 @@ class MatomoImporter extends BaseImporter
     }
 
     /**
-     * Import data into Minilytics database
+     * Import data into Petitstats database
      */
     public function import(string $sourcePath, string $siteId, array $options = []): array
     {
@@ -264,7 +264,7 @@ class MatomoImporter extends BaseImporter
     }
 
     /**
-     * The Minilytics events of one visit, in order.
+     * The Petitstats events of one visit, in order.
      *
      * @param array<string, mixed> $visit
      * @return list<array{string, string, array<string, mixed>}> Timestamp, event name and data.
@@ -626,7 +626,7 @@ class MatomoImporter extends BaseImporter
         $tempDir = null;
         $workPath = $sourcePath;
         if ($this->isZipArchiveFile($sourcePath)) {
-            $tempDir = sys_get_temp_dir() . '/minilytics_matomo_' . uniqid();
+            $tempDir = sys_get_temp_dir() . '/petitstats_matomo_' . uniqid();
             $this->extractZip($sourcePath, $tempDir);
             $workPath = $tempDir;
         }

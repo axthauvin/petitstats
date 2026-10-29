@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Auth;
+namespace Petitstats\Auth;
 
-use Minilytics\Database\DataDirectory;
+use Petitstats\Database\DataDirectory;
 use SQLite3;
 
 /**

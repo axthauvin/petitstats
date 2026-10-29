@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics;
+namespace Petitstats\Analytics;
 
-use Minilytics\Analytics\Reports\AcquisitionReport;
-use Minilytics\Analytics\Reports\BotsReport;
-use Minilytics\Analytics\Reports\CountriesReport;
-use Minilytics\Analytics\Reports\EnvironmentReport;
-use Minilytics\Analytics\Reports\EventsReport;
-use Minilytics\Analytics\Reports\FunnelsReport;
-use Minilytics\Analytics\Reports\PagesReport;
-use Minilytics\Analytics\Reports\ReferrersReport;
-use Minilytics\Analytics\Reports\RevenueReport;
-use Minilytics\Analytics\Reports\SessionsReport;
-use Minilytics\Analytics\Reports\SummaryReport;
-use Minilytics\Analytics\Reports\TimeseriesReport;
-use Minilytics\Database\Connections;
-use Minilytics\Database\DatabaseConnection;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Analytics\Reports\AcquisitionReport;
+use Petitstats\Analytics\Reports\BotsReport;
+use Petitstats\Analytics\Reports\CountriesReport;
+use Petitstats\Analytics\Reports\EnvironmentReport;
+use Petitstats\Analytics\Reports\EventsReport;
+use Petitstats\Analytics\Reports\FunnelsReport;
+use Petitstats\Analytics\Reports\PagesReport;
+use Petitstats\Analytics\Reports\ReferrersReport;
+use Petitstats\Analytics\Reports\RevenueReport;
+use Petitstats\Analytics\Reports\SessionsReport;
+use Petitstats\Analytics\Reports\SummaryReport;
+use Petitstats\Analytics\Reports\TimeseriesReport;
+use Petitstats\Database\Connections;
+use Petitstats\Database\DatabaseConnection;
+use Petitstats\Sites\SiteRegistry;
 
 /**
  * Analytics reports for one website over one period, with the dashboard

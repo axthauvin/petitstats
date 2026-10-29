@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Analytics;
+namespace Petitstats\Analytics;
 
-use Minilytics\Database\Connections;
-use Minilytics\Database\DatabaseConfig;
-use Minilytics\Database\DataDirectory;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Database\Connections;
+use Petitstats\Database\DatabaseConfig;
+use Petitstats\Database\DataDirectory;
+use Petitstats\Sites\SiteRegistry;
 use Throwable;
 
 /** The figures of every website shown on the websites page: totals, live visitors and a 7-day sparkline. */

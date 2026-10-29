@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Sites;
+namespace Petitstats\Tests\Sites;
 
 use InvalidArgumentException;
-use Minilytics\Database\DataDirectory;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Database\DataDirectory;
+use Petitstats\Sites\SiteRegistry;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;

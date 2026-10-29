@@ -1,6 +1,6 @@
-# Contributing to Minilytics
+# Contributing to Petitstats
 
-Thanks for your interest in improving Minilytics! This guide will explain how to set up a local development environment, the coding standard, checks and tests, and the commit convention.
+Thanks for your interest in improving Petitstats! This guide will explain how to set up a local development environment, the coding standard, checks and tests, and the commit convention.
 
 ## Local setup
 
@@ -11,25 +11,25 @@ Requirements:
 - [Node.js](https://nodejs.org/) (only to run the JavaScript tests)
 
 ```bash
-git clone https://github.com/axthauvin/minilytics.git
-cd minilytics/app
+git clone https://github.com/axthauvin/petitstats.git
+cd petitstats/app
 composer install
 composer serve
 ```
 
 Then open [http://localhost:8080/dashboard/](http://localhost:8080/dashboard/) and go through the onboarding to create a local admin account. The landing page is served at [http://localhost:8080/](http://localhost:8080/) by the development router.
 
-Local data (`auth.db`, `sites.json`, analytics databases) is written to `minilytics-data/` at the repository root. To start from a clean install, point `MINILYTICS_DATA_DIR` to an empty directory before running `composer serve`.
+Local data (`auth.db`, `sites.json`, analytics databases) is written to `petitstats-data/` at the repository root. To start from a clean install, point `PETITSTATS_DATA_DIR` to an empty directory before running `composer serve`.
 
 ## Project layout
 
 | Path                | Contents                                                           |
 | ------------------- | ------------------------------------------------------------------ |
 | `app/`              | The deployable application (this is what release archives contain) |
-| `app/src/`          | PHP classes, autoloaded under the `Minilytics\` namespace (PSR-4)  |
+| `app/src/`          | PHP classes, autoloaded under the `Petitstats\` namespace (PSR-4)  |
 | `app/dashboard/`    | Dashboard pages, API endpoints (`src/api/`) and front-end assets   |
 | `app/track.php`     | Tracking endpoint                                                  |
-| `app/minilytics.js` | Tracking script embedded on websites                               |
+| `app/petitstats.js` | Tracking script embedded on websites                               |
 | `app/tests/`        | JavaScript unit and smoke tests, PHPUnit tests in `app/tests/php/` |
 | `landing/`          | Marketing site and install guide                                   |
 | `docs/`             | User documentation, also published as the site's `/docs/` pages    |
@@ -38,7 +38,7 @@ Local data (`auth.db`, `sites.json`, analytics databases) is written to `minilyt
 ## Coding standard
 
 - PHP follows [PER Coding Style 3.0](https://www.php-fig.org/per/coding-style/), enforced by PHP-CS-Fixer (`.php-cs-fixer.dist.php`).
-- New PHP classes go in `app/src/` under the `Minilytics\` namespace, one class per file, with the file path matching the namespace ([PSR-4](https://www.php-fig.org/psr/psr-4/)).
+- New PHP classes go in `app/src/` under the `Petitstats\` namespace, one class per file, with the file path matching the namespace ([PSR-4](https://www.php-fig.org/psr/psr-4/)).
 - Every PHP file starts with `declare(strict_types=1);`.
 - Indentation, line endings and line length are defined in `.editorconfig` (4 spaces, LF, 120 characters for PHP).
 

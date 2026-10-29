@@ -1,5 +1,5 @@
 /**
- * Minilytics – Events Page Controller
+ * Petitstats – Events Page Controller
  */
 
 const EventsPage = {
@@ -24,7 +24,7 @@ const EventsPage = {
   // ── Init ────────────────────────────────────────────────────────────────
 
   init() {
-    this.trendChart = new MinilyticsChart("eventsTrendChart", "eventsTrendTooltip", {
+    this.trendChart = new PetitstatsChart("eventsTrendChart", "eventsTrendTooltip", {
       activeSeries: ["events"],
       sortTooltipMetrics: true,
       hideZeroTooltipMetrics: true,

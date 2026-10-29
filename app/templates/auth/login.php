@@ -1,11 +1,11 @@
 <?php
 /** @var string $error */
 
-use Minilytics\Auth\Csrf;
+use Petitstats\Auth\Csrf;
 
 ?>
 <h1>Sign in</h1>
-<p>Access your Minilytics dashboard.</p>
+<p>Access your Petitstats dashboard.</p>
 <?php if ($error): ?>
     <div class="auth-error"><?= htmlspecialchars($error) ?></div>
 <?php endif; ?>

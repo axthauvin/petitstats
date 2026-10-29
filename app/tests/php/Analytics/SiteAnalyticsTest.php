@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Analytics;
+namespace Petitstats\Tests\Analytics;
 
-use Minilytics\Analytics\Period;
-use Minilytics\Analytics\SiteAnalytics;
-use Minilytics\Database\Connections;
+use Petitstats\Analytics\Period;
+use Petitstats\Analytics\SiteAnalytics;
+use Petitstats\Database\Connections;
 use PHPUnit\Framework\TestCase;
 
 final class SiteAnalyticsTest extends TestCase

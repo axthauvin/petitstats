@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Minilytics\Tests\Importers;
+namespace Petitstats\Tests\Importers;
 
-use Minilytics\Database\Connections;
-use Minilytics\Importers\ImporterRegistry;
-use Minilytics\Importers\UmamiImporter;
-use Minilytics\Sites\SiteRegistry;
+use Petitstats\Database\Connections;
+use Petitstats\Importers\ImporterRegistry;
+use Petitstats\Importers\UmamiImporter;
+use Petitstats\Sites\SiteRegistry;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ZipArchive;
@@ -62,7 +62,7 @@ final class UmamiImporterTest extends TestCase
         $this->assertSame('blog.example.com', $site['domain'] ?? null);
     }
 
-    public function testPageviewsAreStoredInTheMinilyticsFormat(): void
+    public function testPageviewsAreStoredInThePetitstatsFormat(): void
     {
         (new UmamiImporter(self::NOW))->import(self::FIXTURES, 'umami_pageviews');
 
