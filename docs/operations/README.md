@@ -50,7 +50,8 @@ server {
     location ~ \.(db|db-wal|db-shm|json|lock)$ { return 403; }
     location ~ /\.(?!well-known/) { return 403; }
 
-    location = /petitstats.js {
+    # minilytics.js is loaded by snippets written before the rename.
+    location ~ ^/(petitstats|minilytics)\.js$ {
         add_header Cache-Control "no-cache, must-revalidate";
     }
 
@@ -84,7 +85,9 @@ analytics.example.com {
     }
     respond @blocked 403
 
-    header /petitstats.js Cache-Control "no-cache, must-revalidate"
+    # minilytics.js is loaded by snippets written before the rename.
+    @tracker path /petitstats.js /minilytics.js
+    header @tracker Cache-Control "no-cache, must-revalidate"
 
     # Data imports upload ZIP archives of up to 128 MB.
     request_body {
