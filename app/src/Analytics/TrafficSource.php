@@ -53,16 +53,24 @@ final class TrafficSource
     private static function fromValue(string $value, string $fallbackCategory): array
     {
         $host = self::host($value);
+        $matchedId = null;
+        $matchedSource = null;
+        $matchedLength = 0;
+        foreach (self::KNOWN as $id => $source) {
+            foreach ($source['hosts'] as $knownHost) {
+                if (($host === $knownHost || str_ends_with($host, '.' . $knownHost)) && strlen($knownHost) > $matchedLength) {
+                    $matchedId = $id;
+                    $matchedSource = $source;
+                    $matchedLength = strlen($knownHost);
+                }
+            }
+        }
+        if ($matchedId !== null && $matchedSource !== null) {
+            return ['id' => $matchedId] + array_diff_key($matchedSource, ['hosts' => true]);
+        }
         if (preg_match('/(^|\.)google\.[a-z.]+$/', $host)) {
             $source = self::KNOWN['google'];
             return ['id' => 'google'] + array_diff_key($source, ['hosts' => true]);
-        }
-        foreach (self::KNOWN as $id => $source) {
-            foreach ($source['hosts'] as $knownHost) {
-                if ($host === $knownHost || str_ends_with($host, '.' . $knownHost)) {
-                    return ['id' => $id] + array_diff_key($source, ['hosts' => true]);
-                }
-            }
         }
         if ($host !== '') {
             return ['id' => $host, 'name' => $host, 'domain' => $host, 'url' => 'https://' . $host, 'category' => $fallbackCategory];

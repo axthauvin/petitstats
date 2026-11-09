@@ -137,18 +137,21 @@ final class SiteAnalyticsTest extends TestCase
     {
         $this->record('search', 'v1', 'pageview', ['path' => '/', 'referrer' => 'www.google.fr'], 3600);
         $this->record('ai', 'v2', 'pageview', ['path' => '/', 'utm_source' => 'chatgpt.com'], 1800);
+        $this->record('gemini', 'v3', 'pageview', ['path' => '/', 'utm_source' => 'gemini.google.com'], 900);
 
         $referrers = $this->analytics('7d')->topReferrers();
         $names = array_column($referrers, 'name', 'id');
         $this->assertSame('Google', $names['google']);
         $this->assertSame('ChatGPT', $names['chatgpt']);
+        $this->assertSame('Gemini', $names['gemini']);
 
         $acquisition = $this->analytics('7d')->acquisition();
         $channels = array_column($acquisition['channels'], 'sessions', 'name');
         $sources = array_column($acquisition['sources'], 'sessions', 'name');
-        $this->assertSame(1, $channels['AI assistants']);
+        $this->assertSame(2, $channels['AI assistants']);
         $this->assertSame(1, $channels['Organic Search']);
         $this->assertSame(1, $sources['ChatGPT']);
+        $this->assertSame(1, $sources['Gemini']);
         $this->assertSame(1, $sources['Google']);
     }
 
