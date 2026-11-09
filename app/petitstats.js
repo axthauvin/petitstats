@@ -617,7 +617,7 @@
                     link_text: (link.innerText || "").trim().slice(0, 100),
                 });
             else if (
-                /\.(pdf|zip|csv|xlsx|docx|pptx|mp3|mp4)$/i.test(u.pathname)
+                /\.(pdf|zip|csv|xlsx|docx|pptx|mp3|mp4|dmg|pkg|exe|msi|appx|msix|deb|rpm|appimage|apk)$/i.test(u.pathname)
             )
                 send("file_download", {
                     file_name: u.pathname.split("/").pop(),
