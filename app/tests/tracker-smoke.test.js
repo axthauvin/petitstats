@@ -276,6 +276,40 @@ for (const prefix of ["data-petitstats-", "data-minilytics-"]) {
     });
 }
 
+test("tracker records downloads of common software installers", async () => {
+    const downloadExtensions = [
+        "dmg", "pkg", "exe", "msi", "appx", "msix", "deb", "rpm", "AppImage", "apk",
+    ];
+
+    for (const extension of downloadExtensions) {
+        const { beacons, dispatch } = loadTracker();
+        const fileName = `petitstats.${extension}`;
+        const link = {
+            href: `http://localhost:8080/releases/${fileName}`,
+            innerText: "Download Petitstats",
+            closest: (selector) => (selector === "a" ? link : null),
+        };
+
+        dispatch("click", { target: link });
+        assert.equal(beacons.length, 2, `.${extension} should be counted as a download`);
+        const event = await payload(beacons[1].body);
+        assert.equal(event.name, "file_download");
+        assert.equal(event.data.file_name, fileName);
+    }
+});
+
+test("tracker does not record ordinary links as downloads", () => {
+    const { beacons, dispatch } = loadTracker();
+    const link = {
+        href: "http://localhost:8080/docs/install.html",
+        innerText: "Installation guide",
+        closest: (selector) => (selector === "a" ? link : null),
+    };
+
+    dispatch("click", { target: link });
+    assert.equal(beacons.length, 1);
+});
+
 test("strict mode sends an event without any identifier despite GPC, and without web storage", async () => {
     const { beacons, context } = loadTracker({
         navigator: { globalPrivacyControl: true },
