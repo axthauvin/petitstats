@@ -310,6 +310,7 @@ const SessionsPage = {
         const country = s.country || "Unknown";
         const countryCode = s.country_code || "UN";
         const city = s.city || "";
+        const source = s.source || { name: s.referrer || "Direct", category: "referral" };
         const os = s.os || "Unknown OS";
         const browser = s.browser || "Unknown Browser";
         const timeAgo = s.time_ago || s.last_active_at;
@@ -339,6 +340,8 @@ const SessionsPage = {
                           <span class="session-meta-item">${Icons.getBrowserIcon(browser, 14)} ${this.escapeHtml(browser)}</span>
                           <span class="session-meta-divider">·</span>
                           <span class="session-meta-item">${Icons.getOsIcon(os, 14)} ${this.escapeHtml(os)}</span>
+                          <span class="session-meta-divider">·</span>
+                          <span class="session-meta-item" title="Source: ${this.escapeHtml(source.name)}">${Icons.get(source.category === "ai" ? "bot" : "globe", { size: 12 })} ${this.escapeHtml(source.name)}</span>
                           <span class="session-meta-divider">·</span>
                           <span class="session-meta-item" title="${pageviewCount} page view${pageviewCount === 1 ? "" : "s"}">${Icons.get("file-text", { size: 12 })} ${pageviewCount} page view${pageviewCount === 1 ? "" : "s"}</span>
                           <span class="session-meta-divider">·</span>
@@ -508,6 +511,14 @@ const SessionsPage = {
     setTxt("detailStartedAt", startedAt);
     setTxt("detailLastActivity", lastActivity);
     setTxt("detailVisitCount", String(Number(session.visit_count) || 1));
+    const sourceEl = document.getElementById("detailSource");
+    const source = session.source || { name: session.referrer || "Direct / None", url: null };
+    if (sourceEl) {
+      const name = this.escapeHtml(source.name || "Direct / None");
+      sourceEl.innerHTML = source.url
+        ? `<a href="${this.escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">${name}</a>`
+        : name;
+    }
 
     // Extract first event details for screen / locale
     const firstEvt =

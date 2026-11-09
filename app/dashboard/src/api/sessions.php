@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Petitstats\Analytics\AnalyticsFilters;
 use Petitstats\Analytics\Period;
+use Petitstats\Analytics\TrafficSource;
 use Petitstats\Auth\Auth;
 use Petitstats\Database\Connections;
 use Petitstats\Sites\SiteRegistry;
@@ -134,6 +135,7 @@ try {
                     'duration_seconds' => 0,
                     'entry_page' => $data['path'] ?? '/',
                     'referrer' => !empty($data['referrer']) ? $data['referrer'] : 'Direct',
+                    'source' => TrafficSource::fromData(is_array($data) ? $data : []),
                     'pageview_count' => 0,
                     'event_count' => 0,
                 ];
@@ -188,6 +190,7 @@ try {
                 'custom_event_count' => array_sum(array_column($visits, 'event_count')),
                 'entry_page' => $current['entry_page'],
                 'referrer' => $current['referrer'],
+                'source' => $current['source'],
                 'browser' => $context['browser'] ?? 'Other',
                 'os' => $context['os'] ?? 'Other',
                 'device' => $context['device'] ?? 'Desktop',
@@ -320,6 +323,7 @@ try {
         $flow = [];
         $entryPage = null;
         $referrer = null;
+        $source = null;
         $browser = 'Other';
         $os = 'Other';
         $device = 'Desktop';
@@ -339,6 +343,7 @@ try {
                 if (!empty($data['referrer'])) {
                     $referrer = $data['referrer'];
                 }
+                $source = TrafficSource::fromData(is_array($data) ? $data : []);
                 if (!empty($data['browser'])) {
                     $browser = $data['browser'];
                 }
@@ -399,6 +404,7 @@ try {
             'currency' => $sr['currency'] !== null ? strtoupper((string) $sr['currency']) : null,
             'entry_page' => $entryPage ?: '/',
             'referrer' => $referrer ?: 'Direct',
+            'source' => $source ?? TrafficSource::fromData([]),
             'browser' => $browser,
             'os' => $os,
             'device' => $device,

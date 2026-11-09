@@ -1883,6 +1883,15 @@ html.nav-compact .sidebar-user-row {
     white-space: nowrap;
 }
 
+.pill-source-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.pill-source-link:hover {
+    text-decoration: underline;
+}
+
 .pill-stat {
     font-weight: 700;
     color: var(--text-primary);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Petitstats\Analytics\Reports;
 
 use Petitstats\Analytics\ReportQuery;
+use Petitstats\Analytics\TrafficSource;
 
 /** How visits start and end: sources, campaigns, channels, landing and exit pages. */
 final class AcquisitionReport
@@ -59,9 +60,12 @@ final class AcquisitionReport
         $source = (string) ($data['utm_source'] ?? $utm['utm_source'] ?? '');
         $medium = (string) ($data['utm_medium'] ?? $utm['utm_medium'] ?? '');
         $ref = (string) ($data['referrer'] ?? '');
+        $trafficSource = TrafficSource::fromData($data);
         $channel = $medium ? ucfirst(strtolower($medium)) : ($ref ? 'Referral' : 'Direct');
         // If the source or referrer is a search engine, attribute the session to the Organic Search channel.
-        if (preg_match('/google|bing|duckduckgo|yahoo/', $source . ' ' . $ref)) {
+        if ($trafficSource['category'] === 'ai') {
+            $channel = 'AI assistants';
+        } elseif (preg_match('/google|bing|duckduckgo|yahoo/', $source . ' ' . $ref)) {
             $channel = 'Organic Search';
         } elseif (preg_match('/facebook|instagram|linkedin|twitter|tiktok/', $source . ' ' . $ref)) {
             $channel = 'Social';
@@ -75,7 +79,7 @@ final class AcquisitionReport
             $channel = 'Paid';
         }
         return [
-            'sources' => $source ?: ($ref ?: 'Direct'),
+            'sources' => $trafficSource['name'],
             'mediums' => $medium ?: ($ref ? 'referral' : '(none)'),
             'campaigns' => (string) ($data['utm_campaign'] ?? $utm['utm_campaign'] ?? ''),
             'contents' => (string) ($data['utm_content'] ?? $utm['utm_content'] ?? ''),

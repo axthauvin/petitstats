@@ -156,6 +156,10 @@
 
                 <div class="session-meta-section">
                     <div class="meta-field-row">
+                        <span class="meta-field-label">Source</span>
+                        <span class="meta-field-val" id="detailSource">Direct / None</span>
+                    </div>
+                    <div class="meta-field-row">
                         <span class="meta-field-label">First seen</span>
                         <span class="meta-field-val" id="detailStartedAt">–</span>
                     </div>

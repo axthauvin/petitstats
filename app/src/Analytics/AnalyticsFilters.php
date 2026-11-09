@@ -22,6 +22,7 @@ final class AnalyticsFilters
     private const EXPRESSIONS = [
         'page'     => "COALESCE(json_extract(action, '$.data.path'), '/')",
         'referrer' => "ml_ref_domain(json_extract(action, '$.data.referrer'))",
+        'source'   => 'ml_source(action)',
         'browser'  => "COALESCE(json_extract(action, '$.data.browser'), 'Unknown')",
         'os'       => "COALESCE(json_extract(action, '$.data.os'), 'Unknown')",
         'device'   => "COALESCE(json_extract(action, '$.data.device'), 'Unknown')",
@@ -91,6 +92,10 @@ final class AnalyticsFilters
         }
 
         $db->createFunction('ml_ref_domain', static fn($raw) => self::referrerDomain($raw), 1, SQLITE3_DETERMINISTIC);
+        $db->createFunction('ml_source', static function ($action): string {
+            $data = json_decode(is_string($action) ? $action : '', true)['data'] ?? [];
+            return is_array($data) ? TrafficSource::fromData($data)['id'] : 'direct';
+        }, 1, SQLITE3_DETERMINISTIC);
         $db->exec('DROP TABLE IF EXISTS temp.ml_filtered_sessions');
         $db->exec('CREATE TEMP TABLE ml_filtered_sessions (session_id TEXT PRIMARY KEY)');
 

@@ -133,6 +133,25 @@ final class SiteAnalyticsTest extends TestCase
         $this->assertSame([33.3, 33.3, 33.3], array_column($referrers, 'percentage'));
     }
 
+    public function testKnownAndUtmOnlySourcesAreNamedAndAiTrafficGetsItsOwnChannel(): void
+    {
+        $this->record('search', 'v1', 'pageview', ['path' => '/', 'referrer' => 'www.google.fr'], 3600);
+        $this->record('ai', 'v2', 'pageview', ['path' => '/', 'utm_source' => 'chatgpt.com'], 1800);
+
+        $referrers = $this->analytics('7d')->topReferrers();
+        $names = array_column($referrers, 'name', 'id');
+        $this->assertSame('Google', $names['google']);
+        $this->assertSame('ChatGPT', $names['chatgpt']);
+
+        $acquisition = $this->analytics('7d')->acquisition();
+        $channels = array_column($acquisition['channels'], 'sessions', 'name');
+        $sources = array_column($acquisition['sources'], 'sessions', 'name');
+        $this->assertSame(1, $channels['AI assistants']);
+        $this->assertSame(1, $channels['Organic Search']);
+        $this->assertSame(1, $sources['ChatGPT']);
+        $this->assertSame(1, $sources['Google']);
+    }
+
     public function testBotActivityIsSummarisedByReasonAndAgent(): void
     {
         $this->recordBot('known_bot_user_agent', 'Googlebot/2.1', 'ip-1', 3600);
