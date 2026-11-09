@@ -450,18 +450,18 @@ const OverviewPage = {
       return refDom !== ownDomain;
     });
 
-    // Merge raw referrer URLs sharing the same domain into a single row so each
-    // row maps to exactly one filter value.
+    // Known sources can have many domains (google.fr, chat.openai.com, …), but
+    // they should appear as one recognisable source and one useful filter.
     const byDomain = new Map();
     filtered.forEach((r) => {
       const isDirect = !r.domain || r.domain === "direct" || r.domain === "Direct / None";
-      const key = isDirect ? "direct" : r.domain;
+      const key = isDirect ? "direct" : (r.id || r.domain);
       const existing = byDomain.get(key);
       if (existing) {
         existing.visits += r.visits || 0;
         existing.percentage = Math.round((existing.percentage + (r.percentage || 0)) * 10) / 10;
       } else {
-        byDomain.set(key, { ...r, domain: key, visits: r.visits || 0, percentage: r.percentage || 0 });
+        byDomain.set(key, { ...r, id: key, visits: r.visits || 0, percentage: r.percentage || 0 });
       }
     });
     const referrers = [...byDomain.values()].sort((a, b) => b.visits - a.visits);
@@ -473,8 +473,9 @@ const OverviewPage = {
 
     list.innerHTML = referrers
       .map((r) => {
-        const isDirect = r.domain === "direct";
+        const isDirect = r.id === "direct" || r.domain === "direct";
         const domain = isDirect ? "Direct / None" : r.domain;
+        const label = r.name || domain;
         const pct = r.percentage || 0;
 
         const iconHtml = isDirect
@@ -490,10 +491,10 @@ const OverviewPage = {
                     <div class="pill-progress-bg" style="width: ${pct}%;"></div>
                     <div class="pill-left">
                         ${iconHtml}
-                        <span class="pill-title" title="${this.escapeHtml(isDirect ? domain : r.domain)}">${this.escapeHtml(domain)}</span>
+                        ${r.url ? `<a class="pill-title pill-source-link" href="${this.escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer" title="Open ${this.escapeHtml(label)}">${this.escapeHtml(label)}</a>` : `<span class="pill-title" title="${this.escapeHtml(label)}">${this.escapeHtml(label)}</span>`}
                     </div>
                     <div class="pill-right">
-                        ${this.rowActions("referrer", r.domain, domain)}
+                        ${this.rowActions("source", r.id || r.domain, label)}
                         <span class="pill-stat">${r.visits.toLocaleString()}</span>
                         <span class="pill-pct">${pct}%</span>
                     </div>

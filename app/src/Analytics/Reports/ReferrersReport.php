@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Petitstats\Analytics\Reports;
 
 use Petitstats\Analytics\ReportQuery;
+use Petitstats\Analytics\TrafficSource;
 use Petitstats\Sites\SiteRegistry;
 use Throwable;
 
@@ -24,34 +25,30 @@ final class ReferrersReport
         foreach ($this->query->periodRows("
             WITH landings AS (
                 SELECT
-                    json_extract(action, '$.data.referrer') as referrer,
+                    action,
                     ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY timestamp, id) as n
                 FROM user_activity
                 WHERE timestamp >= :start_date AND timestamp <= :end_date
                   AND json_extract(action, '$.name') = 'pageview'
                   {$this->query->condition()}
             )
-            SELECT referrer, COUNT(*) as count, SUM(COUNT(*)) OVER () as total
+            SELECT action, COUNT(*) as count, SUM(COUNT(*)) OVER () as total
             FROM landings
             WHERE n = 1
-            GROUP BY referrer
+            GROUP BY action
             ORDER BY count DESC
             LIMIT 150
         ") as $row) {
-            $rawRef = trim((string) ($row['referrer'] ?? ''));
-            $cleanRef = 'Direct / None';
-            $domain = 'direct';
+            $data = json_decode((string) ($row['action'] ?? ''), true)['data'] ?? [];
+            $rawRef = trim((string) ($data['referrer'] ?? ''));
+            $source = TrafficSource::fromData(is_array($data) ? $data : []);
 
             // MySQL/MariaDB's JSON_UNQUOTE(JSON_EXTRACT(...)) turns a JSON null
             // into the literal string "null", unlike SQLite which returns SQL
             // NULL. Treat both representations as a direct visit.
             if ($rawRef !== '' && strtolower($rawRef) !== 'null') {
-                $parsed = parse_url($rawRef, PHP_URL_HOST);
-                $cleanRef = $parsed ?: $rawRef;
-                $domain = str_replace('www.', '', $cleanRef);
-
                 // Filter out exact self-referrals (matching the site's own domain)
-                $normRef = self::normalizeDomain($cleanRef);
+                $normRef = self::normalizeDomain($rawRef);
                 if ($normRef !== '' && isset($ownDomains[$normRef])) {
                     continue;
                 }
@@ -60,8 +57,11 @@ final class ReferrersReport
             $count = (int) $row['count'];
             $total = (int) $row['total'];
             $referrers[] = [
-                'name' => $cleanRef,
-                'domain' => $domain,
+                'id' => $source['id'],
+                'name' => $source['name'],
+                'domain' => $source['domain'] ?? $source['id'],
+                'url' => $source['url'],
+                'category' => $source['category'],
                 'raw' => $rawRef,
                 'visits' => $count,
                 'percentage' => $total > 0 ? round(($count / $total) * 100, 1) : 0,
