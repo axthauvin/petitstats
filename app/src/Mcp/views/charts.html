@@ -13,6 +13,7 @@
 <title>Petitstats</title>
 <style>
     :root {
+        color-scheme: light;
         --bg: #ffffff;
         --text: #0f172a;
         --text-secondary: #64748b;
@@ -27,6 +28,7 @@
         --danger: #b91c1c;
     }
     :root[data-theme="dark"] {
+        color-scheme: dark;
         --bg: #1f1f1e;
         --text: #f1f5f9;
         --text-secondary: #a1a1aa;
@@ -151,11 +153,34 @@
         }
     });
 
-    function applyContext(context) {
-        if (context.theme) document.documentElement.dataset.theme = context.theme;
-        const background = context.styles?.variables?.['--color-background-primary'];
-        if (background) document.documentElement.style.setProperty('--bg', background);
+    // The host's colors (MCP Apps style variables) replacing the widget's own,
+    // so its text always reads on its background.
+    const HOST_COLORS = {
+        '--color-background-primary': '--bg',
+        '--color-text-primary': '--text',
+        '--color-text-secondary': '--text-secondary',
+        '--color-text-tertiary': '--text-muted',
+        '--color-border-primary': '--border',
+    };
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+    let context = {};
+
+    function applyContext(update) {
+        // Notifications only carry what changed: keep what the host sent before.
+        context = { ...context, ...update };
+        const root = document.documentElement;
+        const theme = context.theme === 'dark' || context.theme === 'light' ? context.theme : (systemDark.matches ? 'dark' : 'light');
+        root.dataset.theme = theme;
+        // Hosts give their colors as light-dark() pairs, which follow color-scheme.
+        root.style.colorScheme = theme;
+        const variables = context.styles?.variables || {};
+        for (const [hostName, name] of Object.entries(HOST_COLORS)) {
+            if (variables[hostName]) root.style.setProperty(name, variables[hostName]);
+            else root.style.removeProperty(name);
+        }
     }
+    applyContext({});
+    systemDark.addEventListener('change', () => applyContext({}));
 
     // The assistant sizes the frame to the page: after each render, and whenever it changes.
     const reportSize = () => notify('ui/notifications/size-changed', { height: Math.ceil(document.documentElement.getBoundingClientRect().height) });
