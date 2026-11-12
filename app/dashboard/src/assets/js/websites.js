@@ -6,6 +6,9 @@
 const WebsitesPage = {
     sites: [],
     searchQuery: '',
+    // Column the table is sorted by (null keeps the server's order) and its direction.
+    sortKey: null,
+    sortDir: 'asc',
 
     init() {
         this.bindEvents();
@@ -20,6 +23,11 @@ const WebsitesPage = {
             });
         }
 
+        document.querySelectorAll('.table-sort[data-sort]').forEach((button) => {
+            button.addEventListener('click', () => this.sortBy(button.dataset.sort));
+        });
+        this.renderSortHeaders();
+
         // "Import Data" is wired by site-setup.js, which owns the add-website window.
         document.getElementById('btnWebsitesAddSite')?.addEventListener('click', () => window.SiteSetup?.open('start'));
     },
@@ -33,6 +41,46 @@ const WebsitesPage = {
         } catch (err) {
             console.error('Failed to load websites:', err);
         }
+    },
+
+    /** Sorts by a column: names and domains A to Z first, visitors and dates highest first; again to reverse. */
+    sortBy(key) {
+        if (this.sortKey === key) {
+            this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.sortKey = key;
+            this.sortDir = key === 'visitors' || key === 'created' ? 'desc' : 'asc';
+        }
+        this.renderSortHeaders();
+        this.render();
+    },
+
+    renderSortHeaders() {
+        document.querySelectorAll('.table-sort[data-sort]').forEach((button) => {
+            const active = button.dataset.sort === this.sortKey;
+            const icon = active ? (this.sortDir === 'asc' ? 'arrow-up' : 'arrow-down') : 'arrow-up-down';
+            button.classList.toggle('is-active', active);
+            button.querySelector('.table-sort-icon').innerHTML = Icons.get(icon, { size: 12 });
+            button.closest('th')?.setAttribute('aria-sort', active ? (this.sortDir === 'asc' ? 'ascending' : 'descending') : 'none');
+        });
+    },
+
+    /** The sites in the selected order. Sites without a domain stay last either way. */
+    sorted(sites) {
+        if (!this.sortKey) return sites;
+        const visitors = (site) => (site.visitors_7d !== undefined ? site.visitors_7d : site.visitors) || 0;
+        const text = (value) => String(value || '');
+        const direction = this.sortDir === 'asc' ? 1 : -1;
+        const compare = {
+            name: (a, b) => text(a.name || a.id).localeCompare(text(b.name || b.id), undefined, { sensitivity: 'base', numeric: true }),
+            domain: (a, b) => text(a.domain).localeCompare(text(b.domain), undefined, { sensitivity: 'base' }),
+            visitors: (a, b) => visitors(a) - visitors(b),
+            created: (a, b) => text(a.created_at).localeCompare(text(b.created_at)),
+        }[this.sortKey];
+        return [...sites].sort((a, b) => {
+            if (this.sortKey === 'domain' && !a.domain !== !b.domain) return a.domain ? -1 : 1;
+            return compare(a, b) * direction;
+        });
     },
 
     renderSummary() {
@@ -182,7 +230,7 @@ const WebsitesPage = {
             return;
         }
 
-        tbody.innerHTML = filtered.map(site => {
+        tbody.innerHTML = this.sorted(filtered).map(site => {
             const domain = site.domain || '';
             const favicon = this.getFaviconUrl(domain);
             const timeAgo = this.formatTimeAgo(site.created_at);
