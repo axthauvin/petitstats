@@ -120,7 +120,7 @@ const Api = {
       if (dates.to) params.append("to", dates.to);
     }
 
-    const res = await apiFetch(`${this.base}/events.php?${params.toString()}`);
+    const res = await apiFetch(`${this.base}/custom-events.php?${params.toString()}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   },
@@ -293,7 +293,7 @@ const Api = {
 
   async trackingServerSettings(body = null) {
     const init = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
-    const res = await apiFetch(`${this.base}/tracking.php`, init); const data = await res.json().catch(() => ({}));
+    const res = await apiFetch(`${this.base}/server-settings.php`, init); const data = await res.json().catch(() => ({}));
     if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`); return data;
   },
 
