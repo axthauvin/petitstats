@@ -30,6 +30,7 @@ $pages = [
     'importing/umami' => ['Running Petitstats', 'importing/umami.md'],
     'importing/matomo' => ['Running Petitstats', 'importing/matomo.md'],
     'mcp' => ['Running Petitstats', 'mcp/README.md'],
+    'api' => ['Running Petitstats', 'api/README.md'],
 ];
 $slugByFile = array_flip(array_map(static fn(array $page): string => $page[1], $pages));
 

@@ -30,7 +30,7 @@ const SettingsPage = {
     const trackingForm = document.getElementById('trackingSettingsForm');
     if (trackingForm) trackingForm.addEventListener('submit', (event) => this.saveTracking(event));
     const siteSelect = document.getElementById('trackingSiteSelect');
-    if (siteSelect) siteSelect.addEventListener('change', () => this.loadTrackingConfig());
+    if (siteSelect) siteSelect.addEventListener('change', () => { this.loadTrackingConfig(); this.loadStatsApi(); });
     this.setupTrackingTagEditor('domains', 'trackingDomainsInput', 'addTrackingDomain');
     this.setupTrackingTagEditor('internalIps', 'trackingInternalIpsInput', 'addTrackingInternalIp');
     const copySnippet = document.getElementById('copyTrackingSnippet');
@@ -56,6 +56,12 @@ const SettingsPage = {
     document.querySelectorAll('#databaseSettingsForm input').forEach((input) => input.addEventListener('input', () => this.invalidateDatabaseTest()));
     document.getElementById('settingsAssistantsPanel')?.addEventListener('click', (event) => this.handleAssistantsClick(event));
     document.getElementById('settingsAssistantsPanel')?.addEventListener('change', (event) => { if (event.target.matches('[data-allow-write]')) this.allowWrite(event.target); });
+    document.getElementById('createStatsApiToken')?.addEventListener('click', (event) => this.createStatsApiToken(event.currentTarget));
+    document.getElementById('statsApiCard')?.addEventListener('click', (event) => {
+      const target = event.target.closest('[data-copy], [data-revoke-site-token]'); if (!target) return;
+      if (target.dataset.copy !== undefined) ClipboardHelper.copy(target.dataset.copy, target);
+      else this.revokeStatsApiToken(Number(target.dataset.revokeSiteToken));
+    });
     document.getElementById('updateCheckNow')?.addEventListener('click', () => this.loadVersion(true));
     document.getElementById('updateInstall')?.addEventListener('click', () => this.installUpdate());
     document.getElementById('updateRollback')?.addEventListener('click', () => this.rollbackUpdate());
@@ -188,9 +194,10 @@ const SettingsPage = {
   async loadTrackingSites(isAdmin) {
     const card = document.getElementById('trackingSettingsCard'); if (!card) return;
     card.hidden = !isAdmin; if (!isAdmin) return;
+    const apiCard = document.getElementById('statsApiCard'); if (apiCard) apiCard.hidden = false;
     const select = document.getElementById('trackingSiteSelect'); const data = await Api.getSites();
     select.innerHTML = (data.sites || []).map(s => `<option value="${this.escapeHtml(s.id)}">${this.escapeHtml(s.name || s.id)}</option>`).join('');
-    await Promise.all([this.loadTrackingConfig(), this.loadTrackingServer()]);
+    await Promise.all([this.loadTrackingConfig(), this.loadTrackingServer(), this.loadStatsApi()]);
   },
 
   async loadVersion(refresh = false) {
@@ -662,6 +669,53 @@ const SettingsPage = {
     try { await Api.accessTokens('DELETE', body); this.setApiFeedback('Access revoked.', 'success'); await this.loadApi(); }
     catch (error) { this.setApiFeedback(error.message, 'error'); }
   },
+
+  /** The stats API tokens of the website selected in the Tracking tab. */
+  async loadStatsApi() {
+    const list = document.getElementById('statsApiTokenList'); const siteId = document.getElementById('trackingSiteSelect')?.value;
+    if (!list || !siteId) return;
+    if (this.statsApiSite !== siteId) { this.statsApiSite = siteId; document.getElementById('statsApiTokenResult').innerHTML = ''; this.setStatsApiFeedback(''); }
+    try {
+      const { tokens } = await Api.siteTokens(siteId);
+      const date = (value) => new Date(value.replace(' ', 'T') + 'Z').toLocaleDateString();
+      list.innerHTML = tokens.length ? tokens.map((token) => `
+        <div class="mcp-access-row">
+          <span class="mcp-access-icon">${Icons.get('key-round', { size: 18 })}</span>
+          <div class="mcp-access-text"><div class="mcp-access-title">${this.escapeHtml(token.name)} <code>${this.escapeHtml(token.hint)}</code></div><span>Created ${date(token.created_at)} · ${token.last_used_at ? `last used ${date(token.last_used_at)}` : 'never used'}</span></div>
+          <button type="button" class="btn-outline btn-sm" data-revoke-site-token="${Number(token.id)}">Revoke</button>
+        </div>`).join('') : '<p class="mcp-empty">No token for this website yet.</p>';
+    } catch (error) { list.innerHTML = `<p class="settings-error">${this.escapeHtml(error.message)}</p>`; }
+  },
+
+  async createStatsApiToken(button) {
+    const input = document.getElementById('statsApiTokenName'); const result = document.getElementById('statsApiTokenResult');
+    const siteId = document.getElementById('trackingSiteSelect')?.value; if (!siteId) return;
+    button.disabled = true;
+    try {
+      const { token } = await Api.siteTokens(siteId, 'POST', { name: input.value.trim() || 'Stats API' });
+      input.value = '';
+      const url = `${location.origin}/api/v1/sites/${encodeURIComponent(siteId)}/summary`;
+      result.innerHTML = `
+        <div class="mcp-token-result">
+          <strong>Copy your token now: it will not be shown again.</strong>
+          ${this.mcpCode(token.token)}
+          <p>Try it from your server:</p>
+          ${this.mcpCode(`curl -H "Authorization: Bearer ${token.token}" \\\n  ${url}`)}
+        </div>`;
+      this.setStatsApiFeedback('');
+      await this.loadStatsApi();
+    } catch (error) { this.setStatsApiFeedback(error.message, 'error'); }
+    button.disabled = false;
+  },
+
+  async revokeStatsApiToken(id) {
+    if (!confirm('Revoke this token? The server using it will not be able to read the statistics anymore.')) return;
+    const siteId = document.getElementById('trackingSiteSelect')?.value;
+    try { await Api.siteTokens(siteId, 'DELETE', { id }); this.setStatsApiFeedback('Token revoked.', 'success'); await this.loadStatsApi(); }
+    catch (error) { this.setStatsApiFeedback(error.message, 'error'); }
+  },
+
+  setStatsApiFeedback(message, type = '') { const el = document.getElementById('statsApiFeedback'); if (!el) return; el.textContent = message; el.className = 'settings-feedback'; if (type) el.classList.add(type === 'error' ? 'settings-error' : 'settings-success'); },
 
   setApiFeedback(message, type = '') { const el = document.getElementById('mcpAccessFeedback'); if (!el) return; el.textContent = message; el.className = 'settings-feedback'; if (type) el.classList.add(type === 'error' ? 'settings-error' : 'settings-success'); },
 

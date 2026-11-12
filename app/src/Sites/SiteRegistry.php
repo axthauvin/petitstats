@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Petitstats\Sites;
 
 use InvalidArgumentException;
+use Petitstats\Auth\SiteTokens;
 use Petitstats\Database\Connections;
 use Petitstats\Database\DatabaseConfig;
 use Petitstats\Database\DataDirectory;
@@ -263,6 +264,8 @@ final class SiteRegistry
         $sites = self::all();
         $filtered = array_values(array_filter($sites, fn($s) => $s['id'] !== $cleanId));
         self::save($filtered);
+        // A website created later with the same ID must not inherit its stats API tokens.
+        SiteTokens::revokeAllForSite($cleanId);
 
         return true;
     }

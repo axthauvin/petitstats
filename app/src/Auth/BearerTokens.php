@@ -7,8 +7,8 @@ namespace Petitstats\Auth;
 use Delight\Auth\Status;
 
 /**
- * Bearer tokens accepted by the MCP endpoint: access tokens and OAuth
- * access tokens. Both are stored as SHA-256 hashes next to their owner.
+ * Bearer tokens: MCP access tokens, OAuth access tokens and stats API tokens.
+ * Each is stored as a SHA-256 hash, and shown in full only once, when created.
  */
 final class BearerTokens
 {
@@ -24,9 +24,7 @@ final class BearerTokens
 
     /**
      * Returns the active account owning a token stored in `$table`, with whether
-     * the token may edit funnels, goals and journeys, and records
-     * the token's use at most once a minute, so read-heavy clients do not write
-     * on every request.
+     * the token may edit funnels, goals and journeys, and records its use.
      *
      * @param string $condition extra SQL on the token row `t`, such as an expiry check
      * @return array{id: int, email: string, can_write: bool}|null
@@ -43,11 +41,29 @@ final class BearerTokens
         if (!$row) {
             return null;
         }
-        $now = time();
-        if ($row['last_used_at'] === null || (int) $row['last_used_at'] < $now - 60) {
-            $db->exec("UPDATE {$table} SET last_used_at = {$now} WHERE id = " . (int) $row['id']);
-        }
+        self::touch($table, (int) $row['id'], $row['last_used_at']);
         return ['id' => (int) $row['user_id'], 'email' => (string) $row['email'], 'can_write' => (bool) $row['can_write']];
+    }
+
+    /**
+     * A new random token starting with `$prefix`, and the hint that lists show
+     * instead of it, such as "mlt_1a2b…9f8e".
+     *
+     * @return array{token: string, hint: string, hash: string}
+     */
+    public static function generate(string $prefix): array
+    {
+        $token = $prefix . bin2hex(random_bytes(24));
+        return ['token' => $token, 'hint' => substr($token, 0, strlen($prefix) + 4) . '…' . substr($token, -4), 'hash' => hash('sha256', $token)];
+    }
+
+    /** Records the use of a token at most once a minute, so read-heavy clients do not write on every request. */
+    public static function touch(string $table, int $id, mixed $lastUsedAt): void
+    {
+        $now = time();
+        if ($lastUsedAt === null || (int) $lastUsedAt < $now - 60) {
+            AuthDatabase::connection()->exec("UPDATE {$table} SET last_used_at = {$now} WHERE id = {$id}");
+        }
     }
 
     /** Formats a stored Unix timestamp for the dashboard (UTC, like every other date it receives). */

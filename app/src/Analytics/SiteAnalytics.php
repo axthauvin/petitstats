@@ -73,6 +73,19 @@ final class SiteAnalytics
         return (new TimeseriesReport($this->query))->get();
     }
 
+    /** Traffic per day of the period, even for a custom period of a day or two. @see TimeseriesReport::get() */
+    public function dailyTimeseries(): array
+    {
+        return (new TimeseriesReport($this->query, daily: true))->get();
+    }
+
+    /** Time of the website's first recorded action (UTC, "Y-m-d H:i:s"), or null when it has none yet. */
+    public function firstActivity(): ?string
+    {
+        $first = $this->query->db->querySingle('SELECT MIN(timestamp) FROM user_activity');
+        return $first === null || $first === false ? null : (string) $first;
+    }
+
     /** @see PagesReport::top() */
     public function topPages(int $limit = 100, ?string $search = null): array
     {
