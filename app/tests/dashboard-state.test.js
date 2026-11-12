@@ -100,7 +100,7 @@ function loadEvents() {
   };
   context.window.document = context.document;
   context.window.Icons = context.Icons;
-  vm.runInNewContext(fs.readFileSync(path.join(root, 'dashboard/src/assets/js/events.js'), 'utf8'), context);
+  vm.runInNewContext(fs.readFileSync(path.join(root, 'dashboard/src/assets/js/custom-events.js'), 'utf8'), context);
   return { EventsPage: context.window.EventsPage, getEl, context };
 }
 

@@ -142,7 +142,7 @@ use Petitstats\Http\View;
     <script src="<?= Asset::url('/dashboard/src/assets/js/site-setup.js') ?>"></script>
     <script src="<?= Asset::url('/dashboard/src/assets/js/overview.js') ?>"></script>
     <script src="<?= Asset::url('/dashboard/src/assets/js/acquisition.js') ?>"></script>
-    <script src="<?= Asset::url('/dashboard/src/assets/js/events.js') ?>"></script>
+    <script src="<?= Asset::url('/dashboard/src/assets/js/custom-events.js') ?>"></script>
     <script src="<?= Asset::url('/dashboard/src/assets/js/sessions.js') ?>"></script>
     <script src="<?= Asset::url('/dashboard/src/assets/js/funnels.js') ?>"></script>
     <script src="<?= Asset::url('/dashboard/src/assets/js/revenue.js') ?>"></script>

@@ -68,7 +68,7 @@ test.after(() => {
   if (workdir) fs.rmSync(workdir, { recursive: true, force: true });
 });
 
-const readEndpoints = ['stats.php', 'events.php', 'sessions.php', 'acquisition.php', 'funnels.php', 'revenue.php'];
+const readEndpoints = ['stats.php', 'custom-events.php', 'sessions.php', 'acquisition.php', 'funnels.php', 'revenue.php'];
 
 for (const endpoint of readEndpoints) {
   test(`guests can read ${endpoint} for a public site`, { skip: !hasPhp }, async () => {
