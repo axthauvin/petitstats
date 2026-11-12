@@ -472,3 +472,4 @@ a.changelog-text:hover { color: var(--primary); text-decoration: underline; }
 .whats-new-dialog { max-width: 560px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); }
 .whats-new-body { overflow-y: auto; }
 .whats-new-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border-light); }
+#statsApiCard .mcp-token-form { margin-top: 14px; }

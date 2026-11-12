@@ -81,6 +81,7 @@ Want to contribute? Read the [contributing guide](CONTRIBUTING.md) for the codin
 - [Operations, backups and storage](docs/operations/README.md)
 - [Importing data from other services](docs/importing/README.md)
 - [AI assistants (MCP)](docs/mcp/README.md)
+- [Stats API](docs/api/README.md)
 
 ---
 

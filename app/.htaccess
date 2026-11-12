@@ -17,9 +17,12 @@ DirectoryIndex index.html index.php
     RewriteEngine On
 
     # PHP running as CGI/FastCGI does not receive the Authorization header,
-    # which carries the tokens of the MCP endpoint.
+    # which carries the tokens of the MCP endpoint and of the stats API.
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Stats API: /api/v1/sites/{site_id}/summary
+    RewriteRule ^api/v1/sites/([A-Za-z0-9_-]+)/summary/?$ api/v1/summary.php?site_id=$1 [QSA,L]
 
     # Application code and Composer files are never meant to be requested directly.
     RewriteRule ^(vendor|src|templates|bin|tests)(/|$) - [F,L]

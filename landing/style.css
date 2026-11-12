@@ -1523,6 +1523,20 @@ h3 {
 .assistants-link:hover svg {
     transform: translateX(3px);
 }
+.assistants-copy > p.assistants-api {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 13.5px;
+}
+.assistants-api a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+.assistants-api a:hover {
+    text-decoration: underline;
+}
 .assistants-visual {
     min-width: 0;
 }

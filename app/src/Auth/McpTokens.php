@@ -21,14 +21,13 @@ final class McpTokens
      */
     public static function create(int $userId, string $name): array
     {
-        $token = self::PREFIX . bin2hex(random_bytes(24));
-        $hint = substr($token, 0, strlen(self::PREFIX) + 4) . '…' . substr($token, -4);
+        ['token' => $token, 'hint' => $hint, 'hash' => $hash] = BearerTokens::generate(self::PREFIX);
         $now = time();
         $db = AuthDatabase::connection();
         $stmt = $db->prepare('INSERT INTO mcp_tokens (user_id, name, token_hash, hint, created_at) VALUES (:user, :name, :hash, :hint, :now)');
         $stmt->bindValue(':user', $userId, SQLITE3_INTEGER);
         $stmt->bindValue(':name', $name, SQLITE3_TEXT);
-        $stmt->bindValue(':hash', hash('sha256', $token), SQLITE3_TEXT);
+        $stmt->bindValue(':hash', $hash, SQLITE3_TEXT);
         $stmt->bindValue(':hint', $hint, SQLITE3_TEXT);
         $stmt->bindValue(':now', $now, SQLITE3_INTEGER);
         $stmt->execute();

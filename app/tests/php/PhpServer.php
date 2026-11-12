@@ -12,12 +12,15 @@ final class PhpServer
     /** @param resource $process */
     private function __construct(private $process, public readonly string $url) {}
 
-    /** @param array<string, string>|null $env the environment of the server, the test's own by default */
-    public static function start(string $docroot, ?array $env = null): self
+    /**
+     * @param array<string, string>|null $env the environment of the server, the test's own by default
+     * @param ?string $router a router script, such as scripts/dev-router.php for the URLs Apache rewrites
+     */
+    public static function start(string $docroot, ?array $env = null, ?string $router = null): self
     {
         $port = self::freePort();
         $null = PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
-        $process = proc_open([PHP_BINARY, '-S', "127.0.0.1:{$port}", '-t', $docroot], [['file', $null, 'r'], ['file', $null, 'w'], ['file', $null, 'w']], $pipes, null, $env ?? getenv());
+        $process = proc_open([PHP_BINARY, '-S', "127.0.0.1:{$port}", '-t', $docroot, ...($router === null ? [] : [$router])], [['file', $null, 'r'], ['file', $null, 'w'], ['file', $null, 'w']], $pipes, null, $env ?? getenv());
         if ($process === false) {
             throw new RuntimeException('Could not start the PHP built-in server.');
         }

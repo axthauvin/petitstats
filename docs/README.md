@@ -13,3 +13,4 @@ New to Petitstats? Start with the [installation guide](../README.md#quick-start)
 - [Operations and storage](operations/README.md). Manage accounts, storage, updates and backups.
 - [Importing from another analytics service](importing/README.md). Bring your past analytics with you.
 - [AI assistants (MCP)](mcp/README.md). Ask Claude, ChatGPT or Cursor about your traffic.
+- [Stats API](api/README.md). Show your audience on your own website.

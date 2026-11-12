@@ -55,6 +55,9 @@ server {
         add_header Cache-Control "no-cache, must-revalidate";
     }
 
+    # Stats API: /api/v1/sites/{site_id}/summary
+    rewrite ^/api/v1/sites/([A-Za-z0-9_-]+)/summary/?$ /api/v1/summary.php?site_id=$1 last;
+
     location / {
         try_files $uri $uri/ =404;
     }
@@ -88,6 +91,10 @@ analytics.example.com {
     # minilytics.js is loaded by snippets written before the rename.
     @tracker path /petitstats.js /minilytics.js
     header @tracker Cache-Control "no-cache, must-revalidate"
+
+    # Stats API: /api/v1/sites/{site_id}/summary
+    @statsApi path_regexp statsApi ^/api/v1/sites/([A-Za-z0-9_-]+)/summary/?$
+    rewrite @statsApi /api/v1/summary.php?site_id={re.statsApi.1}&{query}
 
     # Data imports upload ZIP archives of up to 128 MB.
     request_body {

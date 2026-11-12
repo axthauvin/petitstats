@@ -303,6 +303,13 @@ const Api = {
     if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`); return data;
   },
 
+  /** Stats API tokens of one website: list (GET), create (POST) or revoke (DELETE). */
+  async siteTokens(siteId, method = "GET", body = {}) {
+    const init = method === "GET" ? { method } : { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...body, site_id: siteId }) };
+    const res = await apiFetch(`${this.base}/site-tokens.php${method === "GET" ? `?site_id=${encodeURIComponent(siteId)}` : ""}`, init); const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`); return data;
+  },
+
   async getVersion(refresh = false) {
     const res = await apiFetch(`${this.base}/version.php${refresh ? "?refresh=1" : ""}`); const data = await res.json().catch(() => ({}));
     if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`); return data;

@@ -9,7 +9,8 @@ use Petitstats\Analytics\ReportQuery;
 /** Traffic over time, for the dashboard chart. */
 final class TimeseriesReport
 {
-    public function __construct(private readonly ReportQuery $query) {}
+    /** @param bool $daily one slot per day whatever the length of a custom period, instead of hours or weeks */
+    public function __construct(private readonly ReportQuery $query, private readonly bool $daily = false) {}
 
     /** Traffic per hour, day or week (depending on the period length), with empty slots filled in. */
     public function get(): array
@@ -40,7 +41,9 @@ final class TimeseriesReport
             $effectiveStart = strtotime(gmdate('Y-m-d', $startUnix) . ' 00:00:00 UTC');
             $endStep = strtotime(gmdate('Y-m-d', $endUnix) . ' 00:00:00 UTC');
             $spanDays = max(1, (int) round(($endStep - $effectiveStart) / 86400));
-            if ($spanDays <= 2) {
+            if ($this->daily) {
+                $intervalHours = 24;
+            } elseif ($spanDays <= 2) {
                 $intervalHours = 1;
                 $stepSeconds = 3600;
                 $effectiveStart = floor($startUnix / 3600) * 3600;

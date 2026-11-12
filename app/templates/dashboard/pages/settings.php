@@ -82,6 +82,21 @@
             </div>
             <p class="settings-feedback" id="trackingFeedback" role="status"></p>
         </section>
+        <section class="settings-card" id="statsApiCard" hidden>
+            <div class="settings-card-heading">
+                <div>
+                    <h3>Stats API</h3>
+                    <p>Let your own server read the audience of the website selected above: visitors, pageviews, bounce rate and a daily series, to show on a sponsor page for example. A token reads this website only and can never change anything. <a href="<?= \Petitstats\Http\Docs::url('api') ?>" target="_blank" rel="noopener">How to use it ↗</a></p>
+                </div>
+            </div>
+            <div class="mcp-token-form">
+                <input id="statsApiTokenName" maxlength="80" placeholder="What will use it? e.g. Sponsor page" autocomplete="off">
+                <button type="button" class="btn-outline btn-sm" id="createStatsApiToken">Create token</button>
+            </div>
+            <div id="statsApiTokenResult"></div>
+            <p class="settings-feedback" id="statsApiFeedback" role="status"></p>
+            <div id="statsApiTokenList" class="mcp-access-list"></div>
+        </section>
         <section class="settings-card" id="trackingServerCard" hidden>
             <div class="settings-card-heading">
                 <div>
