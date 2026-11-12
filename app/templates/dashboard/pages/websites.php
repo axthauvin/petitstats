@@ -74,10 +74,10 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th style="width: 280px;">Name <span>↕</span></th>
-                        <th>Domain <span>↕</span></th>
-                        <th style="width: 170px;">Visitors (7d)</th>
-                        <th style="width: 160px;">Created <span>↕</span></th>
+                        <th style="width: 280px;" aria-sort="none"><button type="button" class="table-sort" data-sort="name">Name<span class="table-sort-icon"></span></button></th>
+                        <th aria-sort="none"><button type="button" class="table-sort" data-sort="domain">Domain<span class="table-sort-icon"></span></button></th>
+                        <th style="width: 170px;" aria-sort="none"><button type="button" class="table-sort" data-sort="visitors">Visitors (7d)<span class="table-sort-icon"></span></button></th>
+                        <th style="width: 160px;" aria-sort="none"><button type="button" class="table-sort" data-sort="created">Created<span class="table-sort-icon"></span></button></th>
                         <th style="width: 140px; text-align: right;"></th>
                     </tr>
                 </thead>
