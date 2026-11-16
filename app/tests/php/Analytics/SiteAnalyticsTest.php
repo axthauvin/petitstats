@@ -104,6 +104,52 @@ final class SiteAnalyticsTest extends TestCase
         $this->assertSame(50.0, $this->analytics('7d')->summary()['bounce_rate']);
     }
 
+    public function testTheChartEndsWithTheHourUnderWayAndForecastsTheNextOne(): void
+    {
+        $this->now = intdiv(time(), 3600) * 3600 + 900; // a quarter past the hour
+        for ($hour = 1; $hour <= 3; $hour++) {
+            for ($view = 0; $view < 4; $view++) {
+                $this->record("s{$hour}-{$view}", "v{$hour}-{$view}", 'pageview', ['path' => '/'], $hour * 3600 + $view * 60);
+            }
+        }
+        $this->record('now', 'v-now', 'pageview', ['path' => '/'], 60);
+
+        $timeseries = $this->analytics('24h')->timeseries();
+        $last = $timeseries[count($timeseries) - 1];
+
+        // No slot for the hour that has not started yet: it would show a drop to zero.
+        $this->assertCount(25, $timeseries);
+        $this->assertSame($this->now - 900, (int) $last['timestamp']);
+        // The hour under way keeps its real count.
+        $this->assertTrue($last['in_progress']);
+        $this->assertSame(0.25, $last['progress']);
+        $this->assertSame(1, $last['pageviews']);
+        // The next hour repeats the hour under way: 1 view so far, plus 3/4 of an hour at 4 views an hour.
+        $this->assertSame($this->now - 900 + 3600, $last['next']['timestamp']);
+        $this->assertSame(4, $last['next']['pageviews']);
+        $this->assertSame(3, $last['next']['forecast_from']);
+        $this->assertArrayNotHasKey('next', $timeseries[count($timeseries) - 2]);
+    }
+
+    public function testTheForecastFollowsARiseInTheHourUnderWay(): void
+    {
+        $this->now = intdiv(time(), 3600) * 3600 + 2700; // a quarter to the next hour
+        for ($hour = 1; $hour <= 3; $hour++) {
+            $this->record("s{$hour}-a", "v{$hour}-a", 'pageview', ['path' => '/'], $hour * 3600);
+            $this->record("s{$hour}-b", "v{$hour}-b", 'pageview', ['path' => '/'], $hour * 3600 + 60);
+        }
+        for ($view = 0; $view < 30; $view++) {
+            $this->record("now-{$view}", "v-now-{$view}", 'pageview', ['path' => '/'], 60 + $view * 60);
+        }
+
+        $timeseries = $this->analytics('24h')->timeseries();
+        $last = $timeseries[count($timeseries) - 1];
+
+        $this->assertSame(30, $last['pageviews']);
+        // 30 views so far, and a quarter of an hour to go at 2 views an hour: not dragged down to the earlier hours.
+        $this->assertSame(31, $last['next']['pageviews']);
+    }
+
     public function testTopPagesAreSortedByViews(): void
     {
         $this->record('s1', 'v1', 'pageview', ['path' => '/pricing', 'title' => 'Pricing'], 3600);
@@ -131,6 +177,41 @@ final class SiteAnalyticsTest extends TestCase
 
         $this->assertEquals(['google.com' => 1, 'news.ycombinator.com' => 1, 'direct' => 1], array_column($referrers, 'visits', 'domain'));
         $this->assertSame([33.3, 33.3, 33.3], array_column($referrers, 'percentage'));
+    }
+
+    public function testASourceCountsAllOfItsVisitsWhateverPageTheyLandOn(): void
+    {
+        // Each visit lands on a different page: a source is still one row with every visit.
+        for ($i = 0; $i < 160; $i++) {
+            $this->record("g{$i}", "vg{$i}", 'pageview', ['path' => "/post-{$i}", 'referrer' => $i % 2 ? 'www.google.fr' : 'google.com'], 3600 - $i);
+        }
+        $this->record('h1', 'vh1', 'pageview', ['path' => '/', 'referrer' => 'news.ycombinator.com'], 100);
+
+        $referrers = $this->analytics('7d')->topReferrers();
+
+        $this->assertSame(['google' => 160, 'news.ycombinator.com' => 1], array_column($referrers, 'visits', 'id'));
+        $this->assertSame([99.4, 0.6], array_column($referrers, 'percentage'));
+    }
+
+    public function testTheSourceFilterKeepsTheVisitsFromThoseSources(): void
+    {
+        $this->record('google-fr', 'v1', 'pageview', ['path' => '/', 'referrer' => 'https://www.google.fr/'], 3600);
+        $this->record('google-com', 'v2', 'pageview', ['path' => '/', 'referrer' => 'google.com'], 3500);
+        $this->record('chatgpt-utm', 'v3', 'pageview', ['path' => '/', 'utm_source' => 'chatgpt.com'], 3400);
+        $this->record('chatgpt-nested', 'v4', 'pageview', ['path' => '/', 'referrer' => '', 'utm' => ['utm_source' => 'chat.openai.com']], 3300);
+        $this->record('newsletter', 'v5', 'pageview', ['path' => '/', 'referrer' => null, 'utm_source' => 'newsletter'], 3200);
+        $this->record('direct', 'v6', 'pageview', ['path' => '/'], 3100);
+        $this->record('direct-empty', 'v7', 'pageview', ['path' => '/', 'referrer' => ''], 3000);
+        $this->record('hn', 'v8', 'pageview', ['path' => '/', 'referrer' => 'news.ycombinator.com'], 2900);
+
+        $sessions = fn(array $sources): int => SiteAnalytics::open('test_site', Period::from('7d', now: $this->now), ['source' => $sources])->summary()['sessions'];
+
+        $this->assertSame(2, $sessions(['google']));
+        $this->assertSame(2, $sessions(['chatgpt']));
+        $this->assertSame(1, $sessions(['newsletter']));
+        $this->assertSame(2, $sessions(['direct']));
+        $this->assertSame(3, $sessions(['google', 'news.ycombinator.com']));
+        $this->assertSame(0, $sessions(['bing']));
     }
 
     public function testKnownAndUtmOnlySourcesAreNamedAndAiTrafficGetsItsOwnChannel(): void

@@ -9,6 +9,9 @@
 const Filters = {
   DIMENSIONS: {
     page: { label: "Page", icon: "file-text" },
+    event: { label: "Event", icon: "zap" },
+    source: { label: "Source", icon: "link" },
+    // Filters saved before traffic sources existed still apply.
     referrer: { label: "Referrer", icon: "link" },
     browser: { label: "Browser", icon: "globe" },
     os: { label: "OS", icon: "monitor" },
@@ -17,6 +20,8 @@ const Filters = {
   },
 
   state: {},
+  // What a value is shown as when it is an id ("google" -> "Google"), per dimension.
+  labels: {},
   siteId: null,
   listeners: new Set(),
 
@@ -31,9 +36,14 @@ const Filters = {
       saved = {};
     }
     this.state = {};
+    this.labels = {};
     Object.keys(this.DIMENSIONS).forEach((dim) => {
       if (Array.isArray(saved[dim]) && saved[dim].length) {
         this.state[dim] = saved[dim].map(String);
+      }
+      const labels = saved._labels?.[dim];
+      if (labels && typeof labels === "object") {
+        this.labels[dim] = Object.fromEntries(Object.entries(labels).map(([k, v]) => [k, String(v)]));
       }
     });
   },
@@ -44,7 +54,7 @@ const Filters = {
 
   persist() {
     try {
-      sessionStorage.setItem(this.storageKey(), JSON.stringify(this.state));
+      sessionStorage.setItem(this.storageKey(), JSON.stringify({ ...this.state, _labels: this.labels }));
     } catch (e) {}
   },
 
@@ -64,8 +74,12 @@ const Filters = {
     return Object.values(this.state).reduce((n, vals) => n + vals.length, 0);
   },
 
-  add(dim, value, { silent = false } = {}) {
-    if (!this.DIMENSIONS[dim] || this.has(dim, value)) return;
+  add(dim, value, { silent = false, label = "" } = {}) {
+    if (!this.DIMENSIONS[dim] || value === undefined || value === null || value === "") return;
+    if (label && label !== String(value)) {
+      this.labels[dim] = { ...this.labels[dim], [String(value)]: String(label) };
+    }
+    if (this.has(dim, value)) return;
     this.state[dim] = [...this.values(dim), String(value)];
     if (!silent) this.commit();
   },
@@ -77,9 +91,9 @@ const Filters = {
     this.commit();
   },
 
-  toggle(dim, value) {
+  toggle(dim, value, { label = "" } = {}) {
     if (this.has(dim, value)) this.remove(dim, value);
-    else this.add(dim, value);
+    else this.add(dim, value, { label });
   },
 
   clear() {
@@ -112,7 +126,9 @@ const Filters = {
   },
 
   displayValue(dim, value) {
-    if (dim === "referrer" && (value === "direct" || !value)) return "Direct / None";
+    const label = this.labels[dim]?.[value];
+    if (label) return label;
+    if ((dim === "referrer" || dim === "source") && (value === "direct" || !value)) return "Direct / None";
     return value;
   },
 

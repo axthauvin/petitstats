@@ -21,27 +21,35 @@ final class ReferrersReport
     public function top(int $limit = 100): array
     {
         $ownDomains = $this->ownDomains();
-        $referrers = [];
+        // Grouped by what names the source, not by the whole action: one row
+        // per page, browser or city would split a source and hide most visits.
+        $sources = [];
+        $total = 0;
         foreach ($this->query->periodRows("
             WITH landings AS (
                 SELECT
-                    action,
+                    json_extract(action, '$.data.referrer') as referrer,
+                    json_extract(action, '$.data.utm_source') as utm_source,
+                    json_extract(action, '$.data.utm.utm_source') as nested_utm_source,
                     ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY timestamp, id) as n
                 FROM user_activity
                 WHERE timestamp >= :start_date AND timestamp <= :end_date
                   AND json_extract(action, '$.name') = 'pageview'
                   {$this->query->condition()}
             )
-            SELECT action, COUNT(*) as count, SUM(COUNT(*)) OVER () as total
+            SELECT referrer, utm_source, nested_utm_source, COUNT(*) as count
             FROM landings
             WHERE n = 1
-            GROUP BY action
-            ORDER BY count DESC
-            LIMIT 150
+            GROUP BY referrer, utm_source, nested_utm_source
         ") as $row) {
-            $data = json_decode((string) ($row['action'] ?? ''), true)['data'] ?? [];
-            $rawRef = trim((string) ($data['referrer'] ?? ''));
-            $source = TrafficSource::fromData(is_array($data) ? $data : []);
+            $count = (int) $row['count'];
+            $total += $count;
+            $rawRef = trim((string) ($row['referrer'] ?? ''));
+            $source = TrafficSource::fromData([
+                'referrer' => $rawRef,
+                'utm_source' => $row['utm_source'] ?? null,
+                'utm' => ['utm_source' => $row['nested_utm_source'] ?? null],
+            ]);
 
             // MySQL/MariaDB's JSON_UNQUOTE(JSON_EXTRACT(...)) turns a JSON null
             // into the literal string "null", unlike SQLite which returns SQL
@@ -54,22 +62,27 @@ final class ReferrersReport
                 }
             }
 
-            $count = (int) $row['count'];
-            $total = (int) $row['total'];
-            $referrers[] = [
-                'id' => $source['id'],
-                'name' => $source['name'],
-                'domain' => $source['domain'] ?? $source['id'],
-                'url' => $source['url'],
-                'category' => $source['category'],
-                'raw' => $rawRef,
-                'visits' => $count,
-                'percentage' => $total > 0 ? round(($count / $total) * 100, 1) : 0,
-            ];
-            if (count($referrers) >= 100) {
-                break;
+            $id = $source['id'];
+            if (!isset($sources[$id])) {
+                $sources[$id] = [
+                    'id' => $id,
+                    'name' => $source['name'],
+                    'domain' => $source['domain'] ?? $id,
+                    'url' => $source['url'],
+                    'category' => $source['category'],
+                    'raw' => $rawRef,
+                    'visits' => 0,
+                ];
             }
+            $sources[$id]['visits'] += $count;
         }
+
+        $referrers = array_values($sources);
+        usort($referrers, static fn(array $a, array $b): int => $b['visits'] <=> $a['visits'] ?: strcmp($a['id'], $b['id']));
+        foreach ($referrers as &$referrer) {
+            $referrer['percentage'] = $total > 0 ? round(($referrer['visits'] / $total) * 100, 1) : 0;
+        }
+        unset($referrer);
         return array_slice($referrers, 0, $limit);
     }
 

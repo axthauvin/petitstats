@@ -240,8 +240,55 @@ try {
         $params[':event_name'] = $eventName;
     }
 
+    // Pages and events matching a search, offered as precise filters while typing.
+    if (isset($_GET['suggest'])) {
+        $like = '%' . trim((string) $_GET['suggest']) . '%';
+        $pageExpr = "COALESCE(json_extract(action, '$.data.path'), '/')";
+        $pStmt = $db->prepare("
+            SELECT {$pageExpr} as path, MAX(json_extract(action, '$.data.title')) as title, COUNT(DISTINCT session_id) as sessions
+            FROM user_activity
+            WHERE timestamp >= :start_date AND timestamp <= :end_date
+              AND json_extract(action, '$.name') = 'pageview'
+              AND ({$pageExpr} LIKE :q OR json_extract(action, '$.data.title') LIKE :q)
+            GROUP BY {$pageExpr}
+            ORDER BY sessions DESC, path ASC
+            LIMIT 6
+        ");
+        $eStmt = $db->prepare("
+            SELECT json_extract(action, '$.name') as name, COUNT(DISTINCT session_id) as sessions
+            FROM user_activity
+            WHERE timestamp >= :start_date AND timestamp <= :end_date
+              AND json_extract(action, '$.name') NOT IN ('pageview', '_ml_engaged')
+              AND json_extract(action, '$.name') LIKE :q
+            GROUP BY json_extract(action, '$.name')
+            ORDER BY sessions DESC, name ASC
+            LIMIT 6
+        ");
+        $suggestions = [];
+        foreach (['pages' => $pStmt, 'events' => $eStmt] as $kind => $stmt) {
+            $stmt->bindValue(':start_date', $startDateStr, SQLITE3_TEXT);
+            $stmt->bindValue(':end_date', $endDateStr, SQLITE3_TEXT);
+            $stmt->bindValue(':q', $like, SQLITE3_TEXT);
+            $res = $stmt->execute();
+            $suggestions[$kind] = [];
+            while ($row = $res->fetchArray(SQLITE3_ASSOC)) {
+                $suggestions[$kind][] = $kind === 'pages'
+                    ? ['path' => (string) $row['path'], 'title' => (string) ($row['title'] ?? ''), 'sessions' => (int) $row['sessions']]
+                    : ['name' => (string) $row['name'], 'sessions' => (int) $row['sessions']];
+            }
+        }
+        echo json_encode(['success' => true] + $suggestions, JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
     if ($search !== '') {
-        $where[] = "(session_id LIKE :search OR visitor_id LIKE :search OR action LIKE :search)";
+        // Matched on the whole visit, so that its page views and events are all still counted.
+        $where[] = "session_id IN (
+            SELECT search_ua.session_id
+            FROM user_activity search_ua
+            WHERE search_ua.timestamp >= :start_date AND search_ua.timestamp <= :end_date
+              AND (search_ua.session_id LIKE :search OR search_ua.visitor_id LIKE :search OR search_ua.action LIKE :search)
+        )";
         $params[':search'] = "%{$search}%";
     }
 

@@ -44,7 +44,20 @@ const SessionsPage = {
           this.filters.search = e.target.value.trim();
           this.filters.page = 1;
           this.load();
-        }, 300);
+          this.loadSuggestions();
+        }, 250);
+      });
+      searchInput.addEventListener("focus", () => this.loadSuggestions());
+      searchInput.addEventListener("keydown", (e) => this.onSearchKeydown(e));
+      document.getElementById("sessionSearchSuggestions")?.addEventListener("mousedown", (e) => {
+        // mousedown, so the input keeps its focus until the choice is applied
+        const option = e.target.closest("[data-suggest-dim]");
+        if (!option) return;
+        e.preventDefault();
+        this.pickSuggestion(option);
+      });
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest("#page-sessions .search-input-wrapper")) this.hideSuggestions();
       });
     }
 
@@ -125,6 +138,114 @@ const SessionsPage = {
         this.renderDetailView(this.activeSession);
       });
     }
+  },
+
+  /** Pages and events matching the search, each a precise filter to add. */
+  async loadSuggestions() {
+    const input = document.getElementById("sessionSearch");
+    const box = document.getElementById("sessionSearchSuggestions");
+    if (!input || !box || document.activeElement !== input) return;
+    const query = input.value.trim();
+    const token = (this._suggestToken = (this._suggestToken || 0) + 1);
+    let data;
+    try {
+      data = await Api.getSessionSuggestions({
+        query,
+        range: this.filters.range,
+        siteId: this.filters.siteId,
+        customDates: this.filters.customDates,
+        date: this.filters.date,
+      });
+    } catch (err) {
+      console.error("Failed to load search suggestions:", err);
+      return;
+    }
+    if (token !== this._suggestToken || document.activeElement !== input) return;
+
+    const pages = (data.pages || []).filter((p) => !Filters.has("page", p.path));
+    const events = (data.events || []).filter((e) => !Filters.has("event", e.name));
+    const count = (n) => `${n.toLocaleString()} session${n === 1 ? "" : "s"}`;
+    const option = (dim, value, label, sub, icon, sessions) => `
+      <div class="search-suggestion" role="option" aria-selected="false" data-suggest-dim="${dim}" data-suggest-value="${this.escapeHtml(value)}" data-suggest-label="${this.escapeHtml(label)}">
+        <span class="search-suggestion-icon">${Icons.get(icon, { size: 13 })}</span>
+        <span class="search-suggestion-text">
+          <span class="search-suggestion-label">${this.highlight(label, query)}</span>
+          ${sub ? `<span class="search-suggestion-sub">${this.highlight(sub, query)}</span>` : ""}
+        </span>
+        <span class="search-suggestion-count">${count(sessions)}</span>
+      </div>`;
+    const section = (title, rows) =>
+      rows.length ? `<div class="search-suggestions-title">${title}</div>${rows.join("")}` : "";
+
+    const html =
+      section(
+        query ? "Pages" : "Top pages",
+        pages.map((p) => option("page", p.path, p.path, p.title && p.title !== p.path ? p.title : "", "file-text", p.sessions)),
+      ) +
+      section(
+        query ? "Events" : "Top events",
+        events.map((e) => option("event", e.name, e.name, "", "zap", e.sessions)),
+      );
+
+    if (!html) {
+      this.hideSuggestions();
+      return;
+    }
+    box.innerHTML = `${html}<div class="search-suggestions-hint">Pick one to see only the visitors who viewed that page or triggered that event</div>`;
+    box.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+  },
+
+  hideSuggestions() {
+    const box = document.getElementById("sessionSearchSuggestions");
+    if (box && !box.hidden) {
+      box.hidden = true;
+      box.innerHTML = "";
+    }
+    document.getElementById("sessionSearch")?.setAttribute("aria-expanded", "false");
+  },
+
+  onSearchKeydown(e) {
+    const box = document.getElementById("sessionSearchSuggestions");
+    const options = box && !box.hidden ? [...box.querySelectorAll("[data-suggest-dim]")] : [];
+    if (e.key === "Escape") {
+      this.hideSuggestions();
+      return;
+    }
+    if (!options.length) return;
+    const current = options.findIndex((o) => o.getAttribute("aria-selected") === "true");
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const next =
+        e.key === "ArrowDown" ? (current + 1) % options.length : (current <= 0 ? options.length : current) - 1;
+      options.forEach((o, i) => o.setAttribute("aria-selected", String(i === next)));
+      options[next].scrollIntoView({ block: "nearest" });
+    } else if (e.key === "Enter" && current >= 0) {
+      e.preventDefault();
+      this.pickSuggestion(options[current]);
+    }
+  },
+
+  /** Turns the picked page or event into a filter, which replaces the text search. */
+  pickSuggestion(option) {
+    const { suggestDim: dim, suggestValue: value, suggestLabel: label } = option.dataset;
+    const input = document.getElementById("sessionSearch");
+    clearTimeout(this.searchDebounce);
+    if (input) input.value = "";
+    this.filters.search = "";
+    this.filters.page = 1;
+    this.hideSuggestions();
+    // Filters.onChange reloads the list
+    Filters.add(dim, value, { label });
+  },
+
+  highlight(text, query) {
+    const safe = this.escapeHtml(text);
+    if (!query) return safe;
+    const index = String(text).toLocaleLowerCase().indexOf(query.toLocaleLowerCase());
+    if (index < 0) return safe;
+    const t = String(text);
+    return `${this.escapeHtml(t.slice(0, index))}<mark>${this.escapeHtml(t.slice(index, index + query.length))}</mark>${this.escapeHtml(t.slice(index + query.length))}`;
   },
 
   filterByDay(dayKey) {
@@ -397,7 +518,11 @@ const SessionsPage = {
     try {
       const data = await Api.getSessionDetails(sessionId, siteId);
       this.activeSession = data.session;
-      this.eventSearch = "";
+      // Opened from a search: start on the pages and events that matched it, when some did
+      // (a search can also match the visitor's country or browser, which the journey doesn't list).
+      const listQuery = (this.filters.search || "").trim().toLocaleLowerCase();
+      const journeyMatches = listQuery && (data.session.events || []).some((evt) => this.eventMatchesSearch(evt, listQuery));
+      this.eventSearch = journeyMatches ? this.filters.search.trim() : "";
       this.eventOrder = "desc";
       if (syncUrl) this.syncSelectedSession(data.session.session_id);
       this.renderDetailView(data.session);

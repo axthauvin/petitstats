@@ -11,14 +11,22 @@ use SQLite3Stmt;
 /** Prepared statement wrapper exposing the SQLite3Stmt API over SQLite or PDO. */
 final class DatabaseStatement
 {
-    public function __construct(private SQLite3Stmt|PDOStatement $statement, private bool $mysql) {}
+    /** @param array<string, string[]> $placeholders MySQL: each parameter's names in the query, see DatabaseConnection::uniquePlaceholders() */
+    public function __construct(private SQLite3Stmt|PDOStatement $statement, private bool $mysql, private array $placeholders = []) {}
     public function bindValue(string $name, mixed $value, int $type = SQLITE3_TEXT): bool
     {
         if (!$this->mysql) {
             return $this->statement->bindValue($name, $value, $type);
         }
         $pdoType = $type === SQLITE3_INTEGER ? PDO::PARAM_INT : ($value === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
-        return $this->statement->bindValue($name, $value, $pdoType);
+        $name = str_starts_with($name, ':') ? $name : ':' . $name;
+        // Like SQLite, a value for a parameter the query does not use is ignored.
+        foreach ($this->placeholders[$name] ?? [] as $alias) {
+            if (!$this->statement->bindValue($alias, $value, $pdoType)) {
+                return false;
+            }
+        }
+        return true;
     }
     public function execute(): DatabaseResult|false
     {

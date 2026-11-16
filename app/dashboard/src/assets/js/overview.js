@@ -16,6 +16,7 @@ const OverviewPage = {
   init() {
     this.chart = new PetitstatsChart("overviewChart", "chartTooltip", {
       activeSeries: ["pageviews", "visitors"],
+      showForecast: true,
       onPointClick: (item) => this.openSessionsForPoint(item),
     });
     this.botsChart = new PetitstatsChart("botsChart", "botsChartTooltip", {
@@ -56,14 +57,14 @@ const OverviewPage = {
       if (!btn) return;
       e.preventDefault();
       e.stopPropagation();
-      const { filterDim: dim, filterValue: value } = btn.dataset;
+      const { filterDim: dim, filterValue: value, filterLabel: label } = btn.dataset;
       if (!dim) return;
       if (btn.classList.contains("pill-sessions-btn")) {
-        Filters.add(dim, value, { silent: true });
+        Filters.add(dim, value, { silent: true, label });
         Filters.persist();
         Filters.openSessions();
       } else {
-        Filters.toggle(dim, value);
+        Filters.toggle(dim, value, { label });
       }
     });
 
@@ -81,11 +82,11 @@ const OverviewPage = {
     const l = Filters.escape(label || value);
     return `
       <div class="pill-actions">
-        <button type="button" class="pill-action-btn pill-filter-btn${active ? " active" : ""}" data-filter-dim="${dim}" data-filter-value="${v}"
+        <button type="button" class="pill-action-btn pill-filter-btn${active ? " active" : ""}" data-filter-dim="${dim}" data-filter-value="${v}" data-filter-label="${l}"
                 title="${active ? `Remove filter “${l}”` : `Filter by “${l}”`}" aria-pressed="${active}">
           ${Icons.get("filter", { size: 13 })}
         </button>
-        <button type="button" class="pill-action-btn pill-sessions-btn" data-filter-dim="${dim}" data-filter-value="${v}"
+        <button type="button" class="pill-action-btn pill-sessions-btn" data-filter-dim="${dim}" data-filter-value="${v}" data-filter-label="${l}"
                 title="View sessions for “${l}”">
           ${Icons.get("users", { size: 13 })}
         </button>
@@ -366,7 +367,7 @@ const OverviewPage = {
       weekday: "long", year: "numeric", month: "long", day: "numeric", ...TimeFormat.options(),
     });
 
-    return timeseries.map((point) => {
+    const localize = (point) => {
       const timestamp = Number(point.timestamp);
       if (!Number.isFinite(timestamp)) return point;
       const date = new Date(timestamp * 1000);
@@ -376,7 +377,9 @@ const OverviewPage = {
         date_label: dateFormatter.format(date),
         full_label: fullFormatter.format(date),
       };
-    });
+    };
+    // `next` is the forecast of the hour after the one under way.
+    return timeseries.map((point) => (point.next ? { ...localize(point), next: localize(point.next) } : localize(point)));
   },
 
   /** Open the Sessions page with the day represented by a chart point selected. */
@@ -487,7 +490,7 @@ const OverviewPage = {
                    <span class="pill-icon-fallback" style="display:none;">${Icons.get("globe", { size: 15, color: "#64748b" })}</span>`;
 
         return `
-                <li class="${this.rowClass("referrer", r.domain)}">
+                <li class="${this.rowClass("source", r.id || r.domain)}">
                     <div class="pill-progress-bg" style="width: ${pct}%;"></div>
                     <div class="pill-left">
                         ${iconHtml}
