@@ -64,6 +64,8 @@ server {
 
     location ~ \.php$ {
         try_files $uri =404;
+        # The dashboard is private: keep it out of search engines.
+        add_header X-Robots-Tag "noindex, nofollow" always;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_pass unix:/run/php/php8.3-fpm.sock;
@@ -91,6 +93,11 @@ analytics.example.com {
     # minilytics.js is loaded by snippets written before the rename.
     @tracker path /petitstats.js /minilytics.js
     header @tracker Cache-Control "no-cache, must-revalidate"
+
+    # The dashboard is private: keep it out of search engines. A landing page
+    # deployed next to it stays indexed.
+    @private path *.php /dashboard/* /oauth/* /api/*
+    header @private X-Robots-Tag "noindex, nofollow"
 
     # Stats API: /api/v1/sites/{site_id}/summary
     @statsApi path_regexp statsApi ^/api/v1/sites/([A-Za-z0-9_-]+)/summary/?$

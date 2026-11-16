@@ -7,6 +7,12 @@ Options -Indexes
     <FilesMatch "^(petitstats|minilytics)\.js$">
         Header set Cache-Control "no-cache, must-revalidate"
     </FilesMatch>
+
+    # The dashboard is private: keep it out of search engines. Only the files of
+    # the application match, so a landing page deployed next to it stays indexed.
+    <FilesMatch "\.php$">
+        Header always set X-Robots-Tag "noindex, nofollow"
+    </FilesMatch>
 </IfModule>
 
 # The site root serves a static index.html when a landing page is deployed next
