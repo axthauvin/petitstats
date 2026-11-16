@@ -21,8 +21,41 @@ final class DatabaseConnection
     }
     public function prepare(string $sql): DatabaseStatement|false
     {
-        $statement = $this->connection->prepare($this->translate($sql));
-        return $statement === false ? false : new DatabaseStatement($statement, $this->isMysql());
+        $sql = $this->translate($sql);
+        $placeholders = [];
+        if ($this->isMysql()) {
+            [$sql, $placeholders] = self::uniquePlaceholders($sql);
+        }
+        $statement = $this->connection->prepare($sql);
+        return $statement === false ? false : new DatabaseStatement($statement, $this->isMysql(), $placeholders);
+    }
+
+    /**
+     * SQLite lets a query use a named parameter several times, and ignores a
+     * value bound to a parameter it does not use. PDO's MySQL driver, with real
+     * prepared statements, accepts neither. This renames each repeat of a
+     * parameter (":start", ":start__2"…), outside string literals.
+     *
+     * @return array{0: string, 1: array<string, string[]>} the SQL, and each parameter's names in it
+     */
+    public static function uniquePlaceholders(string $sql): array
+    {
+        $placeholders = [];
+        $sql = (string) preg_replace_callback(
+            "/'(?:[^'\\\\]|\\\\.|'')*'|\"(?:[^\"\\\\]|\\\\.)*\"|(?<![:\\w]):([A-Za-z_]\\w*)/",
+            static function (array $match) use (&$placeholders): string {
+                if (!isset($match[1])) {
+                    return $match[0];
+                }
+                $name = ':' . $match[1];
+                $count = count($placeholders[$name] ?? []);
+                $alias = $count === 0 ? $name : $name . '__' . ($count + 1);
+                $placeholders[$name][] = $alias;
+                return $alias;
+            },
+            $sql,
+        );
+        return [$sql, $placeholders];
     }
     public function query(string $sql): DatabaseResult|false
     {

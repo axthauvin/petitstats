@@ -147,6 +147,27 @@ final class SiteAnalyticsTest extends TestCase
         $this->assertSame([99.4, 0.6], array_column($referrers, 'percentage'));
     }
 
+    public function testTheSourceFilterKeepsTheVisitsFromThoseSources(): void
+    {
+        $this->record('google-fr', 'v1', 'pageview', ['path' => '/', 'referrer' => 'https://www.google.fr/'], 3600);
+        $this->record('google-com', 'v2', 'pageview', ['path' => '/', 'referrer' => 'google.com'], 3500);
+        $this->record('chatgpt-utm', 'v3', 'pageview', ['path' => '/', 'utm_source' => 'chatgpt.com'], 3400);
+        $this->record('chatgpt-nested', 'v4', 'pageview', ['path' => '/', 'referrer' => '', 'utm' => ['utm_source' => 'chat.openai.com']], 3300);
+        $this->record('newsletter', 'v5', 'pageview', ['path' => '/', 'referrer' => null, 'utm_source' => 'newsletter'], 3200);
+        $this->record('direct', 'v6', 'pageview', ['path' => '/'], 3100);
+        $this->record('direct-empty', 'v7', 'pageview', ['path' => '/', 'referrer' => ''], 3000);
+        $this->record('hn', 'v8', 'pageview', ['path' => '/', 'referrer' => 'news.ycombinator.com'], 2900);
+
+        $sessions = fn(array $sources): int => SiteAnalytics::open('test_site', Period::from('7d', now: $this->now), ['source' => $sources])->summary()['sessions'];
+
+        $this->assertSame(2, $sessions(['google']));
+        $this->assertSame(2, $sessions(['chatgpt']));
+        $this->assertSame(1, $sessions(['newsletter']));
+        $this->assertSame(2, $sessions(['direct']));
+        $this->assertSame(3, $sessions(['google', 'news.ycombinator.com']));
+        $this->assertSame(0, $sessions(['bing']));
+    }
+
     public function testKnownAndUtmOnlySourcesAreNamedAndAiTrafficGetsItsOwnChannel(): void
     {
         $this->record('search', 'v1', 'pageview', ['path' => '/', 'referrer' => 'www.google.fr'], 3600);
