@@ -29,7 +29,7 @@ final class TimeseriesReport
             $intervalHours = 1;
             $stepSeconds = 3600;
             $effectiveStart = ($range === 'today') ? strtotime('today midnight UTC', $now) : floor(($now - 86400) / 3600) * 3600;
-            $endStep = ceil($now / 3600) * 3600;
+            $endStep = floor($now / 3600) * 3600;
             $slotFormat = '%Y-%m-%d %H:00:00';
         } elseif ($range === '30d') {
             $effectiveStart = strtotime('29 days ago midnight UTC', $now);
@@ -47,7 +47,7 @@ final class TimeseriesReport
                 $intervalHours = 1;
                 $stepSeconds = 3600;
                 $effectiveStart = floor($startUnix / 3600) * 3600;
-                $endStep = ceil($endUnix / 3600) * 3600;
+                $endStep = floor($endUnix / 3600) * 3600;
                 $slotFormat = '%Y-%m-%d %H:00:00';
             } elseif ($spanDays > 365) {
                 // Long range > 1 year: group weekly
@@ -67,7 +67,7 @@ final class TimeseriesReport
                 if ($spanDays <= 2) {
                     $intervalHours = 1;
                     $stepSeconds = 3600;
-                    $endStep = ceil($now / 3600) * 3600;
+                    $endStep = floor($now / 3600) * 3600;
                     $slotFormat = '%Y-%m-%d %H:00:00';
                 } elseif ($spanDays > 730) {
                     // For long historical data (> 2 years), group weekly
@@ -75,6 +75,11 @@ final class TimeseriesReport
                     $stepSeconds = 7 * 86400;
                 }
             }
+        }
+
+        // The chart ends with the slot under way: later ones have no traffic yet.
+        if ($endStep > $now) {
+            $endStep = $effectiveStart + max(0, floor(($now - $effectiveStart) / $stepSeconds)) * $stepSeconds;
         }
 
         $slotMap = [];
@@ -118,9 +123,6 @@ final class TimeseriesReport
                     $visitors = $slotMap[$subKey]['visitors'];
                     $events = $slotMap[$subKey]['events'];
                 }
-                $timeLabel = gmdate('h A', (int) $currStep);
-                $dateLabel = gmdate('M d, Y', (int) $currStep);
-                $fullLabel = gmdate('l, F j, Y \a\t h:i A', (int) $currStep);
             } elseif ($intervalHours === 24) {
                 $dayKey = gmdate('Y-m-d', (int) $currStep);
                 if (isset($slotMap[$dayKey])) {
@@ -129,15 +131,6 @@ final class TimeseriesReport
                     $visitors = $slotMap[$dayKey]['visitors'];
                     $events = $slotMap[$dayKey]['events'];
                 }
-                if ($range === '7d') {
-                    $timeLabel = gmdate('D, j M', (int) $currStep);
-                } elseif ($range === '30d') {
-                    $timeLabel = gmdate('M d', (int) $currStep);
-                } else {
-                    $timeLabel = ($spanDays > 180) ? gmdate('M y', (int) $currStep) : gmdate('M d', (int) $currStep);
-                }
-                $dateLabel = gmdate('M d, Y', (int) $currStep);
-                $fullLabel = gmdate('l, F j, Y', (int) $currStep);
             } else {
                 // Multi-day interval (e.g. weekly)
                 $intervalDays = (int) ($intervalHours / 24);
@@ -150,17 +143,12 @@ final class TimeseriesReport
                         $events += $slotMap[$dayKey]['events'];
                     }
                 }
-                $timeLabel = gmdate('M d', (int) $currStep);
-                $dateLabel = gmdate('M d, Y', (int) $currStep);
-                $fullLabel = 'Week of ' . gmdate('l, F j, Y', (int) $currStep);
             }
 
             $timeseries[] = [
                 'timestamp' => $currStep,
                 'interval_hours' => $intervalHours,
-                'label' => $timeLabel,
-                'date_label' => $dateLabel,
-                'full_label' => $fullLabel,
+                ...self::labels((int) $currStep, $intervalHours, $range, $spanDays),
                 'pageviews' => $views,
                 'sessions' => $sessions,
                 'visitors' => $visitors,
@@ -169,6 +157,61 @@ final class TimeseriesReport
 
             $currStep += $stepSeconds;
         }
+        return self::withForecast($timeseries, $now, $stepSeconds, static fn(int $timestamp): array => self::labels($timestamp, $intervalHours, $range, $spanDays));
+    }
+
+    /** @return array{label: string, date_label: string, full_label: string} */
+    private static function labels(int $timestamp, int $intervalHours, string $range, int $spanDays): array
+    {
+        if ($intervalHours === 1) {
+            return ['label' => gmdate('h A', $timestamp), 'date_label' => gmdate('M d, Y', $timestamp), 'full_label' => gmdate('l, F j, Y \a\t h:i A', $timestamp)];
+        }
+        if ($intervalHours === 24) {
+            $label = match (true) {
+                $range === '7d' => gmdate('D, j M', $timestamp),
+                $range === '30d' || $spanDays <= 180 => gmdate('M d', $timestamp),
+                default => gmdate('M y', $timestamp),
+            };
+            return ['label' => $label, 'date_label' => gmdate('M d, Y', $timestamp), 'full_label' => gmdate('l, F j, Y', $timestamp)];
+        }
+        return ['label' => gmdate('M d', $timestamp), 'date_label' => gmdate('M d, Y', $timestamp), 'full_label' => 'Week of ' . gmdate('l, F j, Y', $timestamp)];
+    }
+
+    /** Slots before the one under way that set the pace for the rest of it: 3 hours, 7 days or 4 weeks. */
+    private const FORECAST_FROM = [3600 => 3, 86400 => 7, 604800 => 4];
+
+    /**
+     * Marks the slot under way, which keeps its real counts, and forecasts the
+     * next one (`next`), which has not started, as a repeat of the slot under
+     * way: its count so far, plus the rest of it at the pace of the slots before.
+     * Early in the slot, the forecast leans on the previous slots, and later on
+     * the slot under way, so it follows a rise or a fall instead of lagging it.
+     *
+     * @param callable(int): array{label: string, date_label: string, full_label: string} $labels
+     */
+    private static function withForecast(array $timeseries, int $now, int $stepSeconds, callable $labels): array
+    {
+        $last = count($timeseries) - 1;
+        if ($last < 1) {
+            return $timeseries;
+        }
+        $start = (int) $timeseries[$last]['timestamp'];
+        if ($now < $start || $now >= $start + $stepSeconds) {
+            return $timeseries;
+        }
+
+        $progress = ($now - $start) / $stepSeconds;
+        $count = self::FORECAST_FROM[$stepSeconds] ?? 3;
+        $previous = array_slice($timeseries, max(0, $last - $count), min($last, $count));
+        $next = ['timestamp' => $start + $stepSeconds, 'interval_hours' => $timeseries[$last]['interval_hours'], ...$labels($start + $stepSeconds)];
+        foreach (['pageviews', 'sessions', 'visitors', 'events'] as $metric) {
+            $current = (int) $timeseries[$last][$metric];
+            $pace = array_sum(array_column($previous, $metric)) / count($previous);
+            $next[$metric] = (int) round($current + (1 - $progress) * $pace);
+        }
+        $next['forecast_from'] = count($previous);
+
+        $timeseries[$last] += ['in_progress' => true, 'progress' => round($progress, 3), 'next' => $next];
         return $timeseries;
     }
 }

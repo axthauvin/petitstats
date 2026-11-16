@@ -104,6 +104,52 @@ final class SiteAnalyticsTest extends TestCase
         $this->assertSame(50.0, $this->analytics('7d')->summary()['bounce_rate']);
     }
 
+    public function testTheChartEndsWithTheHourUnderWayAndForecastsTheNextOne(): void
+    {
+        $this->now = intdiv(time(), 3600) * 3600 + 900; // a quarter past the hour
+        for ($hour = 1; $hour <= 3; $hour++) {
+            for ($view = 0; $view < 4; $view++) {
+                $this->record("s{$hour}-{$view}", "v{$hour}-{$view}", 'pageview', ['path' => '/'], $hour * 3600 + $view * 60);
+            }
+        }
+        $this->record('now', 'v-now', 'pageview', ['path' => '/'], 60);
+
+        $timeseries = $this->analytics('24h')->timeseries();
+        $last = $timeseries[count($timeseries) - 1];
+
+        // No slot for the hour that has not started yet: it would show a drop to zero.
+        $this->assertCount(25, $timeseries);
+        $this->assertSame($this->now - 900, (int) $last['timestamp']);
+        // The hour under way keeps its real count.
+        $this->assertTrue($last['in_progress']);
+        $this->assertSame(0.25, $last['progress']);
+        $this->assertSame(1, $last['pageviews']);
+        // The next hour repeats the hour under way: 1 view so far, plus 3/4 of an hour at 4 views an hour.
+        $this->assertSame($this->now - 900 + 3600, $last['next']['timestamp']);
+        $this->assertSame(4, $last['next']['pageviews']);
+        $this->assertSame(3, $last['next']['forecast_from']);
+        $this->assertArrayNotHasKey('next', $timeseries[count($timeseries) - 2]);
+    }
+
+    public function testTheForecastFollowsARiseInTheHourUnderWay(): void
+    {
+        $this->now = intdiv(time(), 3600) * 3600 + 2700; // a quarter to the next hour
+        for ($hour = 1; $hour <= 3; $hour++) {
+            $this->record("s{$hour}-a", "v{$hour}-a", 'pageview', ['path' => '/'], $hour * 3600);
+            $this->record("s{$hour}-b", "v{$hour}-b", 'pageview', ['path' => '/'], $hour * 3600 + 60);
+        }
+        for ($view = 0; $view < 30; $view++) {
+            $this->record("now-{$view}", "v-now-{$view}", 'pageview', ['path' => '/'], 60 + $view * 60);
+        }
+
+        $timeseries = $this->analytics('24h')->timeseries();
+        $last = $timeseries[count($timeseries) - 1];
+
+        $this->assertSame(30, $last['pageviews']);
+        // 30 views so far, and a quarter of an hour to go at 2 views an hour: not dragged down to the earlier hours.
+        $this->assertSame(31, $last['next']['pageviews']);
+    }
+
     public function testTopPagesAreSortedByViews(): void
     {
         $this->record('s1', 'v1', 'pageview', ['path' => '/pricing', 'title' => 'Pricing'], 3600);

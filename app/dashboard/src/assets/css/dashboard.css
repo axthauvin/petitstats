@@ -1597,6 +1597,10 @@ html.nav-compact .sidebar-user-row {
 }
 
 .chart-tooltip-date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
     font-size: 13px;
     font-weight: 700;
     color: #0f172a;
@@ -1604,11 +1608,15 @@ html.nav-compact .sidebar-user-row {
     padding-bottom: 6px;
     border-bottom: 1px solid #e2e8f0;
     white-space: nowrap;
+}
+.chart-tooltip-date-text {
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .chart-tooltip-pinned {
-    float: right;
+    flex-shrink: 0;
+    margin-left: auto;
     padding: 2px 6px;
     border-radius: 999px;
     background: #dbeafe;
@@ -1616,6 +1624,21 @@ html.nav-compact .sidebar-user-row {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+.chart-tooltip-pinned.is-progress,
+.chart-tooltip-pinned.is-forecast {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.chart-tooltip-forecast-note {
+    flex-shrink: 0;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #94a3b8;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .chart-tooltip-metric {

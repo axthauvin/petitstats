@@ -16,6 +16,7 @@ const OverviewPage = {
   init() {
     this.chart = new PetitstatsChart("overviewChart", "chartTooltip", {
       activeSeries: ["pageviews", "visitors"],
+      showForecast: true,
       onPointClick: (item) => this.openSessionsForPoint(item),
     });
     this.botsChart = new PetitstatsChart("botsChart", "botsChartTooltip", {
@@ -366,7 +367,7 @@ const OverviewPage = {
       weekday: "long", year: "numeric", month: "long", day: "numeric", ...TimeFormat.options(),
     });
 
-    return timeseries.map((point) => {
+    const localize = (point) => {
       const timestamp = Number(point.timestamp);
       if (!Number.isFinite(timestamp)) return point;
       const date = new Date(timestamp * 1000);
@@ -376,7 +377,9 @@ const OverviewPage = {
         date_label: dateFormatter.format(date),
         full_label: fullFormatter.format(date),
       };
-    });
+    };
+    // `next` is the forecast of the hour after the one under way.
+    return timeseries.map((point) => (point.next ? { ...localize(point), next: localize(point.next) } : localize(point)));
   },
 
   /** Open the Sessions page with the day represented by a chart point selected. */

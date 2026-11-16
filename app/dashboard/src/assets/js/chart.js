@@ -36,6 +36,8 @@ class PetitstatsChart {
         this.gridLines = options.gridLines || 3;
         this.gridDash = options.gridDash || [];
         this.markLastPoint = options.markLastPoint !== false;
+        // Add the forecast of the slot after the one under way (`next`), dashed or hatched.
+        this.showForecast = options.showForecast === true;
         // The Y axis goes at least this high, so that a handful of events does not fill the chart.
         this.minScale = options.minScale || 8;
 
@@ -95,6 +97,10 @@ class PetitstatsChart {
 
     setData(data, activeSeries = null) {
         this.data = data || [];
+        const next = this.data[this.data.length - 1]?.next;
+        if (this.showForecast && next) {
+            this.data = [...this.data, { ...next, is_forecast: true }];
+        }
         if (activeSeries) {
             this.activeSeries = new Set(Array.isArray(activeSeries) ? activeSeries : [activeSeries]);
         }
@@ -170,7 +176,7 @@ class PetitstatsChart {
             if (!this.data?.length) return;
             const index = this.getIndexAtPixel(e.offsetX);
             const item = this.data[index];
-            if (!item) return;
+            if (!item || item.is_forecast) return;
             if (this.lockTooltipOnClick) this.lockTooltip(index);
             else if (this.onPointClick) this.onPointClick(item, index);
         });
@@ -246,6 +252,24 @@ class PetitstatsChart {
         return order;
     }
 
+    /** The forecast point, after the slot under way, when there is one. */
+    forecastPoint() {
+        const index = this.data.length - 1;
+        const item = this.data[index];
+        return index >= 2 && item?.is_forecast ? { index, item } : null;
+    }
+
+    /** "hour", "day" or "week": the length of one slot. */
+    slotUnit(item) {
+        const hours = Number(item?.interval_hours) || 24;
+        return hours <= 1 ? 'hour' : hours >= 168 ? 'week' : 'day';
+    }
+
+    static withAlpha(hex, alpha) {
+        const value = parseInt(String(hex).replace('#', ''), 16);
+        return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
+    }
+
     /** About `gridLines` steps of 1, 2, 2.5 or 5 × 10ⁿ, so that grid lines fall on round counts. */
     scale() {
         const values = [];
@@ -275,6 +299,7 @@ class PetitstatsChart {
             });
         }
 
+        const isForecast = item.is_forecast === true;
         const visibleSeriesKeys = this.hideZeroTooltipMetrics
             ? seriesKeys.filter(key => (Number(item[key]) || 0) > 0)
             : seriesKeys;
@@ -288,16 +313,26 @@ class PetitstatsChart {
                     <span class="chart-tooltip-dot" style="background: ${cfg.color};"></span>
                     <span class="chart-tooltip-name">${cfg.label}</span>
                     ${isAnomaly ? '<span class="chart-tooltip-anomaly" title="Unusual peak: at least 3× the median for this event">!</span>' : ''}
-                    <span class="chart-tooltip-val">${cfg.format ? cfg.format(val) : val.toLocaleString()}</span>
+                    <span class="chart-tooltip-val">${isForecast ? '~' : ''}${cfg.format ? cfg.format(val) : val.toLocaleString()}</span>
                 </${tag}>
             `;
         }).join('');
         const isLocked = this.lockedIndex === index;
+        const unit = this.slotUnit(item);
+        const forecastNote = isForecast
+            ? `<div class="chart-tooltip-forecast-note">At the pace of the previous ${unit}</div>`
+            : '';
+        const badge = isLocked
+            ? '<span class="chart-tooltip-pinned">Pinned</span>'
+            : isForecast
+                ? '<span class="chart-tooltip-pinned is-forecast">Forecast</span>'
+                : item.in_progress ? '<span class="chart-tooltip-pinned is-progress">So far</span>' : '';
 
         this.tooltip.innerHTML = `
-            <div class="chart-tooltip-date">${dateStr}${isLocked ? '<span class="chart-tooltip-pinned">Pinned</span>' : ''}</div>
+            <div class="chart-tooltip-date"><span class="chart-tooltip-date-text">${dateStr}</span>${badge}</div>
             <div class="chart-tooltip-metrics-list">${metricsHtml}</div>
-            ${isLocked && this.onPointClick ? '<div class="chart-tooltip-actions"><button type="button" data-tooltip-action="sessions">View sessions for this day</button><button type="button" class="chart-tooltip-unpin" data-tooltip-action="unpin" aria-label="Unpin tooltip">×</button></div>' : (this.onTooltipMetricClick ? '<div class="chart-tooltip-hint">Click the graph to pin this list, then select an event</div>' : (this.onPointClick ? '<div class="chart-tooltip-hint">Click to view sessions</div>' : ''))}
+            ${forecastNote}
+            ${isForecast ? '' : isLocked && this.onPointClick ? '<div class="chart-tooltip-actions"><button type="button" data-tooltip-action="sessions">View sessions for this day</button><button type="button" class="chart-tooltip-unpin" data-tooltip-action="unpin" aria-label="Unpin tooltip">×</button></div>' : (this.onTooltipMetricClick ? '<div class="chart-tooltip-hint">Click the graph to pin this list, then select an event</div>' : (this.onPointClick ? '<div class="chart-tooltip-hint">Click to view sessions</div>' : ''))}
         `;
         if (this.onTooltipMetricClick) {
             this.tooltip.querySelectorAll('[data-tooltip-series]').forEach((button) => {
@@ -335,14 +370,17 @@ class PetitstatsChart {
 
     lineSeries(key, z) {
         const cfg = this.seriesConfig[key];
+        const forecast = this.forecastPoint();
         const values = this.data.map(item => Number(item[key]) || 0);
         const last = values.length - 1;
         const dot = { color: '#ffffff', borderColor: cfg.color, borderWidth: 2.5 };
-        return {
+        // With a forecast, the real data ends one point earlier, on the slot under way.
+        const lastReal = forecast ? last - 1 : last;
+        const solid = {
             name: cfg.label,
             type: 'line',
             z,
-            data: values,
+            data: forecast ? values.map((value, i) => (i === last ? '-' : value)) : values,
             smooth: 0.3,
             // Stay above the floor between two points, as counts never go below zero.
             smoothMonotone: 'x',
@@ -366,18 +404,36 @@ class PetitstatsChart {
                 itemStyle: dot,
                 label: { show: false },
                 animation: false,
-                data: [{ coord: [last, values[last]] }],
+                data: [
+                    { coord: [lastReal, values[lastReal]] },
+                    ...(forecast ? [{ coord: [last, values[last]], itemStyle: { ...dot, borderType: [2, 2] } }] : []),
+                ],
             } : undefined,
         };
+        if (!forecast) return [solid];
+
+        const dashed = {
+            name: `${cfg.label} (forecast)`,
+            type: 'line',
+            z,
+            silent: true,
+            data: values.map((value, i) => (i >= lastReal ? value : '-')),
+            showSymbol: false,
+            lineStyle: { color: cfg.color, width: cfg.lineWidth, type: [5, 5], cap: 'round' },
+            areaStyle: { color: PetitstatsChart.withAlpha(cfg.color, 0.07) },
+            emphasis: { disabled: true },
+        };
+        return [solid, dashed];
     }
 
     barSeries(key, z) {
         const cfg = this.seriesConfig[key];
-        return {
+        const forecast = this.forecastPoint();
+        const bar = {
             name: cfg.label,
             type: 'bar',
             z,
-            data: this.data.map(item => Number(item[key]) || 0),
+            data: this.data.map((item, i) => (i === forecast?.index ? '-' : Number(item[key]) || 0)),
             // Metrics share a single slot, drawn on top of each other.
             barGap: '-100%',
             barCategoryGap: '28%',
@@ -385,6 +441,32 @@ class PetitstatsChart {
             itemStyle: { color: cfg.color, borderRadius: [4, 4, 0, 0] },
             emphasis: { disabled: true },
         };
+        if (!forecast) return [bar];
+
+        // The slot that has not started: a hatched bar.
+        const expected = {
+            ...bar,
+            name: `${cfg.label} (forecast)`,
+            z,
+            silent: true,
+            data: this.data.map((item, i) => (i === forecast.index ? Number(item[key]) || 0 : '-')),
+            itemStyle: {
+                color: PetitstatsChart.withAlpha(cfg.color, 0.08),
+                borderColor: PetitstatsChart.withAlpha(cfg.color, 0.7),
+                borderWidth: 1,
+                borderType: [3, 3],
+                borderRadius: [4, 4, 0, 0],
+                decal: {
+                    symbol: 'rect',
+                    symbolSize: 1,
+                    dashArrayX: [1, 0],
+                    dashArrayY: [2, 5],
+                    rotation: -Math.PI / 4,
+                    color: PetitstatsChart.withAlpha(cfg.color, 0.45),
+                },
+            },
+        };
+        return [bar, expected];
     }
 
     draw() {
@@ -438,7 +520,7 @@ class PetitstatsChart {
                     },
                 },
             },
-            series: isEmpty ? [] : this.renderOrder().map((key, i) => (isBar ? this.barSeries(key, i + 2) : this.lineSeries(key, i + 2))),
+            series: isEmpty ? [] : this.renderOrder().flatMap((key, i) => (isBar ? this.barSeries(key, 2 * i + 2) : this.lineSeries(key, 2 * i + 2))),
         }, { notMerge: true });
     }
 
