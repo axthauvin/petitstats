@@ -6,6 +6,7 @@ Each service has its own guide, from the export to what you find in Petitstats a
 
 - [x] [Umami](umami.md)
 - [x] [Matomo](matomo.md)
+- [x] [Another Petitstats](petitstats.md), to move your websites to another server or database
 - [ ] Google Analytics (planned)
 - [ ] Plausible (planned)
 - [ ] Simple Analytics (planned)

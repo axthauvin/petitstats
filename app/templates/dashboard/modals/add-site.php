@@ -5,6 +5,10 @@ $docsImport = \Petitstats\Http\Docs::url('importing');
 
 // Services to import from. Logos and brand colours from Simple Icons (simpleicons.org, CC0).
 $importSources = [
+    'petitstats' => [
+        'name' => 'Petitstats', 'desc' => 'Archive from another instance', 'ready' => true, 'color' => '#2563eb',
+        'icon' => 'M3 13h4v8H3zm7-6h4v14h-4zm7-4h4v18h-4z',
+    ],
     'umami' => [
         'name' => 'Umami', 'desc' => 'ZIP export of a website', 'ready' => true, 'color' => '#000000',
         'icon' => 'M2.203 8.611H.857a.845.845 0 0 0-.841.841v.858a13.31 13.31 0 0 0-.016.6c0 6.627 5.373 12 12 12 6.527 0 11.837-5.212 11.996-11.701 0-.025.004-.05.004-.075V9.452a.845.845 0 0 0-.841-.841h-1.346c-1.159-4.329-5.112-7.521-9.805-7.521-4.692 0-8.645 3.192-9.805 7.521Zm18.444 0H3.37c1.127-3.702 4.57-6.399 8.638-6.399 4.069 0 7.512 2.697 8.639 6.399Z',
@@ -57,7 +61,7 @@ $importSources = [
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         </span>
                         <span class="setup-choice-title">Import past data</span>
-                        <span class="setup-choice-desc">Moving from Umami or Matomo? Bring your history into a new website or one you already track.</span>
+                        <span class="setup-choice-desc">Moving from Umami, Matomo or another Petitstats? Bring your history into a new website or one you already track.</span>
                         <span class="setup-choice-logos" aria-hidden="true">
                             <?php foreach (array_filter($importSources, static fn(array $s): bool => $s['ready']) as $source): ?>
                                 <span class="provider-logo" style="--brand: <?= $source['color'] ?>;" title="<?= htmlspecialchars($source['name']) ?>">

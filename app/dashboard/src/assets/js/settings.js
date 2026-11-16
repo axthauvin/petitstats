@@ -62,6 +62,10 @@ const SettingsPage = {
       if (target.dataset.copy !== undefined) ClipboardHelper.copy(target.dataset.copy, target);
       else this.revokeStatsApiToken(Number(target.dataset.revokeSiteToken));
     });
+    document.getElementById('exportDownload')?.addEventListener('click', (event) => this.downloadExport(event.currentTarget));
+    const restoreInput = document.getElementById('restoreArchiveInput');
+    document.getElementById('restoreArchive')?.addEventListener('click', () => restoreInput?.click());
+    restoreInput?.addEventListener('change', () => { if (restoreInput.files[0]) this.restoreArchive(restoreInput.files[0]); restoreInput.value = ''; });
     document.getElementById('updateCheckNow')?.addEventListener('click', () => this.loadVersion(true));
     document.getElementById('updateInstall')?.addEventListener('click', () => this.installUpdate());
     document.getElementById('updateRollback')?.addEventListener('click', () => this.rollbackUpdate());
@@ -82,6 +86,7 @@ const SettingsPage = {
       const isAdmin = Boolean(this.currentUser && this.currentUser.role === 'admin');
       await this.loadTrackingSites(isAdmin);
       await this.loadDatabaseConfig(isAdmin);
+      await this.loadDataTransfer(isAdmin);
 
       // Only administrators can invite new users
       const inviteCard = document.getElementById('inviteUserCard');
@@ -285,6 +290,49 @@ const SettingsPage = {
   selectTab(name) {
     document.querySelectorAll('[data-settings-tab]').forEach((tab) => { const selected = tab.dataset.settingsTab === name; tab.classList.toggle('is-active', selected); tab.setAttribute('aria-selected', String(selected)); });
     document.querySelectorAll('[data-settings-panel]').forEach((panel) => { panel.hidden = panel.dataset.settingsPanel !== name; });
+  },
+
+  /** Settings → Database: export a website or all of them, or restore an archive. */
+  async loadDataTransfer(isAdmin) {
+    const card = document.getElementById('dataTransferCard'); if (!card) return;
+    card.hidden = !isAdmin; if (!isAdmin) return;
+    const select = document.getElementById('exportSite'); const current = select.value;
+    const { sites = [] } = await Api.getSites();
+    select.innerHTML = `<option value="all">All websites</option>` + sites.map(s => `<option value="${this.escapeHtml(s.id)}">${this.escapeHtml(s.name || s.id)}</option>`).join('');
+    if ([...select.options].some((option) => option.value === current)) select.value = current;
+  },
+
+  setDataTransferFeedback(message, type = '') {
+    const feedback = document.getElementById('dataTransferFeedback'); if (!feedback) return;
+    feedback.className = `settings-feedback${type ? ` settings-${type}` : ''}`; feedback.textContent = message;
+  },
+
+  async downloadExport(button) {
+    const site = document.getElementById('exportSite').value; const format = document.getElementById('exportFormat').value;
+    button.disabled = true; this.setDataTransferFeedback('Preparing the export…');
+    try {
+      const { blob, name } = await Api.downloadExport(site, format);
+      const link = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: name });
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 60000);
+      this.setDataTransferFeedback(`Downloaded ${name}.`, 'success');
+    } catch (error) { this.setDataTransferFeedback(error.message, 'error'); }
+    finally { button.disabled = false; }
+  },
+
+  async restoreArchive(file) {
+    const button = document.getElementById('restoreArchive'); button.disabled = true;
+    this.setDataTransferFeedback(`Restoring ${file.name}…`);
+    try {
+      const result = await Api.restoreArchive(file);
+      const sites = result.sites || [];
+      const added = result.created_sites ? `, ${result.created_sites} new website${result.created_sites > 1 ? 's' : ''}` : '';
+      this.setDataTransferFeedback(`Restored ${sites.length} website${sites.length > 1 ? 's' : ''}: ${Number(result.total_imported || 0).toLocaleString()} events added${added}.`, 'success');
+      const { sites: all = [] } = await Api.getSites();
+      if (window.App) window.App.updateSiteSelect(all);
+      await Promise.all([this.loadDataTransfer(true), this.loadTrackingSites(true)]);
+    } catch (error) { this.setDataTransferFeedback(error.message, 'error'); }
+    finally { button.disabled = false; }
   },
 
   async loadDatabaseConfig(isAdmin) {

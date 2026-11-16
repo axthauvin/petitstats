@@ -307,6 +307,28 @@ const Api = {
     return data;
   },
 
+  /** Downloads an export ZIP: a website ("all" for every one) as a Petitstats archive, CSV or JSON. */
+  async downloadExport(site, format) {
+    const res = await apiFetch(`${this.base}/export.php?site=${encodeURIComponent(site)}&format=${encodeURIComponent(format)}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || `HTTP ${res.status}`);
+    }
+    const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") || "")?.[1] || "petitstats-export.zip";
+    return { blob: await res.blob(), name };
+  },
+
+  /** Brings back every website of a Petitstats archive. */
+  async restoreArchive(file) {
+    const form = new FormData();
+    form.append("action", "restore");
+    form.append("file", file);
+    const res = await apiFetch(`${this.base}/export.php`, { method: "POST", body: form });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+    return data;
+  },
+
   async trackingServerSettings(body = null) {
     const init = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
     const res = await apiFetch(`${this.base}/server-settings.php`, init); const data = await res.json().catch(() => ({}));

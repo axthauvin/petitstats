@@ -134,7 +134,29 @@
             </form>
             <div class="database-actions database-save-action"><button class="btn-primary" id="saveDatabaseConnector" type="button">Save database connector</button></div>
             <p class="settings-feedback" id="databaseFeedback" role="status"></p>
-            <p class="settings-muted database-note">Changing connector does not migrate existing SQLite data automatically. Keep a backup of <code>data/</code> before switching.</p>
+            <p class="settings-muted database-note">Changing connector does not move the analytics already collected. Download a Petitstats archive of all websites below first, then restore it once the new connector is saved.</p>
+        </section>
+        <section class="settings-card" id="dataTransferCard" hidden>
+            <div class="settings-card-heading">
+                <div>
+                    <h3>Export and move your data</h3>
+                    <p>Download the analytics of a website, or of all of them. A Petitstats archive moves them to another server, or from SQLite to MySQL, with their settings and tracking tags. <a href="<?= \Petitstats\Http\Docs::url('importing/petitstats') ?>" target="_blank" rel="noopener">How it works ↗</a></p>
+                </div>
+            </div>
+            <div class="data-export-fields">
+                <div class="database-engine-field"><label for="exportSite">Website</label><select id="exportSite"></select></div>
+                <div class="database-engine-field"><label for="exportFormat">Format</label><select id="exportFormat">
+                        <option value="archive">Petitstats archive, to move or back up</option>
+                        <option value="csv">CSV, for a spreadsheet</option>
+                        <option value="json">JSON, for a script</option>
+                    </select></div>
+            </div>
+            <div class="database-actions database-save-action">
+                <input type="file" id="restoreArchiveInput" accept=".zip" hidden>
+                <button class="btn-outline" id="restoreArchive" type="button" title="Brings back every website of a Petitstats archive. Visits a website already has are not added twice.">Restore an archive…</button>
+                <button class="btn-primary" id="exportDownload" type="button">Download</button>
+            </div>
+            <p class="settings-feedback" id="dataTransferFeedback" role="status"></p>
         </section>
     </div>
     <div class="settings-panel" id="settingsAssistantsPanel" role="tabpanel" aria-labelledby="settingsAssistantsTab" data-settings-panel="assistants" hidden>

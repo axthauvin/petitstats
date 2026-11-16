@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Petitstats\Importers\ImporterRegistry;
+use Petitstats\Importers\PetitstatsImporter;
 
 /**
  * Petitstats Pure-PHP CLI Import Tool
@@ -26,11 +27,13 @@ $options = getopt('', ['provider:', 'zip:', 'file:', 'folder:', 'site-id:', 'sit
 if (isset($options['help'])) {
     echo "Usage: php bin/import.php [options]\n\n";
     echo "Options:\n";
-    echo "  --provider <id>     Service the export comes from, umami (default) or matomo\n";
+    echo "  --provider <id>     Service the export comes from: umami (default), matomo, or petitstats\n";
+    echo "                      for an archive made by bin/export.php or Settings → Database\n";
     echo "  --zip <path>        Path to a .zip export archive\n";
     echo "  --file <path>       Path to a single export file (Matomo .json or .csv)\n";
     echo "  --folder <path>     Path to a folder of export files\n";
-    echo "  --site-id <id>      Target Petitstats site ID (e.g. example)\n";
+    echo "  --site-id <id>      Target Petitstats site ID (e.g. example). With petitstats, leave it out\n";
+    echo "                      to restore every website of the archive with its settings\n";
     echo "  --site-name <name>  Display name for the website (e.g. Example)\n";
     echo "  --domain <domain>   Domain name (e.g. example.com)\n";
     echo "  --retention-days <n>  Days of visits the website keeps, up to 760. Older visits are not imported\n";
@@ -63,8 +66,19 @@ $domain = $options['domain'] ?? '';
 
 $providerId = $options['provider'] ?? 'umami';
 $importer = ImporterRegistry::getImporter($providerId);
+
+// A Petitstats archive without --site-id: every website comes back with its settings and tracking key.
+if ($importer instanceof PetitstatsImporter && empty($siteId)) {
+    echo "Restoring every website of " . basename($source) . "...\n\n";
+    $result = $importer->restore($source);
+    foreach ($result['sites'] as $site) {
+        echo sprintf("  %-24s %s visits, %s events%s\n", $site['site_id'], number_format($site['sessions']), number_format($site['total_imported']), $site['created'] ? ' (new website)' : '');
+    }
+    echo "\nDone: " . number_format($result['total_imported']) . " events imported.\n\n";
+    exit(0);
+}
 if (!$importer || !$importer->isAvailable() || !method_exists($importer, 'inspect')) {
-    fwrite(STDERR, "Error: '{$providerId}' cannot be imported yet. Available providers are umami and matomo.\n");
+    fwrite(STDERR, "Error: '{$providerId}' cannot be imported yet. Available providers are umami, matomo and petitstats.\n");
     exit(1);
 }
 

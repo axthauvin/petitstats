@@ -29,6 +29,7 @@ $pages = [
     'importing' => ['Running Petitstats', 'importing/README.md'],
     'importing/umami' => ['Running Petitstats', 'importing/umami.md'],
     'importing/matomo' => ['Running Petitstats', 'importing/matomo.md'],
+    'importing/petitstats' => ['Running Petitstats', 'importing/petitstats.md'],
     'mcp' => ['Running Petitstats', 'mcp/README.md'],
     'api' => ['Running Petitstats', 'api/README.md'],
 ];

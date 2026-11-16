@@ -194,6 +194,35 @@ final class SiteRegistry
         return $newSite;
     }
 
+    /**
+     * Adds a website exported from another instance with its settings and
+     * tracking key, so that its tracking tag keeps working once moved here.
+     */
+    public static function restore(array $site): array
+    {
+        $created = self::create((string) ($site['id'] ?? ''), (string) ($site['name'] ?? ''), (string) ($site['domain'] ?? ''));
+        $created = self::update($created['id'], array_intersect_key($site, array_flip(['allowed_domains', 'internal_ips', 'retention_days', 'allow_localhost', 'is_public'])));
+
+        $writeKey = (string) ($site['write_key'] ?? '');
+        $createdAt = (string) ($site['created_at'] ?? '');
+        $sites = self::all();
+        foreach ($sites as &$entry) {
+            if ($entry['id'] === $created['id']) {
+                if (preg_match('/^[A-Za-z0-9_-]{16,128}$/', $writeKey)) {
+                    $entry['write_key'] = $writeKey;
+                }
+                if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $createdAt)) {
+                    $entry['created_at'] = $createdAt;
+                }
+                $created = $entry;
+            }
+        }
+        unset($entry);
+        self::save($sites);
+
+        return $created;
+    }
+
     public static function update(string $siteId, array $input): array
     {
         $cleanId = self::requireId($siteId);

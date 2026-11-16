@@ -141,7 +141,7 @@ The default storage suits most websites. To use MySQL or MariaDB instead, follow
 
 ![Settings → Database, filled in for a MySQL database](../assets/settings-database.png)
 
-Your PHP installation needs the `pdo_mysql` extension, which most hosting providers enable. Analytics already collected are not moved to the new database, so [back them up](#backups) before switching.
+Your PHP installation needs the `pdo_mysql` extension, which most hosting providers enable. Analytics already collected are not moved to the new database automatically: [export them as a Petitstats archive](../importing/petitstats.md#switch-from-sqlite-to-mysql-or-mariadb) first, then restore it once the new connector is saved.
 
 ## Updates
 
@@ -185,3 +185,5 @@ php bin/backup.php --destination /secure/backups/petitstats
 ```
 
 Keep the backups on another disk or machine, so that a disk failure does not take them with your data. If you use MySQL or MariaDB, use the database backups of your hosting provider instead.
+
+You can also download a copy of your analytics from **Settings → Database**, whatever the database, as explained in [Export and move your data](../importing/petitstats.md).
