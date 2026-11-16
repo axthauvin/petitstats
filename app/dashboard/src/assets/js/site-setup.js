@@ -5,6 +5,13 @@
 
 // Upload wording and accepted files for each available importer.
 const IMPORT_SOURCES = {
+    petitstats: {
+        label: 'Your Petitstats archive',
+        help: 'In the other Petitstats, open Settings → Database and download a Petitstats archive of the website.',
+        hint: '.zip archive',
+        accept: '.zip',
+        docs: 'petitstats/',
+    },
     umami: {
         label: 'Your Umami export',
         help: 'In Umami, open the website settings and export its data as a ZIP file.',

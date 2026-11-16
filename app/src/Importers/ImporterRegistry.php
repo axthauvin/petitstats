@@ -18,6 +18,7 @@ class ImporterRegistry
             return;
         }
 
+        self::register(new PetitstatsImporter());
         self::register(new UmamiImporter());
         self::register(new GoogleAnalyticsImporter());
         self::register(new PlausibleImporter());

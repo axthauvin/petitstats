@@ -110,11 +110,11 @@ final class UmamiImporterTest extends TestCase
         }
     }
 
-    public function testOnlyUmamiAndMatomoAreAvailable(): void
+    public function testOnlyPetitstatsUmamiAndMatomoAreAvailable(): void
     {
         $available = array_column(array_filter(ImporterRegistry::getProvidersList(), static fn(array $p): bool => $p['is_available']), 'id');
 
-        $this->assertSame(['umami', 'matomo'], array_values($available));
+        $this->assertSame(['petitstats', 'umami', 'matomo'], array_values($available));
     }
 
     #[DataProvider('browsers')]
