@@ -133,6 +133,20 @@ final class SiteAnalyticsTest extends TestCase
         $this->assertSame([33.3, 33.3, 33.3], array_column($referrers, 'percentage'));
     }
 
+    public function testASourceCountsAllOfItsVisitsWhateverPageTheyLandOn(): void
+    {
+        // Each visit lands on a different page: a source is still one row with every visit.
+        for ($i = 0; $i < 160; $i++) {
+            $this->record("g{$i}", "vg{$i}", 'pageview', ['path' => "/post-{$i}", 'referrer' => $i % 2 ? 'www.google.fr' : 'google.com'], 3600 - $i);
+        }
+        $this->record('h1', 'vh1', 'pageview', ['path' => '/', 'referrer' => 'news.ycombinator.com'], 100);
+
+        $referrers = $this->analytics('7d')->topReferrers();
+
+        $this->assertSame(['google' => 160, 'news.ycombinator.com' => 1], array_column($referrers, 'visits', 'id'));
+        $this->assertSame([99.4, 0.6], array_column($referrers, 'percentage'));
+    }
+
     public function testKnownAndUtmOnlySourcesAreNamedAndAiTrafficGetsItsOwnChannel(): void
     {
         $this->record('search', 'v1', 'pageview', ['path' => '/', 'referrer' => 'www.google.fr'], 3600);
