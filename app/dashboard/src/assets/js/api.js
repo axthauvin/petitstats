@@ -164,6 +164,22 @@ const Api = {
     return await res.json();
   },
 
+  /** Pages and events whose path, title or name contains `query`, for the Sessions search. */
+  async getSessionSuggestions({ query = "", range = "7d", siteId = "", customDates = null, date = "" } = {}) {
+    const params = new URLSearchParams({ range, suggest: query });
+    const targetSite = siteId && siteId !== "all" ? siteId : window.App?.currentSiteId || "";
+    if (targetSite && targetSite !== "all") params.append("site_id", targetSite);
+    if (date) params.append("date", date);
+    const dates = customDates || window.App?.customDates;
+    if (range === "custom" && dates) {
+      if (dates.from) params.append("from", dates.from);
+      if (dates.to) params.append("to", dates.to);
+    }
+    const res = await apiFetch(`${this.base}/sessions.php?${params.toString()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  },
+
   async getSessionDetails(sessionId, siteId = "") {
     const params = new URLSearchParams({ session_id: sessionId });
     if (siteId) params.append("site_id", siteId);
