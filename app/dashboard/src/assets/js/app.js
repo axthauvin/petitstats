@@ -134,6 +134,8 @@ const App = {
     const sidebar = document.getElementById("sidebar");
     const collapseBtn = document.getElementById("btnSidebarCollapse");
     const headerToggleBtn = document.getElementById("btnHeaderSidebarToggle");
+    const tabbar = document.getElementById("mobileTabbar");
+    const tabbarMoreBtn = document.getElementById("btnTabbarMore");
     const backdrop = document.getElementById("mobileNavBackdrop");
     const main = document.querySelector(".main-wrapper");
     if (!sidebar || document.body.classList.contains("embed-mode")) return;
@@ -159,7 +161,9 @@ const App = {
       root.classList.toggle("nav-open", isOpen);
       // While the overlay is open, only the navigation can be reached.
       if (main) main.inert = isOpen;
+      if (tabbar) tabbar.inert = isOpen;
       if (headerToggleBtn) headerToggleBtn.setAttribute("aria-expanded", String(isOpen));
+      if (tabbarMoreBtn) tabbarMoreBtn.setAttribute("aria-expanded", String(isOpen));
       this.updateSidebarCollapseLabels(isOverlay() ? (isOpen ? "close" : "open") : compact ? "expand" : "collapse");
       // The rail hides the labels: show them as tooltips instead.
       sidebar.querySelectorAll(".nav-title").forEach((title) => {
@@ -207,6 +211,7 @@ const App = {
 
     if (collapseBtn) collapseBtn.addEventListener("click", toggleSidebar);
     if (headerToggleBtn) headerToggleBtn.addEventListener("click", () => setOpen(!isOpen));
+    if (tabbarMoreBtn) tabbarMoreBtn.addEventListener("click", () => setOpen(!isOpen));
     if (backdrop) backdrop.addEventListener("click", () => setOpen(false));
     // Following a link closes the overlay; focus then stays with the new page.
     sidebar.querySelectorAll("a, .nav-item button").forEach((link) => {
@@ -485,9 +490,9 @@ const App = {
     if (!siteId) return;
 
     // Update sidebar navigation links to include ?site= parameter
-    document.querySelectorAll(".sidebar-nav .nav-item[data-page]").forEach((item) => {
+    document.querySelectorAll(".sidebar-nav .nav-item[data-page], .mobile-tabbar .nav-item[data-page]").forEach((item) => {
       const page = item.dataset.page;
-      const anchor = item.querySelector("a");
+      const anchor = item.matches("a") ? item : item.querySelector("a");
       if (anchor && page) {
         anchor.href = `?site=${encodeURIComponent(siteId)}#${page}`;
       }
@@ -666,6 +671,8 @@ const App = {
       pageName = "websites";
     }
 
+    // A new section opens at its top, not at the previous section's scroll offset.
+    if (this.currentPage && this.currentPage !== pageName) window.scrollTo(0, 0);
     this.currentPage = pageName;
 
     const appContainer = document.querySelector(".app-container");
@@ -690,6 +697,8 @@ const App = {
       if (isActive) link.setAttribute("aria-current", "page");
       else link.removeAttribute("aria-current");
     });
+    // Sections without their own tab live behind "More" on phones.
+    document.getElementById("btnTabbarMore")?.classList.toggle("active", ["funnels", "revenue"].includes(pageName));
 
     // Update views visibility
     document.querySelectorAll(".page-view").forEach((view) => {

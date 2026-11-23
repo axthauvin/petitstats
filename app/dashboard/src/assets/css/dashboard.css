@@ -3971,6 +3971,7 @@ pre, .json-box, .code-box {
     .session-card-item, .event-stream-row { align-items: flex-start; padding: 13px 14px; gap: 10px; }
     .session-card-item { flex-direction: column; }
     .session-card-right { width: 100%; justify-content: space-between; padding-left: 54px; }
+    .session-time-block { flex-direction: row; align-items: baseline; gap: 8px; }
     .session-card-title-row { display: flex; flex-wrap: wrap; }
     .session-visitor-name { overflow: visible; text-overflow: clip; white-space: normal; }
     .event-stream-row { flex-wrap: wrap; }
@@ -3984,8 +3985,9 @@ pre, .json-box, .code-box {
     .visit-step { grid-template-columns: 62px 22px minmax(0, 1fr) auto; }
     .visit-steps::before { left: 79px; }
     .journey-step-top, .timeline-header { align-items: flex-start; flex-direction: column; gap: 3px; }
-    .props-row { align-items: flex-start; flex-direction: column; gap: 4px; padding: 10px 12px; }
-    .props-key { width: auto; }
+    .props-row { align-items: baseline; flex-wrap: wrap; gap: 2px 12px; padding: 8px 12px; }
+    .props-key { width: auto; font-size: 12px; }
+    .props-val { flex: 1 1 auto; font-size: 12.5px; }
     .evt-dist-row { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; padding: 10px 14px; }
     .evt-dist-bar-wrap { grid-column: 1 / -1; grid-row: 2; }
 
@@ -4008,7 +4010,10 @@ pre, .json-box, .code-box {
     .app-footnote { margin-inline: 10px; }
     .range-selector svg { display: none; }
     .range-selector select { max-width: 124px; padding-left: 10px; }
-    .websites-kpi-grid, .umami-stats-grid { grid-template-columns: 1fr; }
+    .websites-kpi-grid { grid-template-columns: 1fr; }
+    .umami-stat-card { padding: 12px; min-height: 0; }
+    .umami-stat-label { font-size: 12px; margin-bottom: 6px; }
+    .umami-stat-value { font-size: 21px; margin-bottom: 8px; }
     .kpi-card:last-child { grid-column: auto; }
     .chart-container-card, .full-width-chart, .breakdown-card { padding: 14px; }
     .chart-legend-metrics-row { gap: 10px; }
@@ -4361,3 +4366,90 @@ html.nav-compact .demo-mode-cta span {
 .update-dot { width: 7px; height: 7px; margin-left: auto; border-radius: 50%; background: var(--primary); flex: 0 0 auto; }
 .update-dot[hidden] { display: none; }
 .update-dot--tab { position: absolute; top: 6px; right: 8px; margin: 0; }
+
+/* ==========================================================================
+   Phone tab bar
+   The main sections sit at the bottom, within thumb reach; Funnels, Revenue
+   and the website switcher stay in the drawer behind "More".
+   ========================================================================== */
+.mobile-tabbar {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .mobile-tabbar {
+        position: fixed;
+        inset: auto 0 0 0;
+        z-index: 90;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+        background: rgba(255, 255, 255, 0.96);
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.05);
+        backdrop-filter: blur(8px);
+    }
+
+    .app-container.is-portal .mobile-tabbar {
+        display: none;
+    }
+
+    .mobile-tabbar .nav-item,
+    .mobile-tabbar-more {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        min-width: 0;
+        min-height: 52px;
+        padding: 4px 2px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--text-muted);
+        font: inherit;
+        font-size: 10.5px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-tabbar span {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mobile-tabbar .nav-item.active,
+    .mobile-tabbar-more.active {
+        color: var(--primary);
+    }
+
+    .mobile-tabbar .nav-item:active,
+    .mobile-tabbar-more:active {
+        background: var(--bg-sidebar-hover);
+    }
+
+    .mobile-tabbar .nav-item:focus-visible,
+    .mobile-tabbar-more:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: -2px;
+    }
+
+    /* Keep the last rows clear of the tab bar. */
+    body:not(.embed-mode) .app-container:not(.is-portal) .main-wrapper {
+        padding-bottom: calc(61px + env(safe-area-inset-bottom));
+    }
+
+    /* "More" replaces the header's menu button. */
+    body:not(.embed-mode) .btn-sidebar-toggle-header {
+        display: none;
+    }
+
+    body:not(.embed-mode) .header-left {
+        margin-left: 0;
+    }
+}

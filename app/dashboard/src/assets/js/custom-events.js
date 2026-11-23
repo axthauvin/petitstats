@@ -367,6 +367,8 @@ const EventsPage = {
         const customKeys = Object.keys(customPayload);
         const hasCustom = customKeys.length > 0;
         const propId = `evtProps_${e.id}_${idx}`;
+        // Phones start with the properties folded so the stream stays scannable.
+        const propsOpen = !(window.matchMedia && window.matchMedia("(max-width: 767px)").matches);
 
         const metaItems = [
           `<span class="journey-step-dur" style="cursor:pointer;" onclick="EventsPage.filterBySession('${e.session_id}')" title="Filter by session">
@@ -406,7 +408,7 @@ const EventsPage = {
                             ${
                               hasCustom
                                 ? `
-                                <button type="button" class="btn-step-props active" onclick="EventsPage.toggleStepProps('${propId}', this)">
+                                <button type="button" class="btn-step-props${propsOpen ? " active" : ""}" aria-expanded="${propsOpen}" aria-controls="${propId}" onclick="EventsPage.toggleStepProps('${propId}', this)">
                                     <span class="props-text">Properties (${customKeys.length})</span>
                                     <span class="props-chevron">${Icons.get("chevron-down", { size: 12, color: "#64748b" })}</span>
                                 </button>`
@@ -417,7 +419,7 @@ const EventsPage = {
                         ${
                           hasCustom
                             ? `
-                            <div class="step-props-card" id="${propId}">
+                            <div class="step-props-card" id="${propId}"${propsOpen ? "" : ' style="display: none;"'}>
                                 <div class="props-table">
                                     ${customKeys
                                       .map((k) => {
@@ -461,7 +463,10 @@ const EventsPage = {
     if (!el) return;
     const isHidden = window.getComputedStyle(el).display === "none";
     el.style.display = isHidden ? "block" : "none";
-    if (btn) btn.classList.toggle("active", isHidden);
+    if (btn) {
+      btn.classList.toggle("active", isHidden);
+      btn.setAttribute("aria-expanded", String(isHidden));
+    }
   },
 
   renderPagination(data) {
