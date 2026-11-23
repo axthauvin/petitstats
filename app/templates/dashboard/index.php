@@ -64,6 +64,31 @@ use Petitstats\Http\View;
         <!-- Left Sidebar Navigation -->
         <?php include View::path('dashboard/sidebar'); ?>
         <div class="mobile-nav-backdrop" id="mobileNavBackdrop" aria-hidden="true"></div>
+        <?php if (!$isEmbed): ?>
+        <!-- Phones: the main sections stay one tap away; "More" opens the drawer. -->
+        <nav class="mobile-tabbar" id="mobileTabbar" aria-label="Website analytics sections">
+            <a href="#overview" class="nav-item" data-page="overview">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Overview</span>
+            </a>
+            <a href="#acquisition" class="nav-item" data-page="acquisition">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="m7 16 4-5 3 3 5-7"></path></svg>
+                <span>Acquisition</span>
+            </a>
+            <a href="#sessions" class="nav-item" data-page="sessions">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>Sessions</span>
+            </a>
+            <a href="#events" class="nav-item" data-page="events">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Events</span>
+            </a>
+            <button type="button" class="mobile-tabbar-more" id="btnTabbarMore" aria-controls="sidebar" aria-expanded="false">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+                <span>More</span>
+            </button>
+        </nav>
+        <?php endif; ?>
 
         <!-- Main Content Area -->
         <div class="main-wrapper">
