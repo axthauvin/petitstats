@@ -21,6 +21,7 @@ final class TrackEndpointTest extends TestCase
 {
     private const ORIGIN = 'https://example.com';
     private const BROWSER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36';
+    private const LINUX_CHROME = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36';
     private const FRENCH_IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1';
 
     /** @var array<string, PhpServer> */
@@ -247,6 +248,58 @@ final class TrackEndpointTest extends TestCase
         $this->assertSame('suspicious:software_gl+passive+language_mismatch', Connections::forSite('test_site')->querySingle('SELECT reason FROM bot_activity'));
     }
 
+    public function testABurstOfNewVisitorsSharingAProfileIsRequalifiedWhole(): void
+    {
+        for ($i = 1; $i <= 5; $i++) {
+            $this->assertSame(['success' => true], $this->crawl($i)['body'], "visit {$i}");
+        }
+        $this->assertCount(5, $this->storedEvents());
+
+        $this->assertSame(['ignored' => 'bot'], $this->crawl(6)['body']);
+        $this->assertSame([], $this->storedEvents(), 'the visits recorded before the burst was recognised leave the analytics');
+        $db = Connections::forSite('test_site');
+        $this->assertSame(6, (int) $db->querySingle("SELECT COUNT(*) FROM bot_activity WHERE reason = 'burst' AND country_code = 'US'"));
+        $this->assertSame(5, (int) $db->querySingle("SELECT COUNT(*) FROM bot_activity WHERE reason = 'burst' AND ip_hash IS NULL"), 'visits never kept their address');
+
+        $this->assertSame(['ignored' => 'bot'], $this->crawl(7)['body'], 'the burst goes on');
+        $this->assertSame(['ignored' => 'no_visit'], $this->crawl(3, '_ml_engaged')['body'], 'a rejected page view leaves no visit behind');
+        $this->assertSame([], $this->storedEvents());
+    }
+
+    public function testVisitorsWhoInteractAreNeverABurst(): void
+    {
+        for ($i = 1; $i <= 8; $i++) {
+            $this->crawl($i, data: ['_ml_confirm' => 'interaction']);
+        }
+        $this->assertCount(8, $this->storedEvents());
+        $this->assertSame(0, (int) Connections::forSite('test_site')->querySingle('SELECT COUNT(*) FROM bot_activity'));
+    }
+
+    public function testNewVisitorsOpeningTheSamePageAreNoBurst(): void
+    {
+        for ($i = 1; $i <= 8; $i++) {
+            $this->crawl($i, data: ['path' => '/newsletter-du-mois']);
+        }
+        $this->assertCount(8, $this->storedEvents());
+    }
+
+    public function testVisitorsWithAnotherProfileStayOutOfTheBurst(): void
+    {
+        for ($i = 1; $i <= 5; $i++) {
+            $this->crawl($i);
+        }
+        $this->track(
+            $this->event(['data' => ['path' => '/blog/iphone', 'language' => 'fr-FR', '_ml_confirm' => 'interaction']]),
+            ['User-Agent: ' . self::FRENCH_IPHONE, 'CF-IPCountry: FR', 'CF-Connecting-IP: 10.1.1.1'],
+            'cloudflare',
+        );
+        $this->crawl(6);
+
+        $events = $this->storedEvents();
+        $this->assertCount(1, $events);
+        $this->assertSame('/blog/iphone', $events[0]['action']['data']['path']);
+    }
+
     public function testARealFrenchIphoneVisitIsStoredWithoutTheScoringSignals(): void
     {
         $response = $this->track(
@@ -302,6 +355,22 @@ final class TrackEndpointTest extends TestCase
         $response = $this->track($this->event(), ['CF-Connecting-IP: 10.0.0.99']);
 
         $this->assertSame(['ignored' => 'internal'], $response['body']);
+    }
+
+    /**
+     * A page view from the crawler of November 25: a new address in the US
+     * each time, a Linux Chrome in English, landing directly on another article.
+     *
+     * @param array<string, string> $data
+     * @return array{status: int, body: mixed, headers: array<string, string>}
+     */
+    private function crawl(int $visit, string $name = 'pageview', array $data = []): array
+    {
+        return $this->track(
+            $this->event(['name' => $name, 'data' => $data + ['path' => "/blog/article-{$visit}", 'language' => 'en-US', 'hostname' => 'example.com', '_ml_confirm' => 'visible']]),
+            ['User-Agent: ' . self::LINUX_CHROME, 'CF-IPCountry: US', "CF-Connecting-IP: 10.0.1.{$visit}"],
+            'cloudflare',
+        );
     }
 
     /** @param array<string, mixed> $overrides */
