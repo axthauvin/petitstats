@@ -52,7 +52,7 @@ petitstats.optIn();
 
 Petitstats shows the country, region and city of your visitors. It finds them from the visitor's IP address, without storing that address and without asking another service. If your website already runs behind a service that provides the location, such as Cloudflare, Petitstats uses it instead. Locations are approximate, especially cities.
 
-The location comes from [MaxMind GeoLite2 City](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data), a free database also used by Umami. Your server downloads it from a [public mirror on GitHub](https://github.com/GitSquared/node-geolite2-redist) the first time it is needed, then once a week. No visitor information is ever sent with this download.
+The location comes from [MaxMind GeoLite2 City](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data), a free database also used by Umami. Your server downloads it from a [public mirror on GitHub](https://github.com/GitSquared/node-geolite2-redist) the first time it is needed, then once a week. No visitor information is ever sent with this download. The GeoLite2 ASN database, downloaded the same way, tells which network an address belongs to, so that page views sent from cloud providers are ignored. The network is not stored either.
 
 ## Website settings
 

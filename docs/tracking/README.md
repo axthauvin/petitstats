@@ -56,15 +56,28 @@ The **Revenue** page then shows your revenue, orders, average order and conversi
 
 ## Visits from robots
 
-As with any analytics tool, you want to count only real visitors, not automated programs. Petitstats tries to ignore robots in two ways.
+As with any analytics tool, you want to count only real visitors, not automated programs. Petitstats tries to ignore robots in several ways.
 
-- **Using the user agent:** Crawlers, link previews and scripts such as `curl` announce themselves in their user agent, and automated browsers give themselves away to the tracking script. Petitstats recognises both and ignores them.
+- **Using the user agent:** Crawlers, link previews and scripts such as `curl` announce themselves in their user agent, and automated browsers give themselves away to the tracking script, for example when they name themselves *HeadlessChrome* or show a page without any window. Petitstats recognises both and ignores them.
 - **What the visitor does:** A real visitor moves the mouse, scrolls, touches the screen or presses a key, or at least looks at the page. Petitstats only sends a page view after the first of these, or once the page has been on screen for 3 seconds, so a program that merely loads a page, a page preloaded by the browser or a tab left in the background is never counted.
+- **Where the visit comes from:** Page views sent from a cloud or hosting provider's network (Google Cloud, AWS, Azure, OVHcloud, Hetzner, DigitalOcean…) come from scripts, not people, and are ignored. The network is recognised from the IP address while the page view is received, and neither is stored. Networks that relay people's browsing, such as iCloud Private Relay, are not affected.
+- **Weak signals adding up:** Graphics drawn in software, a desktop browser without its usual plugins, a page counted only after 3 seconds on screen, a browser language other than the page's: each is common among real visitors, so none is enough on its own. A page view showing several of them is ignored.
+- **Bursts:** When, within a minute, several new visitors sharing a country, system, browser and language each land directly on a different page without interacting, they are one crawler spread over many addresses. The page view is ignored, and the visits of the burst already counted are taken out of your statistics.
 
 The visits that were ignored are listed at the bottom of the **Overview** page, with the reason why. Visitors who left in under 3 seconds without interacting appear there as *Left without interacting*. Nothing about them is added to your statistics.
-Of course, thoses methods are not perfect and some robots can still be counted, we apologize for that and we are working on improving our detection methods. 
+Of course, those methods are not perfect and some robots can still be counted, we apologize for that and we are working on improving our detection methods.
 
 If you prefer to count every page load anyway, add `data-require-interaction="false"` to the snippet.
+
+### Removing a crawler afterwards
+
+If a crawler got through anyway, `bin/requalify-bots.php` moves its visits to the ignored ones. Give it the day and the profile the visits share, as shown on the **Sessions** page:
+
+```bash
+php bin/requalify-bots.php --site blog --date 2026-11-25 --country US --os Linux --browser Chrome --language en-US
+```
+
+It first lists the visits that match, without changing anything. Only a first visit landing directly on a single page, with no event and no interaction, can match. Add `--apply` to move them: the script then copies the website's database and saves the visits to a JSON file in the `backups` folder of the data directory, and asks you to type `yes` before going on.
 
 ## When nothing shows up
 
