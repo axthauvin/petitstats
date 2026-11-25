@@ -92,6 +92,7 @@ function loadTracker(options = {}) {
             if (timers[id - 1]) timers[id - 1].cleared = true;
         },
         fetch: options.fetch,
+        ...options.window,
     };
     context.window = context;
     vm.runInNewContext(tracker, context, { filename: "petitstats.js" });
@@ -524,4 +525,127 @@ test("a regular browser is not reported", () => {
     });
 
     assert.deepEqual(names, ["pageview"]);
+});
+
+const FRENCH_IPHONE =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1";
+const LINUX_CHROME =
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36";
+
+// A WebGL context reporting the given renderer.
+function webgl(renderer) {
+    return {
+        createElement: () => ({
+            getContext: () => ({
+                RENDERER: 7937,
+                getExtension: (name) =>
+                    name === "WEBGL_debug_renderer_info"
+                        ? { UNMASKED_RENDERER_WEBGL: 37446 }
+                        : null,
+                getParameter: (key) => (key === 37446 ? renderer : "WebKit WebGL"),
+            }),
+        }),
+    };
+}
+
+function botReports(options) {
+    const requests = [];
+    const loaded = loadTracker({
+        ...options,
+        fetch: (endpoint, init) => {
+            requests.push(JSON.parse(init.body));
+            return Promise.resolve({ ok: true });
+        },
+    });
+    return { ...loaded, requests };
+}
+
+test("headless Chrome naming itself in its client hints is reported", () => {
+    const { requests } = botReports({
+        navigator: {
+            userAgent: LINUX_CHROME,
+            userAgentData: { brands: [{ brand: "HeadlessChrome", version: "142" }] },
+        },
+        window: { chrome: {} },
+    });
+    assert.deepEqual(requests.map((r) => [r.name, r.data.reason]), [["_ml_bot", "headless_brand"]]);
+});
+
+test("a desktop page shown without a window is reported", () => {
+    const { requests } = botReports({
+        navigator: { userAgent: LINUX_CHROME },
+        document: { visibilityState: "visible" },
+        window: { chrome: {}, outerWidth: 0, outerHeight: 0 },
+    });
+    assert.deepEqual(requests.map((r) => [r.name, r.data.reason]), [["_ml_bot", "no_window"]]);
+});
+
+test("a phone in-app browser reporting no window is still counted", () => {
+    const { requests } = botReports({
+        navigator: { userAgent: FRENCH_IPHONE, maxTouchPoints: 5 },
+        document: { visibilityState: "visible" },
+        window: { outerWidth: 0, outerHeight: 0 },
+    });
+    assert.deepEqual(requests.map((r) => r.name), ["pageview"]);
+});
+
+test("the page view says whether an interaction or time on screen confirmed it", async () => {
+    const touched = loadTracker({
+        attributes: { "data-require-interaction": "true" },
+    });
+    touched.interact("touchstart");
+    assert.equal((await payload(touched.beacons[0].body)).data._ml_confirm, "interaction");
+
+    const idle = loadTracker({
+        attributes: { "data-require-interaction": "true" },
+        document: { visibilityState: "visible" },
+    });
+    idle.tick(3000);
+    assert.equal((await payload(idle.beacons[0].body)).data._ml_confirm, "visible");
+});
+
+test("the page language is sent to compare it with the browser's", async () => {
+    const { beacons } = loadTracker({
+        document: { documentElement: { lang: "fr", getAttribute: () => null } },
+    });
+    assert.equal((await payload(beacons[0].body)).data.page_lang, "fr");
+});
+
+test("a software WebGL renderer and missing plugins are sent as weak signals", async () => {
+    const { beacons } = loadTracker({
+        navigator: { userAgent: LINUX_CHROME, plugins: [] },
+        document: webgl("ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)), SwiftShader driver)"),
+        window: { chrome: {} },
+    });
+    assert.equal(beacons.length, 1, "weak signals alone do not stop the page view");
+    assert.equal((await payload(beacons[0].body)).data._ml_signals, "no_plugins,software_gl");
+});
+
+test("a real GPU sends no weak signal", async () => {
+    const { beacons } = loadTracker({
+        navigator: { userAgent: LINUX_CHROME, plugins: [1, 2, 3, 4, 5] },
+        document: webgl("ANGLE (Intel, Mesa Intel(R) UHD Graphics 620, OpenGL 4.6)"),
+        window: { chrome: {} },
+    });
+    assert.equal("_ml_signals" in (await payload(beacons[0].body)).data, false);
+});
+
+test("a French iPhone visitor who scrolls is counted with nothing suspicious", async () => {
+    const { interact, requests } = botReports({
+        attributes: { "data-require-interaction": "true" },
+        navigator: { userAgent: FRENCH_IPHONE, language: "fr-FR", maxTouchPoints: 5, plugins: [] },
+        document: {
+            visibilityState: "visible",
+            documentElement: { lang: "fr", getAttribute: () => null },
+            ...webgl("Apple GPU"),
+        },
+    });
+    interact("scroll");
+
+    assert.deepEqual(requests.map((r) => r.name), ["pageview"], "nothing reported as a bot");
+    const data = requests[0].data;
+    assert.equal(data._ml_confirm, "interaction");
+    assert.equal(data.language, "fr-FR");
+    assert.equal(data.page_lang, "fr");
+    assert.equal("_ml_signals" in data, false, "phones are not probed");
 });
