@@ -46,6 +46,7 @@ final class KnownBotsTest extends TestCase
         $this->assertSame('StackScopeBot', KnownBots::identify('Mozilla/5.0 (compatible; StackScopeBot/1.0; +https://stackscope.example)', 'known_bot_user_agent')['name']);
         $this->assertSame('python-requests', KnownBots::identify('python-requests/2.31.0', 'known_bot_user_agent')['name']);
         $this->assertSame('No user agent', KnownBots::identify('', 'missing_user_agent')['name']);
+        $this->assertSame(['Requalified visits', KnownBots::AUTOMATED], array_values(array_intersect_key(KnownBots::identify('', 'manual:fingerprint'), ['name' => 1, 'category' => 1])));
     }
 
     public function testBrowsersCaughtByTheScriptAreAutomated(): void

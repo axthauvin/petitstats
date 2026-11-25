@@ -550,7 +550,7 @@ const OverviewPage = {
       .join("");
   },
 
-  inconsistencies: ['no_languages','no_screen','no_chrome_object','mobile_without_touch','platform_mismatch'],
+  inconsistencies: ['no_languages','no_screen','no_chrome_object','mobile_without_touch','platform_mismatch','no_window'],
   reasonLabels: {known_bot_user_agent:'Known bot or crawler', missing_user_agent:'Missing user agent', internal_traffic:'Internal traffic', webdriver:'Automated browser'},
   reasonLabel(reason) { if(reason==='client:no_interaction') return 'Left without interacting'; if(String(reason).startsWith('client:')) { const detail=String(reason).slice(7).replace(/^[_$]+/,''); return (this.inconsistencies.includes(detail)?'Inconsistent browser (':'Automated browser (')+detail.replace(/_/g,' ')+')'; } return this.reasonLabels[reason] || String(reason).replace(/_/g,' ').replace(/^./,c=>c.toUpperCase()); },
   bars(rows, key, label) {
@@ -649,9 +649,20 @@ const OverviewPage = {
     'client:no_chrome_object': ['Fake Chrome', 'A desktop Chrome user agent without Chrome itself.'],
     'client:mobile_without_touch': ['Phone without touch', 'A phone user agent on a device without touch.'],
     'client:platform_mismatch': ['Wrong platform', 'The user agent and the system it runs on disagree.'],
+    'client:no_window': ['No window', 'A desktop page shown without a browser window, as headless browsers do.'],
+    'client:headless_brand': ['Headless Chrome', 'The browser names itself HeadlessChrome in its client hints.'],
+    burst: ['Burst of new visitors', 'Within a minute, several new visitors with the same country, system, browser and language each opened a different page directly, without interacting.'],
   },
+  // Cloud and hosting providers recognised from the network (see HostingNetworks.php).
+  hostingProviders: {google_cloud:'Google Cloud', aws:'AWS', azure:'Azure', oracle_cloud:'Oracle Cloud', alibaba_cloud:'Alibaba Cloud', tencent_cloud:'Tencent Cloud', huawei_cloud:'Huawei Cloud', ovh:'OVHcloud', hetzner:'Hetzner', digitalocean:'DigitalOcean', linode:'Linode', vultr:'Vultr', scaleway:'Scaleway', contabo:'Contabo', ionos:'IONOS', leaseweb:'Leaseweb', hostinger:'Hostinger'},
+  // Weak signals that add up to a suspicious visit (see BotScore.php).
+  suspicionSignals: {no_plugins:'no browser plugins', software_gl:'graphics drawn in software', passive:'no interaction', language_mismatch:'browser language differs from the page'},
   reasonHint(reason) {
     if(this.reasonHints[reason]) return this.reasonHints[reason];
+    const [kind, detail='']=String(reason).split(/:(.*)/s);
+    if(kind==='datacenter') { const provider=this.hostingProviders[detail]||detail.replace(/_/g,' '); return [`Datacenter (${provider})`, `Sent from ${provider}'s network, where page views come from scripts rather than people.`]; }
+    if(kind==='suspicious') return ['Suspicious signals', `Several weak signs of a headless browser: ${detail.split('+').map(s=>this.suspicionSignals[s]||s.replace(/_/g,' ')).join(', ')}.`];
+    if(kind==='manual') return ['Requalified', `Moved to the blocked traffic afterwards (${detail.replace(/_/g,' ')}).`];
     const tool=String(reason).replace(/^client:/,'').replace(/^[_$]+/,'').replace(/_/g,' ');
     return [tool.replace(/^./,c=>c.toUpperCase()), `The page found traces of an automation tool (${tool}).`];
   },
