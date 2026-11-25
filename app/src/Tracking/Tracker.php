@@ -58,11 +58,7 @@ final class Tracker
             return ['ignored' => 'internal'];
         }
         // After the internal addresses, which may well be the team's own servers.
-        if (($provider = HostingNetworks::lookup($ip)) !== null) {
-            $store->recordIgnored('datacenter:' . $provider, $userAgent->value, $originHost, $ip, self::countryCode($server, $ip));
-            return ['ignored' => 'bot'];
-        }
-        if (($reason = BotScore::reason($payload->data)) !== null) {
+        if (($reason = BotScore::reason($payload->data, HostingNetworks::lookup($ip))) !== null) {
             $store->recordIgnored($reason, $userAgent->value, $originHost, $ip, self::countryCode($server, $ip));
             return ['ignored' => 'bot'];
         }

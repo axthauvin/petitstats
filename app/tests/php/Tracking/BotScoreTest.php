@@ -51,6 +51,30 @@ final class BotScoreTest extends TestCase
         $this->assertSame('suspicious:no_plugins+passive', BotScore::reason(['_ml_confirm' => 'visible', '_ml_signals' => 'no_plugins']));
     }
 
+    public function testACloudNetworkAloneIsNotEnough(): void
+    {
+        $vpn = ['language' => 'fr-FR', 'page_lang' => 'fr', '_ml_confirm' => 'interaction'];
+
+        $this->assertSame(['datacenter:ovh'], BotScore::signals($vpn, 'ovh'));
+        $this->assertNull(BotScore::reason($vpn, 'ovh'), 'someone on a VPN or a cloud desktop who interacts is kept');
+        $this->assertNull(BotScore::reason(self::FRENCH_IPHONE_VISIT, 'aws'));
+    }
+
+    public function testACloudNetworkWithoutInteractionIsRejected(): void
+    {
+        $this->assertSame('suspicious:datacenter:google_cloud+passive', BotScore::reason(['language' => 'fr-FR', 'page_lang' => 'fr', '_ml_confirm' => 'visible'], 'google_cloud'));
+        $this->assertSame(
+            'suspicious:datacenter:google_cloud+passive+language_mismatch',
+            BotScore::reason(['language' => 'en-US', 'page_lang' => 'fr', '_ml_confirm' => 'visible'], 'google_cloud'),
+            'the crawler of November 25, even with a real graphics card',
+        );
+    }
+
+    public function testOnlyTheServerReportsACloudNetwork(): void
+    {
+        $this->assertSame(['passive'], BotScore::signals(['_ml_confirm' => 'visible', '_ml_signals' => 'datacenter']));
+    }
+
     public function testUnknownSignalsAreIgnored(): void
     {
         $this->assertSame(['passive'], BotScore::signals(['_ml_confirm' => 'visible', '_ml_signals' => 'evil<script>,software_gl_x']));

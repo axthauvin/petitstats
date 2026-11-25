@@ -651,17 +651,21 @@ const OverviewPage = {
     'client:platform_mismatch': ['Wrong platform', 'The user agent and the system it runs on disagree.'],
     'client:no_window': ['No window', 'A desktop page shown without a browser window, as headless browsers do.'],
     'client:headless_brand': ['Headless Chrome', 'The browser names itself HeadlessChrome in its client hints.'],
-    burst: ['Burst of new visitors', 'Within a minute, several new visitors with the same country, system, browser and language each opened a different page directly, without interacting.'],
+    burst: ['Burst of new visitors', 'Within a minute, far more new visitors than usual with the same country, system, browser and language each opened a different page directly, without interacting.'],
   },
   // Cloud and hosting providers recognised from the network (see HostingNetworks.php).
   hostingProviders: {google_cloud:'Google Cloud', aws:'AWS', azure:'Azure', oracle_cloud:'Oracle Cloud', alibaba_cloud:'Alibaba Cloud', tencent_cloud:'Tencent Cloud', huawei_cloud:'Huawei Cloud', ovh:'OVHcloud', hetzner:'Hetzner', digitalocean:'DigitalOcean', linode:'Linode', vultr:'Vultr', scaleway:'Scaleway', contabo:'Contabo', ionos:'IONOS', leaseweb:'Leaseweb', hostinger:'Hostinger'},
   // Weak signals that add up to a suspicious visit (see BotScore.php).
   suspicionSignals: {no_plugins:'no browser plugins', software_gl:'graphics drawn in software', passive:'no interaction', language_mismatch:'browser language differs from the page'},
+  suspicionSignal(signal) {
+    const [name, provider]=String(signal).split(':');
+    if(name==='datacenter') return `sent from ${this.hostingProviders[provider]||String(provider||'a cloud').replace(/_/g,' ')}'s network`;
+    return this.suspicionSignals[name]||name.replace(/_/g,' ');
+  },
   reasonHint(reason) {
     if(this.reasonHints[reason]) return this.reasonHints[reason];
     const [kind, detail='']=String(reason).split(/:(.*)/s);
-    if(kind==='datacenter') { const provider=this.hostingProviders[detail]||detail.replace(/_/g,' '); return [`Datacenter (${provider})`, `Sent from ${provider}'s network, where page views come from scripts rather than people.`]; }
-    if(kind==='suspicious') return ['Suspicious signals', `Several weak signs of a headless browser: ${detail.split('+').map(s=>this.suspicionSignals[s]||s.replace(/_/g,' ')).join(', ')}.`];
+    if(kind==='suspicious') return ['Suspicious signals', `Several signs of a headless browser: ${detail.split('+').map(s=>this.suspicionSignal(s)).join(', ')}.`];
     if(kind==='manual') return ['Requalified', `Moved to the blocked traffic afterwards (${detail.replace(/_/g,' ')}).`];
     const tool=String(reason).replace(/^client:/,'').replace(/^[_$]+/,'').replace(/_/g,' ');
     return [tool.replace(/^./,c=>c.toUpperCase()), `The page found traces of an automation tool (${tool}).`];

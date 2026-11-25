@@ -266,6 +266,24 @@ final class TrackEndpointTest extends TestCase
         $this->assertSame([], $this->storedEvents());
     }
 
+    public function testACommonProfileOnABusyWebsiteIsNoBurst(): void
+    {
+        // The hour before: 120 page views of the same profile, two a minute.
+        $db = Connections::forSite('test_site');
+        $insert = $db->prepare('INSERT INTO user_activity (session_id, visitor_id, action, timestamp) VALUES (:id, :id, :action, :time)');
+        for ($i = 0; $i < 120; $i++) {
+            $insert->bindValue(':id', "earlier{$i}", SQLITE3_TEXT);
+            $insert->bindValue(':action', (string) json_encode(['name' => 'pageview', 'data' => ['path' => "/page-{$i}", 'country_code' => 'US', 'os' => 'Linux', 'browser' => 'Chrome', 'language' => 'en-US']]), SQLITE3_TEXT);
+            $insert->bindValue(':time', gmdate('Y-m-d H:i:s', time() - 90 - $i * 29), SQLITE3_TEXT);
+            $insert->execute();
+        }
+
+        for ($i = 1; $i <= 8; $i++) {
+            $this->assertSame(['success' => true], $this->crawl($i)['body'], "visit {$i}");
+        }
+        $this->assertSame(0, (int) $db->querySingle('SELECT COUNT(*) FROM bot_activity'));
+    }
+
     public function testVisitorsWhoInteractAreNeverABurst(): void
     {
         for ($i = 1; $i <= 8; $i++) {
