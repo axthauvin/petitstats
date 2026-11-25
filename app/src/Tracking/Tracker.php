@@ -62,6 +62,10 @@ final class Tracker
             $store->recordIgnored('datacenter:' . $provider, $userAgent->value, $originHost, $ip, self::countryCode($server, $ip));
             return ['ignored' => 'bot'];
         }
+        if (($reason = BotScore::reason($payload->data)) !== null) {
+            $store->recordIgnored($reason, $userAgent->value, $originHost, $ip, self::countryCode($server, $ip));
+            return ['ignored' => 'bot'];
+        }
 
         $name = $payload->name();
         $data = EventData::sanitize($payload->data, $userAgent);

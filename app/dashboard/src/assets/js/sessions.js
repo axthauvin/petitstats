@@ -21,7 +21,7 @@ const SessionsPage = {
   CONTEXT_KEYS: new Set([
     "browser", "os", "device", "screen", "viewport", "language", "country", "country_code", "region", "city",
     "hostname", "site_id", "session_id", "path", "title", "url", "referrer", "search", "hash", "tracking_mode",
-    "_ml_tracking_mode", "_ml_revenue",
+    "_ml_tracking_mode", "_ml_confirm", "_ml_revenue",
   ]),
 
   init() {

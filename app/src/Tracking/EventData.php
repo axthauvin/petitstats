@@ -23,6 +23,11 @@ final class EventData
         unset($data['url'], $data['search'], $data['hash']);
         $data['_ml_tracking_mode'] = ($data['tracking_mode'] ?? 'strict') === 'enriched' ? 'enriched' : 'strict';
         unset($data['tracking_mode']);
+        // Only used to score the event (see BotScore), never stored.
+        unset($data['_ml_signals'], $data['page_lang']);
+        if (!in_array($data['_ml_confirm'] ?? null, ['interaction', 'visible'], true)) {
+            unset($data['_ml_confirm']);
+        }
         if (isset($data['path'])) {
             $data['path'] = '/' . ltrim((string) $data['path'], '/');
         }

@@ -21,6 +21,7 @@ final class TrackEndpointTest extends TestCase
 {
     private const ORIGIN = 'https://example.com';
     private const BROWSER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36';
+    private const FRENCH_IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1';
 
     /** @var array<string, PhpServer> */
     private static array $servers = [];
@@ -235,6 +236,30 @@ final class TrackEndpointTest extends TestCase
         $this->assertSame(['ignored' => 'bot'], $response['body']);
         $this->assertSame([], $this->storedEvents());
         $this->assertSame('client:webdriver', Connections::forSite('test_site')->querySingle('SELECT reason FROM bot_activity'));
+    }
+
+    public function testWeakSignalsAddingUpAreLoggedWithTheirNames(): void
+    {
+        $response = $this->track($this->event(['data' => ['path' => '/blog/a', 'language' => 'en-US', 'page_lang' => 'fr', '_ml_confirm' => 'visible', '_ml_signals' => 'software_gl']]));
+
+        $this->assertSame(['ignored' => 'bot'], $response['body']);
+        $this->assertSame([], $this->storedEvents());
+        $this->assertSame('suspicious:software_gl+passive+language_mismatch', Connections::forSite('test_site')->querySingle('SELECT reason FROM bot_activity'));
+    }
+
+    public function testARealFrenchIphoneVisitIsStoredWithoutTheScoringSignals(): void
+    {
+        $response = $this->track(
+            $this->event(['data' => ['path' => '/blog/a', 'language' => 'fr-FR', 'page_lang' => 'fr', '_ml_confirm' => 'interaction', '_ml_signals' => 'software_gl']]),
+            ['User-Agent: ' . self::FRENCH_IPHONE, 'CF-IPCountry: FR'],
+        );
+
+        $this->assertSame(['success' => true], $response['body']);
+        $this->assertSame(0, (int) Connections::forSite('test_site')->querySingle('SELECT COUNT(*) FROM bot_activity'));
+        $data = $this->storedEvents()[0]['action']['data'];
+        $this->assertSame(['Safari', 'iOS', 'Mobile', 'interaction'], [$data['browser'], $data['os'], $data['device'], $data['_ml_confirm']]);
+        $this->assertArrayNotHasKey('page_lang', $data);
+        $this->assertArrayNotHasKey('_ml_signals', $data);
     }
 
     public function testInternalTrafficIsIgnored(): void

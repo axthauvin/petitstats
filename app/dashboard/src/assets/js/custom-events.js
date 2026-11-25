@@ -330,6 +330,7 @@ const EventsPage = {
       "session_id",
       "tracking_mode",
       "_ml_tracking_mode",
+      "_ml_confirm",
       "path",
       "title",
       "url",

@@ -160,7 +160,7 @@ final class Exporter
                 $line[] = is_scalar($data[$column] ?? null) ? $data[$column] : '';
                 unset($data[$column]);
             }
-            unset($data['_ml_tracking_mode']);
+            unset($data['_ml_tracking_mode'], $data['_ml_confirm']);
             $line[] = $data === [] ? '' : json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             fputcsv($out, $line, escape: '');
         }
