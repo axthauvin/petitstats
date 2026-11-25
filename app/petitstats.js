@@ -18,6 +18,7 @@
         !script || script.getAttribute("data-require-interaction") !== "false";
     var VISIBLE_MS = 3000;
     var interacted = false,
+        confirmedBy = null,
         visibleMs = 0,
         visibleSince = null,
         visibleTimer = null,
@@ -79,12 +80,24 @@
         "_Selenium_IDE_Recorder",
     ];
     var DRIVER_ATTRIBUTES = ["selenium", "webdriver", "driver"];
+    var MOBILE_UA = /Mobile|Android|iPhone|iPad|iPod/;
 
     // Detection keys based on https://stackoverflow.com/a/41220267 (CC BY-SA 4.0)
     function automatedBrowserReason() {
         if (navigator.webdriver === true) return "webdriver";
-        var key;
-        for (var i = 0; i < WINDOW_DRIVER_KEYS.length; i++) {
+        var key, i;
+        try {
+            // Headless Chrome names itself in its client hints even when its
+            // user agent string pretends otherwise.
+            var brands =
+                (navigator.userAgentData && navigator.userAgentData.brands) ||
+                [];
+            for (i = 0; i < brands.length; i++) {
+                if (/HeadlessChrome/i.test(brands[i] && brands[i].brand))
+                    return "headless_brand";
+            }
+        } catch (_) {}
+        for (i = 0; i < WINDOW_DRIVER_KEYS.length; i++) {
             key = WINDOW_DRIVER_KEYS[i];
             if (window[key]) return key;
         }
@@ -119,6 +132,17 @@
                 return "no_languages";
             if (window.screen && screen.width === 0 && screen.height === 0)
                 return "no_screen";
+            // A desktop page on screen always sits in a window; headless
+            // browsers render it without one. Phone in-app browsers can
+            // report 0, so they are left alone.
+            if (
+                !MOBILE_UA.test(ua) &&
+                window.outerWidth === 0 &&
+                window.outerHeight === 0 &&
+                window.innerWidth > 0 &&
+                pageVisible()
+            )
+                return "no_window";
             // Desktop Chrome always has window.chrome; Android WebViews and
             // iOS browsers do not, so mobile user agents are left alone.
             if (
@@ -136,6 +160,39 @@
                 return "platform_mismatch";
         } catch (_) {}
         return null;
+    }
+    // Weak hints of a headless browser. Real computers show them too (no GPU
+    // driver, PDF viewer turned off), so the server only rejects a visit when
+    // they add up with other signals. Only their names are sent, never what
+    // was read. Desktop only, and read once per page.
+    var weakSignals = null;
+    function browserSignals() {
+        if (weakSignals !== null) return weakSignals;
+        var signals = [];
+        try {
+            if (!MOBILE_UA.test(navigator.userAgent || "")) {
+                if (
+                    navigator.plugins &&
+                    navigator.plugins.length === 0 &&
+                    navigator.pdfViewerEnabled !== false
+                )
+                    signals.push("no_plugins");
+                var gl = document.createElement("canvas").getContext("webgl");
+                if (gl) {
+                    var info = gl.getExtension("WEBGL_debug_renderer_info");
+                    var renderer = String(
+                        gl.getParameter(
+                            info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER,
+                        ) || "",
+                    );
+                    if (/SwiftShader|llvmpipe|softpipe/i.test(renderer))
+                        signals.push("software_gl");
+                    var context = gl.getExtension("WEBGL_lose_context");
+                    if (context) context.loseContext();
+                }
+            }
+        } catch (_) {}
+        return (weakSignals = signals.join(","));
     }
     // Lets the server log the detection (without storing any analytics event),
     // so that it shows up in the dashboard's bot report. Sent once per page.
@@ -235,6 +292,14 @@
         if (privacyMode === "enriched") {
             base.viewport = viewport;
         }
+        // What made the visit count: an interaction, or only time on screen.
+        if (confirmedBy) base._ml_confirm = confirmedBy;
+        // Only checked against the browser's language, never stored.
+        var pageLang =
+            document.documentElement && document.documentElement.lang;
+        if (pageLang) base.page_lang = String(pageLang).slice(0, 20);
+        var signals = browserSignals();
+        if (signals) base._ml_signals = signals;
         return Object.assign(base, campaign());
     }
     function sanitise(data) {
@@ -255,10 +320,14 @@
     ];
     function onInteraction(e) {
         if (interacted || !e.isTrusted) return;
-        confirmVisitor("First interaction detected, sending the held events.");
+        confirmVisitor(
+            "First interaction detected, sending the held events.",
+            "interaction",
+        );
     }
-    function confirmVisitor(message) {
+    function confirmVisitor(message, how) {
         interacted = true;
+        confirmedBy = how;
         clearTimeout(visibleTimer);
         INTERACTION_EVENTS.forEach(function (type) {
             removeEventListener(type, onInteraction, true);
@@ -299,6 +368,7 @@
             if (!interacted && pageVisible())
                 confirmVisitor(
                     "Page visible long enough, sending the held events.",
+                    "visible",
                 );
         }, Math.max(0, VISIBLE_MS - visibleMs));
     }

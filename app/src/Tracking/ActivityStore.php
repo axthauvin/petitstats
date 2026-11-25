@@ -77,18 +77,73 @@ final class ActivityStore
      */
     public function recordIgnored(string $reason, string $userAgent, string $origin, string $ip, ?string $countryCode = null): void
     {
+        $this->insertIgnored($reason, $userAgent, $origin, hash('sha256', $ip), $countryCode, null);
+    }
+
+    /**
+     * Moves visits already recorded to the blocked traffic, once they turn out
+     * to come from a robot: each visit becomes one rejected request, at the
+     * time it started, and its events leave the analytics.
+     *
+     * @param list<string> $sessionIds
+     * @param string $userAgent the robot's user agent when known; visits do not keep theirs
+     * @return int the number of visits moved
+     */
+    public function requalify(array $sessionIds, string $reason, string $userAgent = ''): int
+    {
+        $sessionIds = array_values(array_unique($sessionIds));
+        if ($sessionIds === []) {
+            return 0;
+        }
+        $this->db->exec($this->db->isMysql() ? 'START TRANSACTION' : 'BEGIN IMMEDIATE');
+        try {
+            $moved = 0;
+            foreach (array_chunk($sessionIds, 200) as $chunk) {
+                $placeholders = implode(',', array_map(static fn(int $i): string => ':s' . $i, array_keys($chunk)));
+                $visits = [];
+                $stmt = $this->db->prepare("SELECT session_id, action, timestamp FROM user_activity WHERE session_id IN ({$placeholders}) ORDER BY timestamp, id");
+                foreach ($chunk as $i => $sessionId) {
+                    $stmt->bindValue(':s' . $i, $sessionId, SQLITE3_TEXT);
+                }
+                $result = $stmt->execute();
+                while ($result && ($row = $result->fetchArray(SQLITE3_ASSOC))) {
+                    // The first event of each visit stands for it.
+                    $visits[$row['session_id']] ??= $row;
+                }
+                foreach ($visits as $visit) {
+                    $data = json_decode((string) $visit['action'], true)['data'] ?? [];
+                    $this->insertIgnored($reason, $userAgent, (string) ($data['hostname'] ?? ''), null, $data['country_code'] ?? null, (string) $visit['timestamp']);
+                }
+                $delete = $this->db->prepare("DELETE FROM user_activity WHERE session_id IN ({$placeholders})");
+                foreach ($chunk as $i => $sessionId) {
+                    $delete->bindValue(':s' . $i, $sessionId, SQLITE3_TEXT);
+                }
+                $delete->execute();
+                $moved += count($visits);
+            }
+            $this->db->exec('COMMIT');
+            return $moved;
+        } catch (Throwable $e) {
+            $this->db->exec('ROLLBACK');
+            throw $e;
+        }
+    }
+
+    private function insertIgnored(string $reason, string $userAgent, string $origin, ?string $ipHash, mixed $countryCode, ?string $timestamp): void
+    {
         // Without the column (an account that cannot alter tables), the request is kept without its country.
         $located = Schema::hasBotCountry($this->db);
-        $stmt = $this->db->prepare($located
-            ? 'INSERT INTO bot_activity (reason, user_agent, origin, ip_hash, country_code) VALUES (:reason,:ua,:origin,:ip,:country)'
-            : 'INSERT INTO bot_activity (reason, user_agent, origin, ip_hash) VALUES (:reason,:ua,:origin,:ip)');
-        $stmt->bindValue(':reason', $reason, SQLITE3_TEXT);
-        $stmt->bindValue(':ua', substr($userAgent, 0, 500), SQLITE3_TEXT);
-        $stmt->bindValue(':origin', substr($origin, 0, 255), SQLITE3_TEXT);
-        $stmt->bindValue(':ip', hash('sha256', $ip), SQLITE3_TEXT);
+        $columns = ['reason' => $reason, 'user_agent' => substr($userAgent, 0, 500), 'origin' => substr($origin, 0, 255), 'ip_hash' => $ipHash];
         if ($located) {
-            $country = $countryCode !== null && $countryCode !== 'UN' ? $countryCode : null;
-            $stmt->bindValue(':country', $country, $country === null ? SQLITE3_NULL : SQLITE3_TEXT);
+            $columns['country_code'] = is_string($countryCode) && preg_match('/^[A-Z]{2}$/', $countryCode) && $countryCode !== 'UN' ? $countryCode : null;
+        }
+        if ($timestamp !== null) {
+            $columns['timestamp'] = $timestamp;
+        }
+        $names = array_keys($columns);
+        $stmt = $this->db->prepare('INSERT INTO bot_activity (' . implode(', ', $names) . ') VALUES (:' . implode(', :', $names) . ')');
+        foreach ($columns as $name => $value) {
+            $stmt->bindValue(':' . $name, $value, $value === null ? SQLITE3_NULL : SQLITE3_TEXT);
         }
         $stmt->execute();
     }

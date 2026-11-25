@@ -127,7 +127,10 @@ final class KnownBots
     public static function identify(string $userAgent, string $reason): array
     {
         if ($userAgent === '') {
-            return ['name' => 'No user agent', 'operator' => '', 'domain' => '', 'category' => self::OTHER];
+            // Visits moved to the blocked traffic afterwards never kept their user agent.
+            return str_starts_with($reason, 'manual:')
+                ? ['name' => 'Requalified visits', 'operator' => '', 'domain' => '', 'category' => self::AUTOMATED]
+                : ['name' => 'No user agent', 'operator' => '', 'domain' => '', 'category' => self::OTHER];
         }
         if (($bot = self::match($userAgent)) !== null) {
             return $bot;

@@ -57,6 +57,11 @@ final class Tracker
             $store->recordIgnored('internal_traffic', $userAgent->value, $originHost, $ip, self::countryCode($server, $ip));
             return ['ignored' => 'internal'];
         }
+        // After the internal addresses, which may well be the team's own servers.
+        if (($reason = BotScore::reason($payload->data, HostingNetworks::lookup($ip))) !== null) {
+            $store->recordIgnored($reason, $userAgent->value, $originHost, $ip, self::countryCode($server, $ip));
+            return ['ignored' => 'bot'];
+        }
 
         $name = $payload->name();
         $data = EventData::sanitize($payload->data, $userAgent);
@@ -70,9 +75,19 @@ final class Tracker
         // The visitor is always recognised by the server, with a salt that changes every month.
         // With consent, the browser keeps the visit together when the network changes.
         $visitor = VisitorIdentity::visitorId((string) $site['id'], $ip, $userAgent->value);
+        if (($burst = (new BurstDetector($db))->detect($visitor, $name, $data, $userAgent->value, $originHost)) !== null) {
+            // The whole burst leaves the analytics, the visits already recorded included.
+            $store->requalify($burst, BurstDetector::REASON, $userAgent->value);
+            $store->recordIgnored(BurstDetector::REASON, $userAgent->value, $originHost, $ip, $data['country_code']);
+            return ['ignored' => 'bot'];
+        }
         $action = ['site_id' => $site['id'], 'name' => $name, 'data' => $data];
         if ($data['_ml_tracking_mode'] === 'enriched' && $payload->sessionId !== '') {
             $store->record($payload->sessionId, $visitor, $action);
+        } elseif (str_starts_with($name, '_ml_') && $store->activeSessionId($visitor) === null) {
+            // The tracker's own signals (_ml_engaged) only complete a visit: alone,
+            // they follow a page view that was rejected, and would make up a visit.
+            return ['ignored' => 'no_visit'];
         } else {
             $store->recordInActiveSession($visitor, $action);
         }

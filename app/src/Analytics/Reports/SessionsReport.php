@@ -14,7 +14,7 @@ use Petitstats\Analytics\ReportQuery;
 final class SessionsReport
 {
     /** Context sent with every event, reported once per visit rather than as event properties. */
-    private const CONTEXT_KEYS = ['path', 'title', 'hostname', 'referrer', 'language', 'screen', 'viewport', 'browser', 'os', 'device', 'country', 'country_code', 'region', 'city', '_ml_tracking_mode'];
+    private const CONTEXT_KEYS = ['path', 'title', 'hostname', 'referrer', 'language', 'screen', 'viewport', 'browser', 'os', 'device', 'country', 'country_code', 'region', 'city', '_ml_tracking_mode', '_ml_confirm'];
 
     public function __construct(private readonly ReportQuery $query) {}
 
