@@ -9,41 +9,63 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Local, no-quota country/region/city lookup backed by MaxMind GeoLite2 City,
- * downloaded from the same public mirror Umami uses so no license key is needed.
- * The dashboard credits MaxMind as the GeoLite2 license requires.
+ * Local, no-quota lookups backed by MaxMind GeoLite2, downloaded from the
+ * same public mirror Umami uses so no license key is needed: the City
+ * database for the country/region/city of a visitor, the ASN database for
+ * the network an address belongs to. The dashboard credits MaxMind as the
+ * GeoLite2 license requires.
  */
 
 final class GeoLocation
 {
-    private const DATABASE_URL = 'https://raw.githubusercontent.com/GitSquared/node-geolite2-redist/master/redist/GeoLite2-City.tar.gz';
+    private const MIRROR = 'https://raw.githubusercontent.com/GitSquared/node-geolite2-redist/master/redist/';
+    private const CITY = 'GeoLite2-City';
+    private const ASN = 'GeoLite2-ASN';
     // GeoLite2 is published twice a week and its license asks to stay up to date.
     private const MAX_AGE_SECONDS = 7 * 86400;
     private const LEGACY_DATABASE = 'dbip-city-lite.mmdb';
     private const RETRY_DELAY_SECONDS = 3600;
-    private static ?\MaxMind\Db\Reader $reader = null;
+    /** @var array<string, \MaxMind\Db\Reader> */
+    private static array $readers = [];
 
     public static function lookup(string $ip): ?array
     {
-        if (!self::ensureDatabase()) {
+        $record = self::record(self::CITY, $ip);
+        $code = strtoupper((string) ($record['country']['iso_code'] ?? ''));
+        $country = (string) ($record['country']['names']['en'] ?? '');
+        if (!preg_match('/^[A-Z]{2}$/', $code) || $country === '') {
             return null;
         }
+        return [
+            'country' => $country,
+            'country_code' => $code,
+            'region' => (string) ($record['subdivisions'][0]['names']['en'] ?? ''),
+            'city' => (string) ($record['city']['names']['en'] ?? ''),
+        ];
+    }
+
+    /**
+     * The autonomous system (network operator) an address belongs to, used
+     * to recognise hosting providers. Null when unknown or unavailable.
+     */
+    public static function asn(string $ip): ?int
+    {
+        $number = self::record(self::ASN, $ip)['autonomous_system_number'] ?? null;
+        return is_int($number) && $number > 0 ? $number : null;
+    }
+
+    /** @return array<string, mixed> the database's record for the address, empty when there is none */
+    private static function record(string $edition, string $ip): array
+    {
+        if (!self::ensureDatabase($edition)) {
+            return [];
+        }
         try {
-            self::$reader ??= new \MaxMind\Db\Reader(self::databasePath());
-            $record = self::$reader->get($ip);
-            $code = strtoupper((string) ($record['country']['iso_code'] ?? ''));
-            $country = (string) ($record['country']['names']['en'] ?? '');
-            if (!preg_match('/^[A-Z]{2}$/', $code) || $country === '') {
-                return null;
-            }
-            return [
-                'country' => $country,
-                'country_code' => $code,
-                'region' => (string) ($record['subdivisions'][0]['names']['en'] ?? ''),
-                'city' => (string) ($record['city']['names']['en'] ?? ''),
-            ];
+            self::$readers[$edition] ??= new \MaxMind\Db\Reader(self::databasePath($edition));
+            $record = self::$readers[$edition]->get($ip);
+            return is_array($record) ? $record : [];
         } catch (Throwable) {
-            return null;
+            return [];
         }
     }
 
@@ -52,14 +74,14 @@ final class GeoLocation
         return DataDirectory::path() . '/geo';
     }
 
-    private static function databasePath(): string
+    private static function databasePath(string $edition): string
     {
-        return self::directory() . '/GeoLite2-City.mmdb';
+        return self::directory() . '/' . $edition . '.mmdb';
     }
 
-    private static function ensureDatabase(): bool
+    private static function ensureDatabase(string $edition): bool
     {
-        $database = self::databasePath();
+        $database = self::databasePath($edition);
         if (is_file($database) && filesize($database) > 1024 && filemtime($database) >= time() - self::MAX_AGE_SECONDS) {
             return true;
         }
@@ -67,11 +89,13 @@ final class GeoLocation
         if (!is_dir($directory) && !@mkdir($directory, 0775, true) && !is_dir($directory)) {
             return is_file($database);
         }
-        $failure = $directory . '/last-update-failure';
+        // The City database keeps the file names it had before the ASN one was added.
+        $suffix = $edition === self::CITY ? '' : '-' . $edition;
+        $failure = $directory . '/last-update-failure' . $suffix;
         if (is_file($failure) && filemtime($failure) >= time() - self::RETRY_DELAY_SECONDS) {
             return is_file($database);
         }
-        $lock = @fopen($directory . '/update.lock', 'c');
+        $lock = @fopen($directory . '/update' . $suffix . '.lock', 'c');
         if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
             return is_file($database);
         }
@@ -85,11 +109,15 @@ final class GeoLocation
             @set_time_limit(180);
             $compressed = $database . '.download';
             $temporary = $database . '.new';
-            if (!self::downloadTo($compressed) || !self::extractDatabaseTo($compressed, $temporary) || filesize($temporary) < 1024 || !@rename($temporary, $database)) {
-                throw new RuntimeException('Unable to install GeoLite2 City database.');
+            if (!self::downloadTo(self::MIRROR . $edition . '.tar.gz', $compressed) || !self::extractDatabaseTo($compressed, $temporary) || filesize($temporary) < 1024 || !@rename($temporary, $database)) {
+                throw new RuntimeException("Unable to install the {$edition} database.");
             }
+            // A reader opened on the previous file keeps serving it until the next request.
+            unset(self::$readers[$edition]);
             @unlink($failure);
-            @unlink($directory . '/' . self::LEGACY_DATABASE);
+            if ($edition === self::CITY) {
+                @unlink($directory . '/' . self::LEGACY_DATABASE);
+            }
             return true;
         } catch (Throwable $error) {
             @file_put_contents($failure, gmdate('c') . ' ' . $error->getMessage() . PHP_EOL, LOCK_EX);
@@ -102,14 +130,14 @@ final class GeoLocation
         }
     }
 
-    private static function downloadTo(string $destination): bool
+    private static function downloadTo(string $url, string $destination): bool
     {
         $file = @fopen($destination, 'wb');
         if ($file === false) {
             return false;
         }
         if (function_exists('curl_init')) {
-            $curl = curl_init(self::DATABASE_URL);
+            $curl = curl_init($url);
             curl_setopt_array($curl, [CURLOPT_FILE => $file, CURLOPT_CONNECTTIMEOUT => 5, CURLOPT_TIMEOUT => 120, CURLOPT_HTTPHEADER => ['Accept: application/gzip']]);
             $ok = curl_exec($curl);
             $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
@@ -121,7 +149,7 @@ final class GeoLocation
             fclose($file);
             return false;
         }
-        $source = @fopen(self::DATABASE_URL, 'rb', false, stream_context_create(['http' => ['timeout' => 120]]));
+        $source = @fopen($url, 'rb', false, stream_context_create(['http' => ['timeout' => 120]]));
         if ($source === false) {
             fclose($file);
             return false;

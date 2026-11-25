@@ -57,6 +57,11 @@ final class Tracker
             $store->recordIgnored('internal_traffic', $userAgent->value, $originHost, $ip, self::countryCode($server, $ip));
             return ['ignored' => 'internal'];
         }
+        // After the internal addresses, which may well be the team's own servers.
+        if (($provider = HostingNetworks::lookup($ip)) !== null) {
+            $store->recordIgnored('datacenter:' . $provider, $userAgent->value, $originHost, $ip, self::countryCode($server, $ip));
+            return ['ignored' => 'bot'];
+        }
 
         $name = $payload->name();
         $data = EventData::sanitize($payload->data, $userAgent);
